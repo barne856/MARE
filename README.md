@@ -1,8 +1,9 @@
 # MARE
-Minimal abstraction rendering engine using glfw, glew, OpenGL 4.5, and C++17
+Minimal abstraction rendering engine using OpenGL 4.5 and C++17
 
 ## Dependencies & External Libraries:
-    GLFW3 (git submodule)
+    GLFW (git submodule)
+    GLM (git submodule)
     GLEW  (included in project)
     OpenGL 4.5 Capable Hardware
     C++17 Compiler (Visual Studio 2019 MSVC tested)
