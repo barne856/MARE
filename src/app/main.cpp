@@ -1,43 +1,29 @@
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
+#include "mare/Application.hpp"
 
-int main(void)
+class Sandbox : public mare::Application
 {
-    GLFWwindow* window;
+    glm::vec4 bg_color {0.5, 0.0, 0.5, 1.0};
 
-    /* Initialize the library */
-    if (!glfwInit())
-        return -1;
-
-    /* Create a windowed mode window and its OpenGL context */
-    window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
-    if (!window)
+    void startup() override
     {
-        glfwTerminate();
-        return -1;
+
     }
 
-    /* Make the window's context current */
-    glfwMakeContextCurrent(window);
-
-    if (glewInit() != GLEW_OK)
-        return -1;
-
-    float bg_color[4] = {0.5f, 0.5f, 0.0f, 1.0f};
-
-    /* Loop until the user closes the window */
-    while (!glfwWindowShouldClose(window))
+    void render(double current_time, double delta_time) override
     {
-        /* Render here */
-        glClearBufferfv(GL_COLOR, 0, bg_color);
-
-        /* Swap front and back buffers */
-        glfwSwapBuffers(window);
-
-        /* Poll for and process events */
-        glfwPollEvents();
+        glClearBufferfv(GL_COLOR, 0, &bg_color[0]);
     }
 
-    glfwTerminate();
+    void shutdown() override
+    {
+
+    }
+};
+
+int main()
+{
+    mare::Application* app = new Sandbox();
+    app->run(app);
+    delete app;
     return 0;
 }

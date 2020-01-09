@@ -19,7 +19,8 @@ add_subdirectory(ext/glfw)
 
 set(SRC
 ./ext/glew-2.1.0/src/glew.c
-./src/app/main.cpp)
+./src/app/main.cpp
+./src/mare/Application.cpp)
 
 add_executable(APP ${SRC})
 # UNIX libraries
