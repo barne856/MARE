@@ -12,8 +12,9 @@ namespace mare
 class GLRenderer : public Renderer
 {
 public:
-    void renderer_process(Application *app_pointer) override;
+    void start_process(Application *app_pointer) override;
 
+protected:
     void set_window_title(const char *title) override
     {
         glfwSetWindowTitle(window, title);
@@ -38,6 +39,17 @@ public:
             glfwSetCursor(window, crosshair_cursor);
             break;
         }
+    }
+    void clear_color_buffer(glm::vec4 color) override
+    {
+        glClearBufferfv(GL_COLOR, 0, &color[0]);
+    }
+    void resize_window(int width, int height) override
+    {
+        info.window_width = width;
+        info.window_height = height;
+        info.window_aspect = float(info.window_width) / float(info.window_height);
+        glViewport(0, 0, width, height);
     }
 
 private:

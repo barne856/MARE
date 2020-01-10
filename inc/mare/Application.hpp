@@ -19,15 +19,23 @@ public:
 
     // App and Window Functions
     static inline Application *get_app() { return m_app_pointer; }
-    static inline RendererInfo &get_info() { return m_renderer->get_info(); }
-    static inline RendererInput &get_input() { return m_renderer->get_input(); }
+    static inline RendererInfo &get_info() { return m_renderer_pointer->get_info(); }
+    static inline RendererInput &get_input() { return m_renderer_pointer->get_input(); }
     static inline void set_window_title(const char *title)
     {
-        m_renderer->set_window_title(title);
+        m_renderer_pointer->set_window_title(title);
     }
     static inline void set_cursor(CURSOR type)
     {
-        m_renderer->set_cursor(type);
+        m_renderer_pointer->set_cursor(type);
+    }
+    static inline void clear_color_buffer(glm::vec4 color)
+    {
+        m_renderer_pointer->clear_color_buffer(color);
+    }
+    static inline void resize_window(int width, int height)
+    {
+        m_renderer_pointer->resize_window(width, height);
     }
 
     // Application main functions
@@ -48,18 +56,22 @@ public:
     virtual void startup() = 0;
     virtual void render(double current_time, double delta_time) = 0;
     virtual void shutdown() = 0;
-    void exit_appliction() { m_renderer->end_process(); }
+    void exit_appliction() { m_renderer_pointer->end_process(); }
 
     // Application callback functions
-    virtual void on_resize(int w, int h) {}
+    virtual void on_resize(int width, int height)
+    {
+        m_renderer_pointer->resize_window(width, height);
+    }
     virtual void on_key(int key, int action) {}
     virtual void on_mouse_button(int button, int action) {}
     virtual void on_mouse_move(int x, int y) {}
     virtual void on_mouse_wheel(int pos) {}
 
+private:
     // Static Application data
     static Application *m_app_pointer;
-    static Renderer *m_renderer;
+    static Renderer *m_renderer_pointer;
 };
 } // namespace mare
 

@@ -13,16 +13,16 @@ void Application::run(Application *app_pointer)
     switch (Renderer::get_info().name)
     {
         case RendererName::OpenGL:
-            m_renderer = new GLRenderer();
+            m_renderer_pointer = new GLRenderer();
             break;
         default:
-            m_renderer = new GLRenderer();
+            m_renderer_pointer = new GLRenderer();
     }
-    m_renderer->renderer_process(app_pointer);
-    delete m_renderer;
+    m_renderer_pointer->start_process(app_pointer);
+    delete m_renderer_pointer;
 }
 
 // Initialize static members
 Application *Application::m_app_pointer = nullptr;
-Renderer *Application::m_renderer = nullptr;
+Renderer *Application::m_renderer_pointer = nullptr;
 } // namespace mare

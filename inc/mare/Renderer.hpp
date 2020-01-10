@@ -14,7 +14,7 @@ class Application; // forward declaration
 enum class RendererName
 {
     OpenGL,
-    DirectX
+    DirectX // not implemented yet
 };
 
 enum class CURSOR
@@ -27,7 +27,7 @@ enum class CURSOR
 
 struct RendererInfo
 {
-    RendererName name {};
+    RendererName name{};
     int window_width{};          // window width in pixels
     int window_height{};         // window height in pixels
     float window_aspect{};       // window aspect ratio
@@ -52,13 +52,16 @@ class Renderer
 {
 public:
     virtual ~Renderer() {}
-    virtual void renderer_process(Application *app_pointer) = 0;
-    virtual void set_window_title(const char *title) = 0;
-    virtual void set_cursor(CURSOR type) = 0;
+    virtual void start_process(Application *app_pointer) = 0;
+    static inline void end_process() { running = false; }
 
     static inline RendererInfo &get_info() { return info; }
     static inline RendererInput &get_input() { return input; }
-    static inline void end_process() { running = false; }
+
+    virtual void set_window_title(const char *title) = 0;
+    virtual void set_cursor(CURSOR type) = 0;
+    virtual void clear_color_buffer(glm::vec4 color) = 0;
+    virtual void resize_window(int width, int height) = 0;
 
     // Coordinate conversions
     // get normalized device coordinates from window coordinates

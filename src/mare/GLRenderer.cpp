@@ -98,7 +98,7 @@ GLRenderer::debug_message_callback(GLenum source,
     }
 }
 
-void GLRenderer::renderer_process(Application *app_pointer)
+void GLRenderer::start_process(Application *app_pointer)
 {
     running = true;
     m_app_pointer = app_pointer;
