@@ -1,4 +1,6 @@
 #include "mare/Application.hpp"
+#include "GL/glew.h"
+#include "iostream"
 
 class Sandbox : public mare::Application
 {
@@ -6,7 +8,7 @@ class Sandbox : public mare::Application
 
     void startup() override
     {
-
+        
     }
 
     void render(double current_time, double delta_time) override
@@ -17,6 +19,14 @@ class Sandbox : public mare::Application
     void shutdown() override
     {
 
+    }
+
+    void on_resize(int w, int h) override
+    {
+        get_info().window_width = w;
+        get_info().window_height = h;
+        get_info().window_aspect = float(get_info().window_width) / float(get_info().window_height);
+        glViewport(0, 0, w, h);
     }
 };
 
