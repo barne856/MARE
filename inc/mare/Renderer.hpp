@@ -3,6 +3,10 @@
 
 // Standard Library
 #include <bitset>
+// MARE
+#include "mare/Mesh.hpp"
+#include "mare/Material.hpp"
+#include "mare/Materials/BasicMaterial.hpp"
 // External Libraries
 #include "glm.hpp"
 
@@ -62,6 +66,12 @@ public:
     virtual void set_cursor(CURSOR type) = 0;
     virtual void clear_color_buffer(glm::vec4 color) = 0;
     virtual void resize_window(int width, int height) = 0;
+
+    // Meshes
+    virtual Mesh* GenTriangle(glm::vec2 v1, glm::vec2 v2, glm::vec2 v3) = 0;
+    
+    // Materials
+    virtual BasicMaterial* GenBasicMaterial() = 0;
 
     // Coordinate conversions
     // get normalized device coordinates from window coordinates

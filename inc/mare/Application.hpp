@@ -1,7 +1,7 @@
 #ifndef APPLICATION
 #define APPLICATION
 
-// Renderer
+// MARE
 #include "mare/Renderer.hpp"
 
 namespace mare
@@ -36,6 +36,18 @@ public:
     static inline void resize_window(int width, int height)
     {
         m_renderer_pointer->resize_window(width, height);
+    }
+
+    // Meshes
+    static Mesh* GenTriangle(glm::vec2 v1, glm::vec2 v2, glm::vec2 v3)
+    {
+        return m_renderer_pointer->GenTriangle(v1, v2, v3);
+    }
+
+    // Materials
+    static BasicMaterial* GenBasicMaterial()
+    {
+        return m_renderer_pointer->GenBasicMaterial();
     }
 
     // Application main functions

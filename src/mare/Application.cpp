@@ -1,7 +1,7 @@
 #include "mare/Application.hpp"
 
 // Renderers
-#include "mare/GLRenderer.hpp"
+#include "mare/GL/GLRenderer.hpp"
 
 namespace mare
 {

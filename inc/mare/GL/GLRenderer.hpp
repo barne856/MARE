@@ -4,11 +4,14 @@
 // OpenGL
 #include "GL/glew.h"
 #include "GLFW/glfw3.h"
-// Renderer
+// MARE
 #include "mare/Renderer.hpp"
+#include "mare/GL/GLMeshFactory.hpp"
+#include "mare/GL/GLMaterialFactory.hpp"
 
 namespace mare
 {
+
 class GLRenderer : public Renderer
 {
 public:
@@ -52,8 +55,13 @@ protected:
         glViewport(0, 0, width, height);
     }
 
+    Mesh *GenTriangle(glm::vec2 v1, glm::vec2 v2, glm::vec2 v3) override;
+    BasicMaterial *GenBasicMaterial() override;
+
 private:
     static GLFWwindow *window;
+    static GLMeshFactory mesh_factory;
+    static GLMaterialFactory material_factory;
 
     // Debug functions
     static void GLAPIENTRY debug_message_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *userParam);

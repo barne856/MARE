@@ -1,4 +1,4 @@
-#include "mare/GLRenderer.hpp"
+#include "mare/GL/GLRenderer.hpp"
 #include "mare/Application.hpp"
 
 // Standard Library
@@ -178,6 +178,16 @@ void GLRenderer::start_process(Application *app_pointer)
     glfwTerminate();
 }
 
+Mesh* GLRenderer::GenTriangle(glm::vec2 v1, glm::vec2 v2, glm::vec2 v3)
+{
+    return mesh_factory.GenTriangle(v1, v2, v3);
+}
+
+BasicMaterial* GLRenderer::GenBasicMaterial()
+{
+    return material_factory.GenBasicMaterial();
+}
+
 // Renderer callback functions
 void GLRenderer::glfw_onResize(GLFWwindow *window, int w, int h)
 {
@@ -207,5 +217,7 @@ void GLRenderer::glfw_onMouseWheel(GLFWwindow *window, double xoffset, double yo
 }
 
 GLFWwindow *GLRenderer::window = nullptr;
+GLMeshFactory GLRenderer::mesh_factory {};
+GLMaterialFactory GLRenderer::material_factory{};
 
 }

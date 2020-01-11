@@ -22,7 +22,14 @@ set(SRC
 ./src/app/main.cpp
 ./src/mare/Application.cpp
 ./src/mare/Renderer.cpp
-./src/mare/GLRenderer.cpp)
+./src/mare/GL/GLBuffer.cpp
+./src/mare/GL/GLMaterial.cpp
+./src/mare/GL/GLMaterialFactory.cpp
+./src/mare/GL/GLMesh.cpp
+./src/mare/GL/GLMeshFactory.cpp
+./src/mare/GL/GLRenderer.cpp
+./src/mare/GL/GLShader.cpp
+./src/mare/GL/VertexArray.cpp)
 
 add_executable(APP ${SRC})
 # UNIX libraries
