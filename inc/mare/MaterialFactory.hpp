@@ -14,6 +14,7 @@ namespace mare
         public:
         virtual ~MaterialFactory(){}
         virtual BasicMaterial* GenBasicMaterial() = 0;
+        virtual Material* GenMaterial(const char *directory) = 0;
     };
 }
 

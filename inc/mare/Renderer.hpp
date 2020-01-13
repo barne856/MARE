@@ -4,6 +4,7 @@
 // Standard Library
 #include <bitset>
 // MARE
+#include "mare/Camera.hpp"
 #include "mare/Mesh.hpp"
 #include "mare/Material.hpp"
 #include "mare/Materials/BasicMaterial.hpp"
@@ -18,7 +19,8 @@ class Application; // forward declaration
 enum class RendererName
 {
     OpenGL,
-    DirectX // not implemented yet
+    DirectX, // not implemented yet
+    Vulkan // not implemented yet
 };
 
 enum class CURSOR
@@ -50,6 +52,7 @@ struct RendererInput
 {
     std::bitset<3> mouse_button{}; // 001 == left, 010 == right, 100 == middle
     glm::ivec2 mouse_pos{};        // window coordinates of mouse position (in pixels from top left corner)
+    glm::ivec2 mouse_vel{};        // window coordinates of mouse velocity (in pixels from top left corner)
 };
 
 class Renderer
@@ -58,6 +61,7 @@ public:
     virtual ~Renderer() {}
     virtual void start_process(Application *app_pointer) = 0;
     static inline void end_process() { running = false; }
+    static inline void set_camera(Camera *camera) { m_camera_pointer = camera; }
 
     static inline RendererInfo &get_info() { return info; }
     static inline RendererInput &get_input() { return input; }
@@ -68,10 +72,11 @@ public:
     virtual void resize_window(int width, int height) = 0;
 
     // Meshes
-    virtual Mesh* GenTriangle(glm::vec2 v1, glm::vec2 v2, glm::vec2 v3) = 0;
-    
+    virtual Mesh *GenTriangle(glm::vec2 v1, glm::vec2 v2, glm::vec2 v3) = 0;
+
     // Materials
-    virtual BasicMaterial* GenBasicMaterial() = 0;
+    virtual BasicMaterial *GenBasicMaterial() = 0;
+    virtual Material *GenMaterial(const char *directory) = 0;
 
     // Coordinate conversions
     // get normalized device coordinates from window coordinates
@@ -91,6 +96,7 @@ protected:
     static RendererInfo info;
     static RendererInput input;
     static Application *m_app_pointer;
+    static Camera *m_camera_pointer;
     static bool running;
 };
 } // namespace mare

@@ -7,4 +7,8 @@ BasicMaterial *GLMaterialFactory::GenBasicMaterial()
 {
     return new GLBasicMaterial();
 }
+Material* GLMaterialFactory::GenMaterial(const char* directory)
+{
+    return new GLMaterial(directory);
+}
 } // namespace mare

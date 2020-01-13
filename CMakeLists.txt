@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.1)
 
 project(APP)
 
-add_definitions(-D_USE_MATH_DEFINES)
 add_definitions(-DGLEW_STATIC)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -21,9 +20,10 @@ set(SRC
 ./ext/glew-2.1.0/src/glew.c
 ./src/app/main.cpp
 ./src/mare/Application.cpp
+./src/mare/Camera.cpp
+./src/mare/Controls.cpp
 ./src/mare/Renderer.cpp
 ./src/mare/GL/GLBuffer.cpp
-./src/mare/GL/GLMaterial.cpp
 ./src/mare/GL/GLMaterialFactory.cpp
 ./src/mare/GL/GLMesh.cpp
 ./src/mare/GL/GLMeshFactory.cpp

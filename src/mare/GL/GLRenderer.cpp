@@ -68,12 +68,12 @@ std::string GLRenderer::debug_severity_string(GLenum severity)
 }
 void GLAPIENTRY
 GLRenderer::debug_message_callback(GLenum source,
-                                    GLenum type,
-                                    GLuint id,
-                                    GLenum severity,
-                                    GLsizei length,
-                                    const GLchar *message,
-                                    const void *userParam)
+                                   GLenum type,
+                                   GLuint id,
+                                   GLenum severity,
+                                   GLsizei length,
+                                   const GLchar *message,
+                                   const void *userParam)
 {
     auto debug_state = info.debug_mode;
     if (debug_state[0] && severity == GL_DEBUG_SEVERITY_HIGH)
@@ -144,6 +144,10 @@ void GLRenderer::start_process(Application *app_pointer)
     {
         glfwSwapInterval(1);
     }
+    else
+    {
+        glfwSwapInterval(0);
+    }
 
     if (glewInit() != GLEW_OK)
     {
@@ -178,19 +182,30 @@ void GLRenderer::start_process(Application *app_pointer)
     glfwTerminate();
 }
 
-Mesh* GLRenderer::GenTriangle(glm::vec2 v1, glm::vec2 v2, glm::vec2 v3)
+Mesh *GLRenderer::GenTriangle(glm::vec2 v1, glm::vec2 v2, glm::vec2 v3)
 {
     return mesh_factory.GenTriangle(v1, v2, v3);
 }
 
-BasicMaterial* GLRenderer::GenBasicMaterial()
+BasicMaterial *GLRenderer::GenBasicMaterial()
 {
     return material_factory.GenBasicMaterial();
+}
+
+Material *GLRenderer::GenMaterial(const char *directory)
+{
+    return material_factory.GenMaterial(directory);
 }
 
 // Renderer callback functions
 void GLRenderer::glfw_onResize(GLFWwindow *window, int w, int h)
 {
+    m_app_pointer->resize_window(w, h);
+    if (m_camera_pointer)
+    {
+        m_camera_pointer->set_aspect(info.window_aspect);
+        m_camera_pointer->recalculate_projection();
+    }
     m_app_pointer->on_resize(w, h);
 }
 
@@ -201,23 +216,40 @@ void GLRenderer::glfw_onKey(GLFWwindow *window, int key, int scancode, int actio
 
 void GLRenderer::glfw_onMouseButton(GLFWwindow *window, int button, int action, int mods)
 {
+    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+    {
+        input.mouse_button.set(0, 1);
+    }
+    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
+    {
+        input.mouse_button.set(0, 0);
+    }
+    if (m_camera_pointer)
+    {
+        m_camera_pointer->interpret_input();
+    }
     m_app_pointer->on_mouse_button(button, action);
 }
 
 void GLRenderer::glfw_onMouseMove(GLFWwindow *window, double x, double y)
 {
-
+    glm::ivec2 old_pos = get_input().mouse_pos;
+    get_input().mouse_pos = glm::ivec2(x, y);
+    get_input().mouse_vel = glm::ivec2(x, y) - old_pos;
+    if (m_camera_pointer)
+    {
+        m_camera_pointer->interpret_input();
+    }
     m_app_pointer->on_mouse_move(static_cast<int>(x), static_cast<int>(y));
 }
 
 void GLRenderer::glfw_onMouseWheel(GLFWwindow *window, double xoffset, double yoffset)
 {
-
     m_app_pointer->on_mouse_wheel(static_cast<int>(yoffset));
 }
 
 GLFWwindow *GLRenderer::window = nullptr;
-GLMeshFactory GLRenderer::mesh_factory {};
+GLMeshFactory GLRenderer::mesh_factory{};
 GLMaterialFactory GLRenderer::material_factory{};
 
-}
+} // namespace mare

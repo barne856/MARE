@@ -25,6 +25,14 @@ public:
     {
         m_renderer_pointer->set_window_title(title);
     }
+    static inline void resize_window(int width, int height)
+    {
+        m_renderer_pointer->resize_window(width, height);
+    }
+    static inline void set_camera(Camera* camera)
+    {
+        m_renderer_pointer->set_camera(camera);
+    }
     static inline void set_cursor(CURSOR type)
     {
         m_renderer_pointer->set_cursor(type);
@@ -33,21 +41,21 @@ public:
     {
         m_renderer_pointer->clear_color_buffer(color);
     }
-    static inline void resize_window(int width, int height)
-    {
-        m_renderer_pointer->resize_window(width, height);
-    }
 
     // Meshes
-    static Mesh* GenTriangle(glm::vec2 v1, glm::vec2 v2, glm::vec2 v3)
+    static Mesh *GenTriangle(glm::vec2 v1, glm::vec2 v2, glm::vec2 v3)
     {
         return m_renderer_pointer->GenTriangle(v1, v2, v3);
     }
 
     // Materials
-    static BasicMaterial* GenBasicMaterial()
+    static BasicMaterial *GenBasicMaterial()
     {
         return m_renderer_pointer->GenBasicMaterial();
+    }
+    static Material* GenMaterial(const char* directory)
+    {
+        return m_renderer_pointer->GenMaterial(directory);
     }
 
     // Application main functions
@@ -71,10 +79,7 @@ public:
     void exit_appliction() { m_renderer_pointer->end_process(); }
 
     // Application callback functions
-    virtual void on_resize(int width, int height)
-    {
-        m_renderer_pointer->resize_window(width, height);
-    }
+    virtual void on_resize(int width, int height) {}
     virtual void on_key(int key, int action) {}
     virtual void on_mouse_button(int button, int action) {}
     virtual void on_mouse_move(int x, int y) {}

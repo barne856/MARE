@@ -14,6 +14,7 @@ namespace mare
         public:
         virtual ~GLMaterialFactory(){}
         BasicMaterial* GenBasicMaterial() override;
+        Material* GenMaterial(const char *directory) override;
     };
 }
 
