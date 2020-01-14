@@ -21,6 +21,7 @@ public:
     static inline Application *get_app() { return m_app_pointer; }
     static inline RendererInfo &get_info() { return m_renderer_pointer->get_info(); }
     static inline RendererInput &get_input() { return m_renderer_pointer->get_input(); }
+    static inline Camera *get_camera() { return m_renderer_pointer->get_camera(); }
     static inline void set_window_title(const char *title)
     {
         m_renderer_pointer->set_window_title(title);
@@ -29,9 +30,9 @@ public:
     {
         m_renderer_pointer->resize_window(width, height);
     }
-    static inline void set_camera(Camera* camera)
+    static inline void set_camera(Camera *camera)
     {
-        m_renderer_pointer->set_camera(camera);
+        Renderer::set_camera(camera);
     }
     static inline void set_cursor(CURSOR type)
     {
@@ -41,11 +42,19 @@ public:
     {
         m_renderer_pointer->clear_color_buffer(color);
     }
+    static inline void wireframe_mode(bool wireframe)
+    {
+        m_renderer_pointer->wireframe_mode(wireframe);
+    }
 
     // Meshes
     static Mesh *GenTriangle(glm::vec2 v1, glm::vec2 v2, glm::vec2 v3)
     {
         return m_renderer_pointer->GenTriangle(v1, v2, v3);
+    }
+    static CompositeMesh* GenCompositeMesh()
+    {
+        return m_renderer_pointer->GenCompositeMesh();
     }
 
     // Materials
@@ -53,7 +62,7 @@ public:
     {
         return m_renderer_pointer->GenBasicMaterial();
     }
-    static Material* GenMaterial(const char* directory)
+    static Material *GenMaterial(const char *directory)
     {
         return m_renderer_pointer->GenMaterial(directory);
     }
@@ -80,10 +89,10 @@ public:
 
     // Application callback functions
     virtual void on_resize(int width, int height) {}
-    virtual void on_key(int key, int action) {}
-    virtual void on_mouse_button(int button, int action) {}
-    virtual void on_mouse_move(int x, int y) {}
-    virtual void on_mouse_wheel(int pos) {}
+    virtual void on_key(const RendererInput& input) {}
+    virtual void on_mouse_button(const RendererInput& input) {}
+    virtual void on_mouse_move(const RendererInput& input) {}
+    virtual void on_mouse_wheel(const RendererInput& input) {}
 
 private:
     // Static Application data

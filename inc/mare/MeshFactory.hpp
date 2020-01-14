@@ -3,6 +3,7 @@
 
 // MARE
 #include "mare/Mesh.hpp"
+#include "mare/CompositeMesh.hpp"
 // External Libraries
 #include "glm.hpp"
 
@@ -13,6 +14,7 @@ namespace mare
         public:
         virtual ~MeshFactory(){}
         virtual Mesh* GenTriangle(glm::vec2 v1, glm::vec2 v2, glm::vec2 v3) = 0;
+        virtual CompositeMesh* GenCompositeMesh() = 0;
     };
 }
 

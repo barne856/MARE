@@ -8,14 +8,17 @@
 
 namespace mare
 {
-class CompositeMesh : public Mesh
+class CompositeMesh : virtual public Mesh
 {
 public:
+    CompositeMesh() {}
     virtual ~CompositeMesh() {}
-    virtual void render() = 0;
+    virtual void render(Material *material) = 0;
+    virtual void render(Material *material, glm::mat4 model) = 0;
+    void push_mesh(Mesh *mesh) { m_meshes.push_back(mesh); }
 
-private:
-    std::vector<Mesh*> m_meshes {};
+protected:
+    std::vector<Mesh *> m_meshes{};
 };
 } // namespace mare
 

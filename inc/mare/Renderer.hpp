@@ -6,6 +6,7 @@
 // MARE
 #include "mare/Camera.hpp"
 #include "mare/Mesh.hpp"
+#include "mare/CompositeMesh.hpp"
 #include "mare/Material.hpp"
 #include "mare/Materials/BasicMaterial.hpp"
 // External Libraries
@@ -20,7 +21,7 @@ enum class RendererName
 {
     OpenGL,
     DirectX, // not implemented yet
-    Vulkan // not implemented yet
+    Vulkan   // not implemented yet
 };
 
 enum class CURSOR
@@ -53,6 +54,7 @@ struct RendererInput
     std::bitset<3> mouse_button{}; // 001 == left, 010 == right, 100 == middle
     glm::ivec2 mouse_pos{};        // window coordinates of mouse position (in pixels from top left corner)
     glm::ivec2 mouse_vel{};        // window coordinates of mouse velocity (in pixels from top left corner)
+    bool W_PRESSED = false;
 };
 
 class Renderer
@@ -65,14 +67,17 @@ public:
 
     static inline RendererInfo &get_info() { return info; }
     static inline RendererInput &get_input() { return input; }
+    static inline Camera *get_camera() { return m_camera_pointer; }
 
     virtual void set_window_title(const char *title) = 0;
     virtual void set_cursor(CURSOR type) = 0;
     virtual void clear_color_buffer(glm::vec4 color) = 0;
     virtual void resize_window(int width, int height) = 0;
+    virtual void wireframe_mode(bool wireframe) = 0;
 
     // Meshes
     virtual Mesh *GenTriangle(glm::vec2 v1, glm::vec2 v2, glm::vec2 v3) = 0;
+    virtual CompositeMesh* GenCompositeMesh() = 0;
 
     // Materials
     virtual BasicMaterial *GenBasicMaterial() = 0;

@@ -54,14 +54,22 @@ protected:
         info.window_aspect = float(info.window_width) / float(info.window_height);
         glViewport(0, 0, width, height);
     }
-    void set_camera(Camera* camera)
+    void wireframe_mode(bool wireframe) override
     {
-        m_camera_pointer = camera;
+        if (wireframe)
+        {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        }
+        else
+        {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        }
     }
 
     Mesh *GenTriangle(glm::vec2 v1, glm::vec2 v2, glm::vec2 v3) override;
+    CompositeMesh *GenCompositeMesh() override;
     BasicMaterial *GenBasicMaterial() override;
-    Material* GenMaterial(const char *directory) override;
+    Material *GenMaterial(const char *directory) override;
 
 private:
     static GLFWwindow *window;

@@ -9,11 +9,12 @@
 namespace mare
 {
 
-class GLMesh : public Mesh, protected GLRenderer
+class GLMesh : virtual public Mesh, protected GLRenderer
 {
 public:
     virtual ~GLMesh() {}
-    void render() override;
+    void render(Material* material) override;
+    void render(Material *material, glm::mat4 model) override;
     void bind() const { m_vao->bind(); }
 
 protected:

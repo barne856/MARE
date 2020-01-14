@@ -37,8 +37,9 @@ void Camera::interpret_input()
     }
 }
 
-void Camera::render(float dt)
+void Camera::render(double dt)
 {
-    // update camera (translate and rotate from velocities)
+    set_position(m_position + m_linear_velocity*float(dt));
+    set_direction(glm::vec3(glm::rotate(glm::mat4(1.0f), m_angular_velocity*float(dt), m_up) * glm::vec4(m_direction, 1.0f)));
 }
 } // namespace mare

@@ -168,7 +168,9 @@ void GLRenderer::start_process(Application *app_pointer)
     do
     {
         double time = glfwGetTime();
-        m_app_pointer->render(time, time - info.current_time);
+        double delta_time = time - info.current_time;
+        m_camera_pointer->render(delta_time);
+        m_app_pointer->render(time, delta_time);
         info.current_time = time;
         glfwPollEvents();
         glfwSwapBuffers(window);
@@ -180,6 +182,11 @@ void GLRenderer::start_process(Application *app_pointer)
     glfwDestroyCursor(crosshair_cursor);
     glfwDestroyWindow(window);
     glfwTerminate();
+}
+
+CompositeMesh* GLRenderer::GenCompositeMesh()
+{
+    return mesh_factory.GenCompositeMesh();
 }
 
 Mesh *GLRenderer::GenTriangle(glm::vec2 v1, glm::vec2 v2, glm::vec2 v3)
@@ -211,7 +218,19 @@ void GLRenderer::glfw_onResize(GLFWwindow *window, int w, int h)
 
 void GLRenderer::glfw_onKey(GLFWwindow *window, int key, int scancode, int action, int mods)
 {
-    m_app_pointer->on_key(key, action);
+    switch (key)
+    {
+    case GLFW_KEY_W:
+        if (action == GLFW_PRESS)
+        {
+            input.W_PRESSED = true;
+        }
+        else
+        {
+            input.W_PRESSED = false;
+        }
+    }
+    m_app_pointer->on_key(input);
 }
 
 void GLRenderer::glfw_onMouseButton(GLFWwindow *window, int button, int action, int mods)
@@ -228,7 +247,7 @@ void GLRenderer::glfw_onMouseButton(GLFWwindow *window, int button, int action, 
     {
         m_camera_pointer->interpret_input();
     }
-    m_app_pointer->on_mouse_button(button, action);
+    m_app_pointer->on_mouse_button(input);
 }
 
 void GLRenderer::glfw_onMouseMove(GLFWwindow *window, double x, double y)
@@ -240,12 +259,12 @@ void GLRenderer::glfw_onMouseMove(GLFWwindow *window, double x, double y)
     {
         m_camera_pointer->interpret_input();
     }
-    m_app_pointer->on_mouse_move(static_cast<int>(x), static_cast<int>(y));
+    m_app_pointer->on_mouse_move(input);
 }
 
 void GLRenderer::glfw_onMouseWheel(GLFWwindow *window, double xoffset, double yoffset)
 {
-    m_app_pointer->on_mouse_wheel(static_cast<int>(yoffset));
+    m_app_pointer->on_mouse_wheel(input);
 }
 
 GLFWwindow *GLRenderer::window = nullptr;

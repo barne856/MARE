@@ -24,6 +24,7 @@ set(SRC
 ./src/mare/Controls.cpp
 ./src/mare/Renderer.cpp
 ./src/mare/GL/GLBuffer.cpp
+./src/mare/GL/GLCompositeMesh.cpp
 ./src/mare/GL/GLMaterialFactory.cpp
 ./src/mare/GL/GLMesh.cpp
 ./src/mare/GL/GLMeshFactory.cpp

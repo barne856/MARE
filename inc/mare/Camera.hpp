@@ -108,7 +108,7 @@ public:
     glm::vec3 get_up() const { return m_up; }
     float get_distance_to_center() const { return m_distance_to_center; }
 
-    void render(float dt);
+    void render(double dt);
     void recalculate_projection();
     void recalculate_view();
 
