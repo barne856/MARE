@@ -7,6 +7,7 @@
 #include "mare/Camera.hpp"
 #include "mare/Mesh.hpp"
 #include "mare/CompositeMesh.hpp"
+#include "mare/InstancedMesh.hpp"
 #include "mare/Material.hpp"
 #include "mare/Materials/BasicMaterial.hpp"
 // External Libraries
@@ -78,6 +79,7 @@ public:
     // Meshes
     virtual Mesh *GenTriangle(glm::vec2 v1, glm::vec2 v2, glm::vec2 v3) = 0;
     virtual CompositeMesh* GenCompositeMesh() = 0;
+    virtual InstancedMesh* GenInstancedMesh(unsigned int max_instances) = 0;
 
     // Materials
     virtual BasicMaterial *GenBasicMaterial() = 0;

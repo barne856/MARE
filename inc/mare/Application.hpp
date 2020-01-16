@@ -52,9 +52,13 @@ public:
     {
         return m_renderer_pointer->GenTriangle(v1, v2, v3);
     }
-    static CompositeMesh* GenCompositeMesh()
+    static CompositeMesh *GenCompositeMesh()
     {
         return m_renderer_pointer->GenCompositeMesh();
+    }
+    static InstancedMesh *GenInstancedMesh(unsigned int max_instances)
+    {
+        return m_renderer_pointer->GenInstancedMesh(max_instances);
     }
 
     // Materials
@@ -89,10 +93,10 @@ public:
 
     // Application callback functions
     virtual void on_resize(int width, int height) {}
-    virtual void on_key(const RendererInput& input) {}
-    virtual void on_mouse_button(const RendererInput& input) {}
-    virtual void on_mouse_move(const RendererInput& input) {}
-    virtual void on_mouse_wheel(const RendererInput& input) {}
+    virtual void on_key(const RendererInput &input) {}
+    virtual void on_mouse_button(const RendererInput &input) {}
+    virtual void on_mouse_move(const RendererInput &input) {}
+    virtual void on_mouse_wheel(const RendererInput &input) {}
 
 private:
     // Static Application data

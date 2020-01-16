@@ -84,7 +84,6 @@ void OrbitControls::interpret_input(Camera *camera, RendererInput &input)
             pos.z = r * cos(theta + dtheta) + center.z;
         }
         camera->set_view(pos, center, up);
-        input.mouse_vel = {0, 0};
     }
 }
 } // namespace mare

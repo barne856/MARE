@@ -188,6 +188,10 @@ CompositeMesh* GLRenderer::GenCompositeMesh()
 {
     return mesh_factory.GenCompositeMesh();
 }
+InstancedMesh* GLRenderer::GenInstancedMesh(unsigned int max_instances)
+{
+    return mesh_factory.GenInstancedMesh(max_instances);
+}
 
 Mesh *GLRenderer::GenTriangle(glm::vec2 v1, glm::vec2 v2, glm::vec2 v3)
 {
@@ -260,6 +264,7 @@ void GLRenderer::glfw_onMouseMove(GLFWwindow *window, double x, double y)
         m_camera_pointer->interpret_input();
     }
     m_app_pointer->on_mouse_move(input);
+    get_input().mouse_vel = glm::ivec2(0, 0);
 }
 
 void GLRenderer::glfw_onMouseWheel(GLFWwindow *window, double xoffset, double yoffset)

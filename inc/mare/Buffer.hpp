@@ -133,14 +133,14 @@ template <typename T>
 class Buffer
 {
 public:
-    Buffer() : m_buffer_ID(0), m_format(BufferFormat()), m_count(0), m_data_size(0) {}
+    Buffer() : m_buffer_ID(0), m_format(BufferFormat()), m_count(0), m_data_size(0), m_dynamic_size_in_bytes(0), is_dynamic(false) {}
     virtual ~Buffer() {}
     void inline set_format(const BufferFormat &format)
     {
         m_format = format;
         m_count = m_data_size / format.stride();
     }
-    virtual void create(std::vector<T> &data) = 0;
+    virtual void create(std::vector<T> &data, size_t dynamic_size_in_bytes = 0) = 0;
     virtual void update(std::vector<T> &data, unsigned int offset) = 0;
     inline const size_t count() const { return m_count; }
     inline unsigned int name() { return m_buffer_ID; }
@@ -151,6 +151,8 @@ protected:
     BufferFormat m_format;
     size_t m_count;
     size_t m_data_size;
+    size_t m_dynamic_size_in_bytes;
+    bool is_dynamic;
 };
 } // namespace mare
 

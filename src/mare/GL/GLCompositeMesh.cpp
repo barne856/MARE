@@ -5,6 +5,7 @@
 
 namespace mare
 {
+
 void GLCompositeMesh::render(Material *material)
 {
     material->bind();
@@ -13,16 +14,26 @@ void GLCompositeMesh::render(Material *material)
         material->upload_mat4("projection", Application::get_camera()->projection());
         material->upload_mat4("view", Application::get_camera()->view());
     }
-    for (Mesh* mesh : m_meshes)
+    for (Mesh *mesh : m_meshes)
     {
         mesh->render(material, transform);
     }
 }
-void GLCompositeMesh::render(Material *material, glm::mat4 model)
+
+void GLCompositeMesh::render(Material *material, glm::mat4 parent_model)
 {
-    for(Mesh* mesh : m_meshes)
+    for (Mesh *mesh : m_meshes)
     {
-        mesh->render(material, transform * model);
+        mesh->render(material, transform * parent_model);
     }
 }
+
+void GLCompositeMesh::render(Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4>* models)
+{
+    for (Mesh *mesh : m_meshes)
+    {
+        mesh->render(material, transform * parent_model, instance_count, models);
+    }
+}
+
 } // namespace mare
