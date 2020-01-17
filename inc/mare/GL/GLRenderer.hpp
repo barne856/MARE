@@ -67,6 +67,7 @@ protected:
     }
 
     Mesh *GenTriangle(glm::vec2 v1, glm::vec2 v2, glm::vec2 v3) override;
+    CharMesh *GenCharMesh(std::string str, float keying = 1.0f) override;
     CompositeMesh *GenCompositeMesh() override;
     InstancedMesh *GenInstancedMesh(unsigned int max_instances) override;
     BasicMaterial *GenBasicMaterial() override;

@@ -198,6 +198,11 @@ Mesh *GLRenderer::GenTriangle(glm::vec2 v1, glm::vec2 v2, glm::vec2 v3)
     return mesh_factory.GenTriangle(v1, v2, v3);
 }
 
+CharMesh *GLRenderer::GenCharMesh(std::string str, float keying)
+{
+    return mesh_factory.GenCharMesh(str, keying);
+}
+
 BasicMaterial *GLRenderer::GenBasicMaterial()
 {
     return material_factory.GenBasicMaterial();

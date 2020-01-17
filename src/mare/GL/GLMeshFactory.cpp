@@ -1,5 +1,6 @@
 #include "mare/GL/GLMeshFactory.hpp"
 #include "mare/GL/Meshes/GLTriangleMesh.hpp"
+#include "mare/GL/Meshes/GLCharMesh.hpp"
 #include "mare/GL/GLCompositeMesh.hpp"
 #include "mare/GL/GLInstancedMesh.hpp"
 
@@ -16,5 +17,9 @@ CompositeMesh* GLMeshFactory::GenCompositeMesh()
 InstancedMesh* GLMeshFactory::GenInstancedMesh(unsigned int max_instances)
 {
     return new GLInstancedMesh(max_instances);
+}
+CharMesh* GLMeshFactory::GenCharMesh(std::string str, float keying)
+{
+    return new GLCharMesh(str, keying);
 }
 } // namespace mare

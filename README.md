@@ -1,6 +1,8 @@
 # MARE
 Minimal abstraction rendering engine using OpenGL 4.5 and C++17
 
+![Alt text](/res/Screenshots/MARE.PNG?raw=true "M.A.R.E.")
+
 ## Dependencies & External Libraries:
     GLFW (git submodule)
     GLM (git submodule)

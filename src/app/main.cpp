@@ -12,13 +12,14 @@
 // shadows and lights
 // implement pop instance and others in the instanced mesh
 // implement instanced mesh or instanced mesh rendering
+// Add Text Thickness to CharMesh
 
 using namespace mare;
 
 class Sandbox : public mare::Application
 {
-    glm::vec4 bg_color{237 / 255.0f, 201 / 255.0f, 175 / 255.0f, 1.0f};
-    glm::vec4 tri_color{0.05f, 0.72f, 0.71f, 1.0f};
+    glm::vec4 bg_color{0.1f, 0.08f, 0.12f, 1.0f};
+    glm::vec4 tri_color{0.95f, 0.95f, 0.95f, 1.0f};
     Mesh *tri;
     Mesh* tri2;
     Mesh* tri3;
@@ -27,6 +28,7 @@ class Sandbox : public mare::Application
     Material *basic_mat;
     Camera *main_camera;
     bool wireframe = false;
+    CharMesh* some_text;
 
     InstancedMesh* instance_mesh;
 
@@ -84,13 +86,18 @@ class Sandbox : public mare::Application
         instance_mesh->push_instance(instances[1]);
         instance_mesh->push_instance(instances[2]);
 
+        some_text = GenCharMesh("M.A.R.E.");
+        some_text->set_scale({0.15f, 0.3f, 0.3f});
+        some_text->set_center(glm::vec3(0.0f));
+
     }
 
     void render(double current_time, double delta_time) override
     {
         clear_color_buffer(bg_color);
-        comp2->render(basic_mat);
-        instance_mesh->render(basic_mat);
+        //comp2->render(basic_mat);
+        //instance_mesh->render(basic_mat);
+        some_text->render(basic_mat);
     }
 
     void shutdown() override

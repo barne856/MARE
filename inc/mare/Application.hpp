@@ -52,6 +52,10 @@ public:
     {
         return m_renderer_pointer->GenTriangle(v1, v2, v3);
     }
+    static CharMesh *GenCharMesh(std::string str, float keying = 1.0f)
+    {
+        return m_renderer_pointer->GenCharMesh(str, keying);
+    }
     static CompositeMesh *GenCompositeMesh()
     {
         return m_renderer_pointer->GenCompositeMesh();
