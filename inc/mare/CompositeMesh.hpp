@@ -13,9 +13,9 @@ class CompositeMesh : virtual public Mesh
 public:
     CompositeMesh() {}
     virtual ~CompositeMesh() {}
-    virtual void render(Material *material) = 0;
-    virtual void render(Material *material, glm::mat4 parent_model) = 0;
-    virtual void render(Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4>* models) = 0;
+    void render(Material *material) override;
+    void render(Material *material, glm::mat4 parent_model) override;
+    void render(Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models) override;
     void push_mesh(Mesh *mesh) { m_meshes.push_back(mesh); }
 
 protected:

@@ -47,32 +47,40 @@ public:
         m_renderer_pointer->wireframe_mode(wireframe);
     }
 
+    // Buffers
+    static Buffer<float>* GenFloatBuffer()
+    {
+        return m_renderer_pointer->GenFloatBuffer();
+    }
+    static Buffer<glm::mat4>* GenMat4Buffer()
+    {
+        return m_renderer_pointer->GenMat4Buffer();
+    }
+
+    // RenderState
+    static RenderState* GenRenderState()
+    {
+        return m_renderer_pointer->GenRenderState();
+    }
+
     // Meshes
-    static Mesh *GenTriangle(glm::vec2 v1, glm::vec2 v2, glm::vec2 v3)
+    static void render_mesh(Mesh* mesh, Material* material)
     {
-        return m_renderer_pointer->GenTriangle(v1, v2, v3);
+        m_renderer_pointer->render_mesh(mesh, material);
     }
-    static CharMesh *GenCharMesh(std::string str, float keying = 1.0f)
+    static void render_mesh(Mesh* mesh, Material* material, glm::mat4 parent_model)
     {
-        return m_renderer_pointer->GenCharMesh(str, keying);
+        m_renderer_pointer->render_mesh(mesh, material, parent_model);
     }
-    static CompositeMesh *GenCompositeMesh()
+    static void render_mesh(Mesh* mesh, Material* material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4>* models)
     {
-        return m_renderer_pointer->GenCompositeMesh();
-    }
-    static InstancedMesh *GenInstancedMesh(unsigned int max_instances)
-    {
-        return m_renderer_pointer->GenInstancedMesh(max_instances);
+        m_renderer_pointer->render_mesh(mesh, material, parent_model, instance_count, models);
     }
 
     // Materials
-    static BasicMaterial *GenBasicMaterial()
+    static Shader* GenShader(const char *directory)
     {
-        return m_renderer_pointer->GenBasicMaterial();
-    }
-    static Material *GenMaterial(const char *directory)
-    {
-        return m_renderer_pointer->GenMaterial(directory);
+        return m_renderer_pointer->GenShader(directory);
     }
 
     // Application main functions

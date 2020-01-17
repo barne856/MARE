@@ -6,11 +6,7 @@
 // MARE
 #include "mare/Camera.hpp"
 #include "mare/Mesh.hpp"
-#include "mare/CompositeMesh.hpp"
-#include "mare/InstancedMesh.hpp"
-#include "mare/Meshes/CharMesh.hpp"
 #include "mare/Material.hpp"
-#include "mare/Materials/BasicMaterial.hpp"
 // External Libraries
 #include "glm.hpp"
 
@@ -77,15 +73,20 @@ public:
     virtual void resize_window(int width, int height) = 0;
     virtual void wireframe_mode(bool wireframe) = 0;
 
-    // Meshes
-    virtual Mesh *GenTriangle(glm::vec2 v1, glm::vec2 v2, glm::vec2 v3) = 0;
-    virtual CharMesh *GenCharMesh(std::string str, float keying = 1.0f) = 0;
-    virtual CompositeMesh* GenCompositeMesh() = 0;
-    virtual InstancedMesh* GenInstancedMesh(unsigned int max_instances) = 0;
+    // Buffers
+    virtual Buffer<float>* GenFloatBuffer() = 0;
+    virtual Buffer<glm::mat4>* GenMat4Buffer() = 0;
 
-    // Materials
-    virtual BasicMaterial *GenBasicMaterial() = 0;
-    virtual Material *GenMaterial(const char *directory) = 0;
+    // RenderState
+    virtual RenderState* GenRenderState() = 0;
+
+    // Rendering
+    virtual void render_mesh(Mesh* mesh, Material* material) = 0;
+    virtual void render_mesh(Mesh* mesh, Material* material, glm::mat4 parent_model) = 0;
+    virtual void render_mesh(Mesh* mesh, Material* material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4>* models) = 0;
+
+    // Shaders
+    virtual Shader* GenShader(const char *directory) = 0;
 
     // Coordinate conversions
     // get normalized device coordinates from window coordinates

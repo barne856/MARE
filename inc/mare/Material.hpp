@@ -8,10 +8,10 @@ namespace mare
 class Material
 {
 public:
-    Material() : m_shader(nullptr) {}
+    Material(const char *directory);
     virtual ~Material() {}
-    virtual void render() = 0;
-    virtual void bind() = 0;
+    virtual void render() {}
+    inline void bind() const { m_shader->use(); }
 
     void upload_float(const char *name, float value) { m_shader->upload_float(name, value); }
     void upload_vec3(const char *name, glm::vec3 value) { m_shader->upload_vec3(name, value); }

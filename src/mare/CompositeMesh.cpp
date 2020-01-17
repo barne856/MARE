@@ -1,12 +1,10 @@
-#include "mare/GL/GLCompositeMesh.hpp"
+#include "mare/CompositeMesh.hpp"
 #include "mare/Application.hpp"
-
-#include <iostream>
 
 namespace mare
 {
 
-void GLCompositeMesh::render(Material *material)
+void CompositeMesh::render(Material *material)
 {
     material->bind();
     if (Application::get_camera())
@@ -20,7 +18,7 @@ void GLCompositeMesh::render(Material *material)
     }
 }
 
-void GLCompositeMesh::render(Material *material, glm::mat4 parent_model)
+void CompositeMesh::render(Material *material, glm::mat4 parent_model)
 {
     for (Mesh *mesh : m_meshes)
     {
@@ -28,7 +26,7 @@ void GLCompositeMesh::render(Material *material, glm::mat4 parent_model)
     }
 }
 
-void GLCompositeMesh::render(Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4>* models)
+void CompositeMesh::render(Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4>* models)
 {
     for (Mesh *mesh : m_meshes)
     {

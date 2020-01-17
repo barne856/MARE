@@ -21,17 +21,16 @@ set(SRC
 ./src/app/main.cpp
 ./src/mare/Application.cpp
 ./src/mare/Camera.cpp
+./src/mare/CompositeMesh.cpp
 ./src/mare/Controls.cpp
+./src/mare/InstancedMesh.cpp
+./src/mare/Material.cpp
+./src/mare/Mesh.cpp
 ./src/mare/Renderer.cpp
 ./src/mare/GL/GLBuffer.cpp
-./src/mare/GL/GLCompositeMesh.cpp
-./src/mare/GL/GLInstancedMesh.cpp
-./src/mare/GL/GLMaterialFactory.cpp
-./src/mare/GL/GLMesh.cpp
-./src/mare/GL/GLMeshFactory.cpp
 ./src/mare/GL/GLRenderer.cpp
-./src/mare/GL/GLShader.cpp
-./src/mare/GL/VertexArray.cpp)
+./src/mare/GL/GLRenderState.cpp
+./src/mare/GL/GLShader.cpp)
 
 add_executable(APP ${SRC})
 # UNIX libraries

@@ -6,8 +6,6 @@
 #include "GLFW/glfw3.h"
 // MARE
 #include "mare/Renderer.hpp"
-#include "mare/GL/GLMeshFactory.hpp"
-#include "mare/GL/GLMaterialFactory.hpp"
 
 namespace mare
 {
@@ -66,17 +64,25 @@ protected:
         }
     }
 
-    Mesh *GenTriangle(glm::vec2 v1, glm::vec2 v2, glm::vec2 v3) override;
-    CharMesh *GenCharMesh(std::string str, float keying = 1.0f) override;
-    CompositeMesh *GenCompositeMesh() override;
-    InstancedMesh *GenInstancedMesh(unsigned int max_instances) override;
-    BasicMaterial *GenBasicMaterial() override;
-    Material *GenMaterial(const char *directory) override;
+    // Buffers
+    Buffer<float> *GenFloatBuffer() override;
+    Buffer<glm::mat4>* GenMat4Buffer() override;
+
+    // RenderState
+    RenderState *GenRenderState() override;
+
+    // Meshes
+    void render_mesh(Mesh *mesh, Material *material) override;
+    void render_mesh(Mesh *mesh, Material *material, glm::mat4 parent_model) override;
+    void render_mesh(Mesh *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models) override;
+
+    // Shaders
+    Shader* GenShader(const char *directory) override;
 
 private:
     static GLFWwindow *window;
-    static GLMeshFactory mesh_factory;
-    static GLMaterialFactory material_factory;
+
+    GLenum GLDrawMethod(DrawMethod draw_method);
 
     // Debug functions
     static void GLAPIENTRY debug_message_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *userParam);

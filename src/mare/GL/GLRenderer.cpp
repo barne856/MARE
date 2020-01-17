@@ -1,4 +1,7 @@
 #include "mare/GL/GLRenderer.hpp"
+#include "mare/GL/GLBuffer.hpp"
+#include "mare/GL/GLShader.hpp"
+#include "mare/GL/GLRenderState.hpp"
 #include "mare/Application.hpp"
 
 // Standard Library
@@ -184,33 +187,99 @@ void GLRenderer::start_process(Application *app_pointer)
     glfwTerminate();
 }
 
-CompositeMesh* GLRenderer::GenCompositeMesh()
+GLenum GLRenderer::GLDrawMethod(DrawMethod draw_method)
 {
-    return mesh_factory.GenCompositeMesh();
-}
-InstancedMesh* GLRenderer::GenInstancedMesh(unsigned int max_instances)
-{
-    return mesh_factory.GenInstancedMesh(max_instances);
-}
-
-Mesh *GLRenderer::GenTriangle(glm::vec2 v1, glm::vec2 v2, glm::vec2 v3)
-{
-    return mesh_factory.GenTriangle(v1, v2, v3);
-}
-
-CharMesh *GLRenderer::GenCharMesh(std::string str, float keying)
-{
-    return mesh_factory.GenCharMesh(str, keying);
+    switch (draw_method)
+    {
+    case DrawMethod::TRIANGLES:
+        return GL_TRIANGLES;
+    case DrawMethod::LINES:
+        return GL_LINES;
+    default:
+        return GL_POINTS;
+    }
 }
 
-BasicMaterial *GLRenderer::GenBasicMaterial()
+// Buffers
+Buffer<float> *GLRenderer::GenFloatBuffer()
 {
-    return material_factory.GenBasicMaterial();
+    return new GLBuffer<float>();
+}
+Buffer<glm::mat4> *GLRenderer::GenMat4Buffer()
+{
+    return new GLBuffer<glm::mat4>();
 }
 
-Material *GLRenderer::GenMaterial(const char *directory)
+// RenderState
+RenderState *GLRenderer::GenRenderState()
 {
-    return material_factory.GenMaterial(directory);
+    return new GLRenderState();
+}
+
+// Meshes
+void GLRenderer::render_mesh(Mesh *mesh, Material *material)
+{
+    mesh->bind();
+    material->bind();
+    if (Application::get_camera())
+    {
+        material->upload_mat4("projection", Application::get_camera()->projection());
+        material->upload_mat4("view", Application::get_camera()->view());
+    }
+    material->upload_mat4("model", mesh->get_model());
+    if (mesh->get_state()->is_indexed())
+    {
+        glDrawElements(GLDrawMethod(mesh->get_draw_method()), GLsizei(mesh->get_state()->render_count()), GL_UNSIGNED_INT, nullptr);
+    }
+    else
+    {
+        glDrawArrays(GLDrawMethod(mesh->get_draw_method()), 0, GLsizei(mesh->get_state()->render_count()));
+    }
+}
+void GLRenderer::render_mesh(Mesh *mesh, Material *material, glm::mat4 parent_model)
+{
+    mesh->bind();
+    material->bind();
+    if (Application::get_camera())
+    {
+        material->upload_mat4("projection", Application::get_camera()->projection());
+        material->upload_mat4("view", Application::get_camera()->view());
+    }
+    material->upload_mat4("model", parent_model * mesh->get_model());
+    if (mesh->get_state()->is_indexed())
+    {
+        glDrawElements(GLDrawMethod(mesh->get_draw_method()), GLsizei(mesh->get_state()->render_count()), GL_UNSIGNED_INT, nullptr);
+    }
+    else
+    {
+        glDrawArrays(GLDrawMethod(mesh->get_draw_method()), 0, GLsizei(mesh->get_state()->render_count()));
+    }
+}
+void GLRenderer::render_mesh(Mesh *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models)
+{
+    mesh->bind();
+    material->bind();
+    if (Application::get_camera())
+    {
+        material->upload_mat4("projection", Application::get_camera()->projection());
+        material->upload_mat4("view", Application::get_camera()->view());
+    }
+    material->upload_mat4("model", parent_model * mesh->get_model());
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, models->name());
+    if (mesh->get_state()->is_indexed())
+    {
+        glDrawElementsInstanced(GLDrawMethod(mesh->get_draw_method()), mesh->get_state()->render_count(), GL_UNSIGNED_INT, nullptr, instance_count);
+    }
+    else
+    {
+        glDrawArraysInstanced(GLDrawMethod(mesh->get_draw_method()), 0, mesh->get_state()->render_count(), instance_count);
+    }
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, 0);
+}
+
+Shader *GLRenderer::GenShader(const char *directory)
+{
+    return new GLShader(directory);
 }
 
 // Renderer callback functions
@@ -278,7 +347,5 @@ void GLRenderer::glfw_onMouseWheel(GLFWwindow *window, double xoffset, double yo
 }
 
 GLFWwindow *GLRenderer::window = nullptr;
-GLMeshFactory GLRenderer::mesh_factory{};
-GLMaterialFactory GLRenderer::material_factory{};
 
 } // namespace mare
