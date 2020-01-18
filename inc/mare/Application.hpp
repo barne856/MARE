@@ -42,43 +42,87 @@ public:
     {
         m_renderer_pointer->clear_color_buffer(color);
     }
+    static inline void clear_depth_buffer()
+    {
+        m_renderer_pointer->clear_depth_buffer();
+    }
     static inline void wireframe_mode(bool wireframe)
     {
         m_renderer_pointer->wireframe_mode(wireframe);
     }
+    static inline void enable_depth_testing(bool enable)
+    {
+        m_renderer_pointer->enable_depth_testing(enable);
+    }
+    static inline void enable_face_culling(bool enable)
+    {
+        m_renderer_pointer->enable_face_culling(enable);
+    }
 
     // Buffers
-    static Buffer<float>* GenFloatBuffer()
+    static Buffer<float> *GenFloatBuffer()
     {
         return m_renderer_pointer->GenFloatBuffer();
     }
-    static Buffer<glm::mat4>* GenMat4Buffer()
+    static Buffer<int> *GenIntBuffer()
+    {
+        return m_renderer_pointer->GenIntBuffer();
+    }
+    static Buffer<unsigned int> *GenIndexBuffer()
+    {
+        return m_renderer_pointer->GenIndexBuffer();
+    }
+    static Buffer<bool> *GenBoolBuffer()
+    {
+        return m_renderer_pointer->GenBoolBuffer();
+    }
+    static Buffer<glm::mat4> *GenMat4Buffer()
     {
         return m_renderer_pointer->GenMat4Buffer();
     }
+    static Buffer<glm::mat3> *GenMat3Buffer()
+    {
+        return m_renderer_pointer->GenMat3Buffer();
+    }
+    static Buffer<glm::mat2> *GenMat2Buffer()
+    {
+        return m_renderer_pointer->GenMat2Buffer();
+    }
+    static Buffer<glm::vec2> *GenVec2Buffer()
+    {
+        return m_renderer_pointer->GenVec2Buffer();
+    }
+    static Buffer<glm::vec3> *GenVec3Buffer()
+    {
+        return m_renderer_pointer->GenVec3Buffer();
+    }
+    static Buffer<glm::vec4> *GenVec4Buffer()
+    {
+        return m_renderer_pointer->GenVec4Buffer();
+    }
 
     // RenderState
-    static RenderState* GenRenderState()
+    static RenderState *GenRenderState()
     {
         return m_renderer_pointer->GenRenderState();
     }
 
     // Meshes
-    static void render_mesh(Mesh* mesh, Material* material)
+    static void render_mesh(Mesh *mesh, Material *material)
     {
         m_renderer_pointer->render_mesh(mesh, material);
     }
-    static void render_mesh(Mesh* mesh, Material* material, glm::mat4 parent_model)
+    static void render_mesh(Mesh *mesh, Material *material, glm::mat4 parent_model)
     {
         m_renderer_pointer->render_mesh(mesh, material, parent_model);
     }
-    static void render_mesh(Mesh* mesh, Material* material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4>* models)
+    static void render_mesh(Mesh *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models)
     {
         m_renderer_pointer->render_mesh(mesh, material, parent_model, instance_count, models);
     }
 
     // Materials
-    static Shader* GenShader(const char *directory)
+    static Shader *GenShader(const char *directory)
     {
         return m_renderer_pointer->GenShader(directory);
     }

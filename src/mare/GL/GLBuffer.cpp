@@ -31,11 +31,11 @@ void GLBuffer<T>::create(std::vector<T> &data, size_t dynamic_size_in_bytes)
     }
     if (!m_format.stride())
     {
-        m_count = data.size();
+        m_count = unsigned int(data.size());
     }
     else
     {
-        m_count = m_data_size / m_format.stride();
+        m_count = unsigned int(m_data_size / m_format.stride());
     }
 }
 
@@ -57,11 +57,11 @@ void GLBuffer<T>::update(std::vector<T> &data, unsigned int offset)
                 m_data_size = sizeof(T) * data.size() + offset * sizeof(T);
                 if (!m_format.stride())
                 {
-                    m_count = data.size();
+                    m_count = unsigned int(data.size());
                 }
                 else
                 {
-                    m_count = m_data_size / m_format.stride();
+                    m_count = unsigned int(m_data_size / m_format.stride());
                 }
             }
             void *p = glMapNamedBufferRange(m_buffer_ID, offset * sizeof(T), sizeof(T) * data.size(), GL_MAP_WRITE_BIT);
@@ -114,6 +114,7 @@ unsigned int GLBuffer<T>::gl_type(ShaderDataType type)
 
 template class GLBuffer<float>;
 template class GLBuffer<int>;
+template class GLBuffer<unsigned int>;
 template class GLBuffer<bool>;
 template class GLBuffer<glm::mat4>;
 template class GLBuffer<glm::mat3>;

@@ -15,8 +15,13 @@ namespace mare
 
 enum class DrawMethod
 {
+    POINTS,
+    LINES,
+    LINE_STRIP,
+    LINE_LOOP,
     TRIANGLES,
-    LINES
+    TRIANGLE_STRIP,
+    TRIANGLE_FAN
 };
 
 class Mesh

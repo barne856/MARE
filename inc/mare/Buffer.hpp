@@ -138,18 +138,18 @@ public:
     void inline set_format(const BufferFormat &format)
     {
         m_format = format;
-        m_count = m_data_size / format.stride();
+        m_count = unsigned int(m_data_size / format.stride());
     }
     virtual void create(std::vector<T> &data, size_t dynamic_size_in_bytes = 0) = 0;
     virtual void update(std::vector<T> &data, unsigned int offset) = 0;
-    inline const size_t count() const { return m_count; }
+    inline const unsigned int count() const { return m_count; }
     inline unsigned int name() { return m_buffer_ID; }
     inline const BufferFormat &format() const { return m_format; }
 
 protected:
     unsigned int m_buffer_ID;
     BufferFormat m_format;
-    size_t m_count;
+    unsigned int m_count;
     size_t m_data_size;
     size_t m_dynamic_size_in_bytes;
     bool is_dynamic;

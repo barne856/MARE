@@ -191,10 +191,20 @@ GLenum GLRenderer::GLDrawMethod(DrawMethod draw_method)
 {
     switch (draw_method)
     {
-    case DrawMethod::TRIANGLES:
-        return GL_TRIANGLES;
+    case DrawMethod::POINTS:
+        return GL_POINTS;
     case DrawMethod::LINES:
         return GL_LINES;
+    case DrawMethod::LINE_STRIP:
+        return GL_LINE_STRIP;
+    case DrawMethod::LINE_LOOP:
+        return GL_LINE_LOOP;
+    case DrawMethod::TRIANGLES:
+        return GL_TRIANGLES;
+    case DrawMethod::TRIANGLE_STRIP:
+        return GL_TRIANGLE_STRIP;
+    case DrawMethod::TRIANGLE_FAN:
+        return GL_TRIANGLE_FAN;
     default:
         return GL_POINTS;
     }
@@ -205,10 +215,43 @@ Buffer<float> *GLRenderer::GenFloatBuffer()
 {
     return new GLBuffer<float>();
 }
+Buffer<int> *GLRenderer::GenIntBuffer()
+{
+    return new GLBuffer<int>();
+}
+Buffer<unsigned int>* GLRenderer::GenIndexBuffer()
+{
+    return new GLBuffer<unsigned int>();
+}
+Buffer<bool> *GLRenderer::GenBoolBuffer()
+{
+    return new GLBuffer<bool>();
+}
 Buffer<glm::mat4> *GLRenderer::GenMat4Buffer()
 {
     return new GLBuffer<glm::mat4>();
 }
+Buffer<glm::mat3> *GLRenderer::GenMat3Buffer()
+{
+    return new GLBuffer<glm::mat3>();
+}
+Buffer<glm::mat2> *GLRenderer::GenMat2Buffer()
+{
+    return new GLBuffer<glm::mat2>();
+}
+Buffer<glm::vec2> *GLRenderer::GenVec2Buffer()
+{
+    return new GLBuffer<glm::vec2>();
+}
+Buffer<glm::vec3> *GLRenderer::GenVec3Buffer()
+{
+    return new GLBuffer<glm::vec3>();
+}
+Buffer<glm::vec4> *GLRenderer::GenVec4Buffer()
+{
+    return new GLBuffer<glm::vec4>();
+}
+
 
 // RenderState
 RenderState *GLRenderer::GenRenderState()
@@ -217,6 +260,7 @@ RenderState *GLRenderer::GenRenderState()
 }
 
 // Meshes
+// normal rendering
 void GLRenderer::render_mesh(Mesh *mesh, Material *material)
 {
     mesh->bind();
@@ -236,6 +280,7 @@ void GLRenderer::render_mesh(Mesh *mesh, Material *material)
         glDrawArrays(GLDrawMethod(mesh->get_draw_method()), 0, GLsizei(mesh->get_state()->render_count()));
     }
 }
+// composite rendering
 void GLRenderer::render_mesh(Mesh *mesh, Material *material, glm::mat4 parent_model)
 {
     mesh->bind();
@@ -255,6 +300,7 @@ void GLRenderer::render_mesh(Mesh *mesh, Material *material, glm::mat4 parent_mo
         glDrawArrays(GLDrawMethod(mesh->get_draw_method()), 0, GLsizei(mesh->get_state()->render_count()));
     }
 }
+// instanced rendering
 void GLRenderer::render_mesh(Mesh *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models)
 {
     mesh->bind();

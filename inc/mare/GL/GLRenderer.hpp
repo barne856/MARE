@@ -45,6 +45,10 @@ protected:
     {
         glClearBufferfv(GL_COLOR, 0, &color[0]);
     }
+    void clear_depth_buffer() override
+    {
+        glClear(GL_DEPTH_BUFFER_BIT);
+    }
     void resize_window(int width, int height) override
     {
         info.window_width = width;
@@ -63,10 +67,42 @@ protected:
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         }
     }
+    void enable_depth_testing(bool enable) override
+    {
+        if (enable)
+        {
+            glEnable(GL_DEPTH_TEST);
+            glDepthFunc(GL_LESS);
+        }
+        else
+        {
+            glDisable(GL_DEPTH_TEST);
+        }
+    }
+    void enable_face_culling(bool enable) override
+    {
+        if (enable)
+        {
+            glEnable(GL_CULL_FACE);
+            glCullFace(GL_BACK);
+        }
+        else
+        {
+            glDisable(GL_CULL_FACE);
+        }
+    }
 
     // Buffers
     Buffer<float> *GenFloatBuffer() override;
-    Buffer<glm::mat4>* GenMat4Buffer() override;
+    Buffer<int> *GenIntBuffer() override;
+    Buffer<unsigned int>* GenIndexBuffer() override;
+    Buffer<bool> *GenBoolBuffer() override;
+    Buffer<glm::mat4> *GenMat4Buffer() override;
+    Buffer<glm::mat3> *GenMat3Buffer() override;
+    Buffer<glm::mat2> *GenMat2Buffer() override;
+    Buffer<glm::vec2> *GenVec2Buffer() override;
+    Buffer<glm::vec3> *GenVec3Buffer() override;
+    Buffer<glm::vec4> *GenVec4Buffer() override;
 
     // RenderState
     RenderState *GenRenderState() override;
@@ -77,7 +113,7 @@ protected:
     void render_mesh(Mesh *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models) override;
 
     // Shaders
-    Shader* GenShader(const char *directory) override;
+    Shader *GenShader(const char *directory) override;
 
 private:
     static GLFWwindow *window;

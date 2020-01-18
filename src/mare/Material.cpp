@@ -3,5 +3,8 @@
 
 namespace mare
 {
-Material::Material(const char *directory) : m_shader(Application::GenShader(directory)) {}
+Material::Material(const char *directory) : m_shader(Application::GenShader(directory))
+{
+    m_shader->use();
+}
 } // namespace mare

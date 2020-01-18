@@ -67,15 +67,27 @@ public:
     static inline RendererInput &get_input() { return input; }
     static inline Camera *get_camera() { return m_camera_pointer; }
 
+    // Renderer Commands
     virtual void set_window_title(const char *title) = 0;
     virtual void set_cursor(CURSOR type) = 0;
     virtual void clear_color_buffer(glm::vec4 color) = 0;
     virtual void resize_window(int width, int height) = 0;
     virtual void wireframe_mode(bool wireframe) = 0;
+    virtual void enable_depth_testing(bool enable) = 0;
+    virtual void clear_depth_buffer() = 0;
+    virtual void enable_face_culling(bool enable) = 0;
 
     // Buffers
     virtual Buffer<float>* GenFloatBuffer() = 0;
+    virtual Buffer<int>* GenIntBuffer() = 0;
+    virtual Buffer<unsigned int>* GenIndexBuffer() = 0;
+    virtual Buffer<bool>* GenBoolBuffer() = 0;
     virtual Buffer<glm::mat4>* GenMat4Buffer() = 0;
+    virtual Buffer<glm::mat3>* GenMat3Buffer() = 0;
+    virtual Buffer<glm::mat2>* GenMat2Buffer() = 0;
+    virtual Buffer<glm::vec2>* GenVec2Buffer() = 0;
+    virtual Buffer<glm::vec3>* GenVec3Buffer() = 0;
+    virtual Buffer<glm::vec4>* GenVec4Buffer() = 0;
 
     // RenderState
     virtual RenderState* GenRenderState() = 0;
