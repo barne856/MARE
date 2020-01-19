@@ -3,12 +3,108 @@
 #include "mare/GL/GLShader.hpp"
 #include "mare/GL/GLRenderState.hpp"
 #include "mare/Application.hpp"
+#include "mare/SimpleMesh.hpp"
 
 // Standard Library
 #include <iostream>
 
 namespace mare
 {
+
+namespace GL
+{
+
+GLenum GLDrawMethod(DrawMethod draw_method)
+{
+    switch (draw_method)
+    {
+    case DrawMethod::POINTS:
+        return GL_POINTS;
+    case DrawMethod::LINES:
+        return GL_LINES;
+    case DrawMethod::LINE_STRIP:
+        return GL_LINE_STRIP;
+    case DrawMethod::LINE_LOOP:
+        return GL_LINE_LOOP;
+    case DrawMethod::TRIANGLES:
+        return GL_TRIANGLES;
+    case DrawMethod::TRIANGLE_STRIP:
+        return GL_TRIANGLE_STRIP;
+    case DrawMethod::TRIANGLE_FAN:
+        return GL_TRIANGLE_FAN;
+    default:
+        return GL_POINTS;
+    }
+}
+// Meshes
+// normal rendering
+template <typename T>
+void render_mesh(SimpleMesh<T> *mesh, Material *material)
+{
+    mesh->bind();
+    material->bind();
+    if (Application::get_camera())
+    {
+        material->upload_mat4("projection", Application::get_camera()->projection());
+        material->upload_mat4("view", Application::get_camera()->view());
+    }
+    material->upload_mat4("model", mesh->get_model());
+    if (mesh->get_state()->is_indexed())
+    {
+        glDrawElements(GLDrawMethod(mesh->get_draw_method()), GLsizei(mesh->get_state()->render_count()), GL_UNSIGNED_INT, nullptr);
+    }
+    else
+    {
+        glDrawArrays(GLDrawMethod(mesh->get_draw_method()), 0, GLsizei(mesh->get_state()->render_count()));
+    }
+}
+// composite rendering
+template <typename T>
+void render_mesh(SimpleMesh<T> *mesh, Material *material, glm::mat4 parent_model)
+{
+    mesh->bind();
+    material->bind();
+    if (Application::get_camera())
+    {
+        material->upload_mat4("projection", Application::get_camera()->projection());
+        material->upload_mat4("view", Application::get_camera()->view());
+    }
+    material->upload_mat4("model", parent_model * mesh->get_model());
+    if (mesh->get_state()->is_indexed())
+    {
+        glDrawElements(GLDrawMethod(mesh->get_draw_method()), GLsizei(mesh->get_state()->render_count()), GL_UNSIGNED_INT, nullptr);
+    }
+    else
+    {
+        glDrawArrays(GLDrawMethod(mesh->get_draw_method()), 0, GLsizei(mesh->get_state()->render_count()));
+    }
+}
+// instanced rendering
+template <typename T>
+void render_mesh(SimpleMesh<T> *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models)
+{
+    mesh->bind();
+    material->bind();
+    if (Application::get_camera())
+    {
+        material->upload_mat4("projection", Application::get_camera()->projection());
+        material->upload_mat4("view", Application::get_camera()->view());
+    }
+    material->upload_mat4("model", parent_model * mesh->get_model());
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, models->name());
+    if (mesh->get_state()->is_indexed())
+    {
+        glDrawElementsInstanced(GLDrawMethod(mesh->get_draw_method()), mesh->get_state()->render_count(), GL_UNSIGNED_INT, nullptr, instance_count);
+    }
+    else
+    {
+        glDrawArraysInstanced(GLDrawMethod(mesh->get_draw_method()), 0, mesh->get_state()->render_count(), instance_count);
+    }
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, 0);
+}
+
+} // namespace GL
+
 // Debug functions
 std::string GLRenderer::debug_source_string(GLenum source)
 {
@@ -187,140 +283,114 @@ void GLRenderer::start_process(Application *app_pointer)
     glfwTerminate();
 }
 
-GLenum GLRenderer::GLDrawMethod(DrawMethod draw_method)
-{
-    switch (draw_method)
-    {
-    case DrawMethod::POINTS:
-        return GL_POINTS;
-    case DrawMethod::LINES:
-        return GL_LINES;
-    case DrawMethod::LINE_STRIP:
-        return GL_LINE_STRIP;
-    case DrawMethod::LINE_LOOP:
-        return GL_LINE_LOOP;
-    case DrawMethod::TRIANGLES:
-        return GL_TRIANGLES;
-    case DrawMethod::TRIANGLE_STRIP:
-        return GL_TRIANGLE_STRIP;
-    case DrawMethod::TRIANGLE_FAN:
-        return GL_TRIANGLE_FAN;
-    default:
-        return GL_POINTS;
-    }
-}
-
 // Buffers
-Buffer<float> *GLRenderer::GenFloatBuffer()
+Buffer<float> *GLRenderer::GenFloatBuffer(unsigned int count)
 {
-    return new GLBuffer<float>();
+    return new GLBuffer<float>[count];
 }
-Buffer<int> *GLRenderer::GenIntBuffer()
+Buffer<int> *GLRenderer::GenIntBuffer(unsigned int count)
 {
-    return new GLBuffer<int>();
+    return new GLBuffer<int>[count];
 }
-Buffer<unsigned int>* GLRenderer::GenIndexBuffer()
+Buffer<unsigned int> *GLRenderer::GenIndexBuffer(unsigned int count)
 {
-    return new GLBuffer<unsigned int>();
+    return new GLBuffer<unsigned int>[count];
 }
-Buffer<bool> *GLRenderer::GenBoolBuffer()
+Buffer<bool> *GLRenderer::GenBoolBuffer(unsigned int count)
 {
-    return new GLBuffer<bool>();
+    return new GLBuffer<bool>[count];
 }
-Buffer<glm::mat4> *GLRenderer::GenMat4Buffer()
+Buffer<glm::mat4> *GLRenderer::GenMat4Buffer(unsigned int count)
 {
-    return new GLBuffer<glm::mat4>();
+    return new GLBuffer<glm::mat4>[count];
 }
-Buffer<glm::mat3> *GLRenderer::GenMat3Buffer()
+Buffer<glm::mat3> *GLRenderer::GenMat3Buffer(unsigned int count)
 {
-    return new GLBuffer<glm::mat3>();
+    return new GLBuffer<glm::mat3>[count];
 }
-Buffer<glm::mat2> *GLRenderer::GenMat2Buffer()
+Buffer<glm::mat2> *GLRenderer::GenMat2Buffer(unsigned int count)
 {
-    return new GLBuffer<glm::mat2>();
+    return new GLBuffer<glm::mat2>[count];
 }
-Buffer<glm::vec2> *GLRenderer::GenVec2Buffer()
+Buffer<glm::vec2> *GLRenderer::GenVec2Buffer(unsigned int count)
 {
-    return new GLBuffer<glm::vec2>();
+    return new GLBuffer<glm::vec2>[count];
 }
-Buffer<glm::vec3> *GLRenderer::GenVec3Buffer()
+Buffer<glm::vec3> *GLRenderer::GenVec3Buffer(unsigned int count)
 {
-    return new GLBuffer<glm::vec3>();
+    return new GLBuffer<glm::vec3>[count];
 }
-Buffer<glm::vec4> *GLRenderer::GenVec4Buffer()
+Buffer<glm::vec4> *GLRenderer::GenVec4Buffer(unsigned int count)
 {
-    return new GLBuffer<glm::vec4>();
-}
-
-
-// RenderState
-RenderState *GLRenderer::GenRenderState()
-{
-    return new GLRenderState();
+    return new GLBuffer<glm::vec4>[count];
 }
 
-// Meshes
-// normal rendering
-void GLRenderer::render_mesh(Mesh *mesh, Material *material)
+// Render States
+RenderState<float> *GLRenderer::GenFloatRenderState()
 {
-    mesh->bind();
-    material->bind();
-    if (Application::get_camera())
-    {
-        material->upload_mat4("projection", Application::get_camera()->projection());
-        material->upload_mat4("view", Application::get_camera()->view());
-    }
-    material->upload_mat4("model", mesh->get_model());
-    if (mesh->get_state()->is_indexed())
-    {
-        glDrawElements(GLDrawMethod(mesh->get_draw_method()), GLsizei(mesh->get_state()->render_count()), GL_UNSIGNED_INT, nullptr);
-    }
-    else
-    {
-        glDrawArrays(GLDrawMethod(mesh->get_draw_method()), 0, GLsizei(mesh->get_state()->render_count()));
-    }
+    return new GLRenderState<float>();
 }
-// composite rendering
-void GLRenderer::render_mesh(Mesh *mesh, Material *material, glm::mat4 parent_model)
+RenderState<glm::vec2> *GLRenderer::GenVec2RenderState()
 {
-    mesh->bind();
-    material->bind();
-    if (Application::get_camera())
-    {
-        material->upload_mat4("projection", Application::get_camera()->projection());
-        material->upload_mat4("view", Application::get_camera()->view());
-    }
-    material->upload_mat4("model", parent_model * mesh->get_model());
-    if (mesh->get_state()->is_indexed())
-    {
-        glDrawElements(GLDrawMethod(mesh->get_draw_method()), GLsizei(mesh->get_state()->render_count()), GL_UNSIGNED_INT, nullptr);
-    }
-    else
-    {
-        glDrawArrays(GLDrawMethod(mesh->get_draw_method()), 0, GLsizei(mesh->get_state()->render_count()));
-    }
+    return new GLRenderState<glm::vec2>();
 }
-// instanced rendering
-void GLRenderer::render_mesh(Mesh *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models)
+RenderState<glm::vec3> *GLRenderer::GenVec3RenderState()
 {
-    mesh->bind();
-    material->bind();
-    if (Application::get_camera())
-    {
-        material->upload_mat4("projection", Application::get_camera()->projection());
-        material->upload_mat4("view", Application::get_camera()->view());
-    }
-    material->upload_mat4("model", parent_model * mesh->get_model());
-    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, models->name());
-    if (mesh->get_state()->is_indexed())
-    {
-        glDrawElementsInstanced(GLDrawMethod(mesh->get_draw_method()), mesh->get_state()->render_count(), GL_UNSIGNED_INT, nullptr, instance_count);
-    }
-    else
-    {
-        glDrawArraysInstanced(GLDrawMethod(mesh->get_draw_method()), 0, mesh->get_state()->render_count(), instance_count);
-    }
-    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, 0);
+    return new GLRenderState<glm::vec3>();
+}
+RenderState<glm::vec4> *GLRenderer::GenVec4RenderState()
+{
+    return new GLRenderState<glm::vec4>();
+}
+
+// Render Meshes
+void GLRenderer::render_float_mesh(SimpleMesh<float> *mesh, Material *material)
+{
+    GL::render_mesh(mesh, material);
+}
+void GLRenderer::render_float_mesh(SimpleMesh<float> *mesh, Material *material, glm::mat4 parent_model)
+{
+    GL::render_mesh(mesh, material, parent_model);
+}
+void GLRenderer::render_float_mesh(SimpleMesh<float> *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models)
+{
+    GL::render_mesh(mesh, material, parent_model, instance_count, models);
+}
+void GLRenderer::render_vec2_mesh(SimpleMesh<glm::vec2> *mesh, Material *material)
+{
+    GL::render_mesh(mesh, material);
+}
+void GLRenderer::render_vec2_mesh(SimpleMesh<glm::vec2> *mesh, Material *material, glm::mat4 parent_model)
+{
+    GL::render_mesh(mesh, material, parent_model);
+}
+void GLRenderer::render_vec2_mesh(SimpleMesh<glm::vec2> *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models)
+{
+    GL::render_mesh(mesh, material, parent_model, instance_count, models);
+}
+void GLRenderer::render_vec3_mesh(SimpleMesh<glm::vec3> *mesh, Material *material)
+{
+    GL::render_mesh(mesh, material);
+}
+void GLRenderer::render_vec3_mesh(SimpleMesh<glm::vec3> *mesh, Material *material, glm::mat4 parent_model)
+{
+    GL::render_mesh(mesh, material, parent_model);
+}
+void GLRenderer::render_vec3_mesh(SimpleMesh<glm::vec3> *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models)
+{
+    GL::render_mesh(mesh, material, parent_model, instance_count, models);
+}
+void GLRenderer::render_vec4_mesh(SimpleMesh<glm::vec4> *mesh, Material *material)
+{
+    GL::render_mesh(mesh, material);
+}
+void GLRenderer::render_vec4_mesh(SimpleMesh<glm::vec4> *mesh, Material *material, glm::mat4 parent_model)
+{
+    GL::render_mesh(mesh, material, parent_model);
+}
+void GLRenderer::render_vec4_mesh(SimpleMesh<glm::vec4> *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models)
+{
+    GL::render_mesh(mesh, material, parent_model, instance_count, models);
 }
 
 Shader *GLRenderer::GenShader(const char *directory)

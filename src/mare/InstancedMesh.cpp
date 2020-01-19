@@ -7,14 +7,14 @@ namespace mare
 InstancedMesh::InstancedMesh(unsigned int max_instances)
     : instance_count(0), instance_transforms(nullptr), m_mesh(nullptr), m_max_instances(max_instances)
 {
-    instance_transforms = Application::GenMat4Buffer();
+    instance_transforms = Application::GenBuffer<glm::mat4>(1);
     std::vector<glm::mat4> empty{};
     instance_transforms->create(empty, max_instances * sizeof(glm::mat4));
 }
 
 InstancedMesh::~InstancedMesh()
 {
-    delete instance_transforms;
+    delete[] instance_transforms;
 }
 
 void InstancedMesh::push_instance(glm::mat4 model)

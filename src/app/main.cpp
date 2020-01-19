@@ -3,6 +3,9 @@
 #include "mare/Meshes/CharMesh.hpp"
 #include "mare/Meshes/TriangleMesh.hpp"
 #include "mare/Meshes/CircleMesh.hpp"
+#include "mare/Meshes/CubeMesh.hpp"
+#include "mare/Meshes/ConeMesh.hpp"
+#include "mare/Meshes/CylinderMesh.hpp"
 #include "mare/Meshes/SphereMesh.hpp"
 #include "mare/Meshes/TubeMesh.hpp"
 #include "mare/Materials/BasicMaterial.hpp"
@@ -11,7 +14,8 @@
 #include "mare/CompositeMesh.hpp"
 
 // TODO:
-// add more primative meshes: Cylinder, Rectangle, Cube, Cone, arrow(from composite mesh), and array mesh
+// render state should own and delete buffers, fix arraymesh
+// add more primative meshes: Slope, Torus, arrow(from composite mesh), and array mesh
 // Abstract Scene interface to create new renderable scenes
 // finish input implementation in GLRenderer
 // add widgets and UI
@@ -22,6 +26,8 @@
 // Add Text Thickness to CharMesh
 // Phong material should render point light not directional light
 // organize headers and cpp files, GL files should have protected inheritence from GLRenderer
+// Cylinder, Cone, and Tube meshes should have an option for flat shading normals or smooth shading normals
+// add exception handling
 
 using namespace mare;
 
@@ -29,12 +35,11 @@ class Sandbox : public mare::Application
 {
     glm::vec4 bg_color{0.1f, 0.08f, 0.12f, 1.0f};
     glm::vec4 mesh_color{0.8f, 0.95f, 0.7f, 1.0f};
-    SphereMesh* sphere;
-    TubeMesh* tube;
+    ConeMesh* cone;
+    InstancedMesh* inst_cones;
     PhongMaterial *phong_mat;
     Camera *main_camera;
     bool wireframe = false;
-    InstancedMesh* balls;
 
     void init(RendererInfo &info) override
     {
@@ -55,18 +60,16 @@ class Sandbox : public mare::Application
     {
         set_window_title("Sandbox");
 
-        sphere = new SphereMesh(5, 0.5f);
-        sphere->set_scale(glm::vec3(0.25f));
+        cone = new ConeMesh(0.2f, 60);
+        cone->translate({0.0f, 0.0f, 0.05f});
 
-        balls = new InstancedMesh(100);
-        balls->set_mesh(sphere);
-        balls->push_instance(glm::translate(glm::mat4(1.0f), glm::vec3(0.5f, 0.0f, 0.0f)));
-        balls->push_instance(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f)));
-        balls->push_instance(glm::translate(glm::mat4(1.0f), glm::vec3(-0.5f, 0.0f, 0.0f)));
-
-        tube = new TubeMesh(0.0f, 2.0f*3.141592653f, 0.1f, 60);
-        tube->set_scale(glm::vec3(0.2f));
-        tube->translate({0.0f, 0.3f, 0.0f});
+        inst_cones = new InstancedMesh(5);
+        inst_cones->set_mesh(cone);
+        inst_cones->push_instance(glm::translate(glm::mat4(1.0f), {0.0f, 0.0f, 0.0f}));
+        inst_cones->push_instance(glm::translate(glm::mat4(1.0f), {0.5f, 0.0f, 0.0f}));
+        inst_cones->push_instance(glm::translate(glm::mat4(1.0f), {-0.5f, 0.0f, 0.0f}));
+        inst_cones->push_instance(glm::translate(glm::mat4(1.0f), {0.0f, 0.5f, 0.0f}));
+        inst_cones->push_instance(glm::translate(glm::mat4(1.0f), {0.0f, -0.5f, 0.0f}));
 
         phong_mat = new PhongMaterial();
         
@@ -85,16 +88,14 @@ class Sandbox : public mare::Application
         clear_depth_buffer();
         phong_mat->bind();
         phong_mat->render();
-        balls->render(phong_mat);
-        tube->render(phong_mat);
+        inst_cones->render(phong_mat);
     }
 
     void shutdown() override
     {
         // cleanup meshes, materials, and Cameras
-        delete sphere;
-        delete balls;
-        delete tube;
+        delete cone;
+        delete inst_cones;
         delete phong_mat;
         delete main_camera;
     }

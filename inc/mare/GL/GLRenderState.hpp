@@ -9,7 +9,8 @@
 
 namespace mare
 {
-class GLRenderState : public RenderState
+template <typename T>
+class GLRenderState : public RenderState<T>
 {
 public:
     GLRenderState() {}
@@ -17,9 +18,7 @@ public:
     void bind() const override;
     void unbind() const override;
     void create() override;
-    void add_vertex_buffer(Buffer<float> *vbo) override;
-    void add_vertex_buffer(Buffer<glm::vec2> *vbo) override;
-    void add_vertex_buffer(Buffer<glm::vec3> *vbo) override;
+    void add_vertex_buffer(Buffer<T> *vbo) override;
     void set_index_buffer(Buffer<unsigned int> *ibo) override;
 };
 } // namespace mare

@@ -60,65 +60,155 @@ public:
     }
 
     // Buffers
-    static Buffer<float> *GenFloatBuffer()
+    template <typename T>
+    static Buffer<T> *GenBuffer(unsigned int count)
     {
-        return m_renderer_pointer->GenFloatBuffer();
+        return nullptr;
     }
-    static Buffer<int> *GenIntBuffer()
+    template <>
+    static Buffer<float> *GenBuffer<float>(unsigned int count)
     {
-        return m_renderer_pointer->GenIntBuffer();
+        return m_renderer_pointer->GenFloatBuffer(count);
     }
-    static Buffer<unsigned int> *GenIndexBuffer()
+    template <>
+    static Buffer<int> *GenBuffer<int>(unsigned int count)
     {
-        return m_renderer_pointer->GenIndexBuffer();
+        return m_renderer_pointer->GenIntBuffer(count);
     }
-    static Buffer<bool> *GenBoolBuffer()
+    template <>
+    static Buffer<unsigned int> *GenBuffer<unsigned int>(unsigned int count)
     {
-        return m_renderer_pointer->GenBoolBuffer();
+        return m_renderer_pointer->GenIndexBuffer(count);
     }
-    static Buffer<glm::mat4> *GenMat4Buffer()
+    template <>
+    static Buffer<bool> *GenBuffer<bool>(unsigned int count)
     {
-        return m_renderer_pointer->GenMat4Buffer();
+        return m_renderer_pointer->GenBoolBuffer(count);
     }
-    static Buffer<glm::mat3> *GenMat3Buffer()
+    template <>
+    static Buffer<glm::mat4> *GenBuffer<glm::mat4>(unsigned int count)
     {
-        return m_renderer_pointer->GenMat3Buffer();
+        return m_renderer_pointer->GenMat4Buffer(count);
     }
-    static Buffer<glm::mat2> *GenMat2Buffer()
+    template <>
+    static Buffer<glm::mat3> *GenBuffer<glm::mat3>(unsigned int count)
     {
-        return m_renderer_pointer->GenMat2Buffer();
+        return m_renderer_pointer->GenMat3Buffer(count);
     }
-    static Buffer<glm::vec2> *GenVec2Buffer()
+    template <>
+    static Buffer<glm::mat2> *GenBuffer<glm::mat2>(unsigned int count)
     {
-        return m_renderer_pointer->GenVec2Buffer();
+        return m_renderer_pointer->GenMat2Buffer(count);
     }
-    static Buffer<glm::vec3> *GenVec3Buffer()
+    template <>
+    static Buffer<glm::vec2> *GenBuffer<glm::vec2>(unsigned int count)
     {
-        return m_renderer_pointer->GenVec3Buffer();
+        return m_renderer_pointer->GenVec2Buffer(count);
     }
-    static Buffer<glm::vec4> *GenVec4Buffer()
+    template <>
+    static Buffer<glm::vec3> *GenBuffer<glm::vec3>(unsigned int count)
     {
-        return m_renderer_pointer->GenVec4Buffer();
+        return m_renderer_pointer->GenVec3Buffer(count);
+    }
+    template <>
+    static Buffer<glm::vec4> *GenBuffer<glm::vec4>(unsigned int count)
+    {
+        return m_renderer_pointer->GenVec4Buffer(count);
     }
 
-    // RenderState
-    static RenderState *GenRenderState()
+    // Render State Generation
+    template <typename T>
+    static RenderState<T> *GenRenderState()
     {
-        return m_renderer_pointer->GenRenderState();
+        return nullptr;
+    }
+    template <>
+    static RenderState<float> *GenRenderState<float>()
+    {
+        return m_renderer_pointer->GenFloatRenderState();
+    }
+    template <>
+    static RenderState<glm::vec2> *GenRenderState<glm::vec2>()
+    {
+        return m_renderer_pointer->GenVec2RenderState();
+    }
+    template <>
+    static RenderState<glm::vec3> *GenRenderState<glm::vec3>()
+    {
+        return m_renderer_pointer->GenVec3RenderState();
+    }
+    template <>
+    static RenderState<glm::vec4> *GenRenderState<glm::vec4>()
+    {
+        return m_renderer_pointer->GenVec4RenderState();
     }
 
     // Meshes
-    static void render_mesh(Mesh *mesh, Material *material)
+    template <typename T>
+    static void render_mesh(SimpleMesh<T> *mesh, Material *material) {}
+    template <>
+    static void render_mesh<float>(SimpleMesh<float> *mesh, Material *material)
     {
-        m_renderer_pointer->render_mesh(mesh, material);
+        m_renderer_pointer->render_float_mesh(mesh, material);
     }
-    static void render_mesh(Mesh *mesh, Material *material, glm::mat4 parent_model)
+    template <>
+    static void render_mesh<glm::vec2>(SimpleMesh<glm::vec2> *mesh, Material *material)
     {
-        m_renderer_pointer->render_mesh(mesh, material, parent_model);
+        m_renderer_pointer->render_vec2_mesh(mesh, material);
     }
-    static void render_mesh(Mesh *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models)
+    template <>
+    static void render_mesh<glm::vec3>(SimpleMesh<glm::vec3> *mesh, Material *material)
     {
-        m_renderer_pointer->render_mesh(mesh, material, parent_model, instance_count, models);
+        m_renderer_pointer->render_vec3_mesh(mesh, material);
+    }
+    template <>
+    static void render_mesh<glm::vec4>(SimpleMesh<glm::vec4> *mesh, Material *material)
+    {
+        m_renderer_pointer->render_vec4_mesh(mesh, material);
+    }
+    template <typename T>
+    static void render_mesh(SimpleMesh<T> *mesh, Material *material, glm::mat4 parent_model) {}
+    template <>
+    static void render_mesh<float>(SimpleMesh<float> *mesh, Material *material, glm::mat4 parent_model)
+    {
+        m_renderer_pointer->render_float_mesh(mesh, material, parent_model);
+    }
+    template <>
+    static void render_mesh<glm::vec2>(SimpleMesh<glm::vec2> *mesh, Material *material, glm::mat4 parent_model)
+    {
+        m_renderer_pointer->render_vec2_mesh(mesh, material, parent_model);
+    }
+    template <>
+    static void render_mesh<glm::vec3>(SimpleMesh<glm::vec3> *mesh, Material *material, glm::mat4 parent_model)
+    {
+        m_renderer_pointer->render_vec3_mesh(mesh, material, parent_model);
+    }
+    template <>
+    static void render_mesh<glm::vec4>(SimpleMesh<glm::vec4> *mesh, Material *material, glm::mat4 parent_model)
+    {
+        m_renderer_pointer->render_vec4_mesh(mesh, material, parent_model);
+    }
+    template <typename T>
+    static void render_mesh(SimpleMesh<T> *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models) {}
+    template <>
+    static void render_mesh<float>(SimpleMesh<float> *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models)
+    {
+        m_renderer_pointer->render_float_mesh(mesh, material, parent_model, instance_count, models);
+    }
+    template <>
+    static void render_mesh<glm::vec2>(SimpleMesh<glm::vec2> *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models)
+    {
+        m_renderer_pointer->render_vec2_mesh(mesh, material, parent_model, instance_count, models);
+    }
+    template <>
+    static void render_mesh<glm::vec3>(SimpleMesh<glm::vec3> *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models)
+    {
+        m_renderer_pointer->render_vec3_mesh(mesh, material, parent_model, instance_count, models);
+    }
+    template <>
+    static void render_mesh<glm::vec4>(SimpleMesh<glm::vec4> *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models)
+    {
+        m_renderer_pointer->render_vec4_mesh(mesh, material, parent_model, instance_count, models);
     }
 
     // Materials

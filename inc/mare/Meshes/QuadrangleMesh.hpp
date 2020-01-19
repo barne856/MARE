@@ -1,5 +1,5 @@
-#ifndef TRIANGLEMESH
-#define TRIANGLEMESH
+#ifndef QUADRANGLEMESH
+#define QUADRANGLEMESH
 
 #include "mare/SimpleMesh.hpp"
 #include "mare/Application.hpp"
@@ -8,10 +8,10 @@
 
 namespace mare
 {
-class TriangleMesh : public SimpleMesh<float>
+class QuadrangleMesh : public SimpleMesh<float>
 {
 public:
-    TriangleMesh(glm::vec2 v1, glm::vec2 v2, glm::vec2 v3)
+    QuadrangleMesh(glm::vec2 v1, glm::vec2 v2, glm::vec2 v3, glm::vec2 v4)
     {
         std::vector<float> verts;
         draw_method = DrawMethod::TRIANGLES;
@@ -22,6 +22,8 @@ public:
         verts.push_back(v2[1]);
         verts.push_back(v3[0]);
         verts.push_back(v3[1]);
+        verts.push_back(v4[0]);
+        verts.push_back(v4[1]);
 
         vertex_buffer = Application::GenBuffer<float>(1);
         vertex_buffer->create(verts);

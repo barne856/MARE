@@ -1,22 +1,7 @@
 #include "mare/Mesh.hpp"
 
-// MARE
-#include "mare/Application.hpp"
-
 namespace mare
 {
-void Mesh::render(Material *material)
-{
-    Application::render_mesh(this, material);
-}
-void Mesh::render(Material *material, glm::mat4 parent_model)
-{
-    Application::render_mesh(this, material, parent_model);
-}
-void Mesh::render(Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models)
-{
-    Application::render_mesh(this, material, parent_model, instance_count, models);
-}
 void Mesh::translate(glm::vec3 translation)
 {
     this->translation += translation;

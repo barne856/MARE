@@ -1,14 +1,14 @@
 #ifndef TUBEMESH
 #define TUBEMESH
 
-#include "mare/Mesh.hpp"
+#include "mare/SimpleMesh.hpp"
 #include "mare/Application.hpp"
 
 #include "glm.hpp"
 
 namespace mare
 {
-class TubeMesh : public Mesh
+class TubeMesh : public SimpleMesh<float>
 {
 public:
     // walls for hollow cylindrical structures
@@ -168,26 +168,26 @@ public:
         data.push_back((0.5f) * cos(end_angle));
         data.push_back((0.5f) * sin(end_angle));
         data.push_back(0.0f);
-        data.push_back(cos(end_angle + PI/2.0f));
-        data.push_back(sin(end_angle + PI/2.0f));
+        data.push_back(cos(end_angle + PI / 2.0f));
+        data.push_back(sin(end_angle + PI / 2.0f));
         data.push_back(0.0f);
         data.push_back((0.5f) * cos(end_angle));
         data.push_back((0.5f) * sin(end_angle));
         data.push_back(1.0f);
-        data.push_back(cos(end_angle + PI/2.0f));
-        data.push_back(sin(end_angle + PI/2.0f));
+        data.push_back(cos(end_angle + PI / 2.0f));
+        data.push_back(sin(end_angle + PI / 2.0f));
         data.push_back(0.0f);
         data.push_back((0.5f + thickness) * cos(end_angle));
         data.push_back((0.5f + thickness) * sin(end_angle));
         data.push_back(0.0f);
-        data.push_back(cos(end_angle + PI/2.0f));
-        data.push_back(sin(end_angle + PI/2.0f));
+        data.push_back(cos(end_angle + PI / 2.0f));
+        data.push_back(sin(end_angle + PI / 2.0f));
         data.push_back(0.0f);
         data.push_back((0.5f + thickness) * cos(end_angle));
         data.push_back((0.5f + thickness) * sin(end_angle));
         data.push_back(1.0f);
-        data.push_back(cos(end_angle + PI/2.0f));
-        data.push_back(sin(end_angle + PI/2.0f));
+        data.push_back(cos(end_angle + PI / 2.0f));
+        data.push_back(sin(end_angle + PI / 2.0f));
         data.push_back(0.0f);
         indes.push_back(unsigned int(data.size() / 6 - 1));
         indes.push_back(unsigned int(data.size() / 6 - 2));
@@ -200,26 +200,26 @@ public:
         data.push_back((0.5f) * cos(start_angle));
         data.push_back((0.5f) * sin(start_angle));
         data.push_back(0.0f);
-        data.push_back(cos(start_angle - PI/2.0f));
-        data.push_back(sin(start_angle - PI/2.0f));
+        data.push_back(cos(start_angle - PI / 2.0f));
+        data.push_back(sin(start_angle - PI / 2.0f));
         data.push_back(0.0f);
         data.push_back((0.5f) * cos(start_angle));
         data.push_back((0.5f) * sin(start_angle));
         data.push_back(1.0f);
-        data.push_back(cos(start_angle - PI/2.0f));
-        data.push_back(sin(start_angle - PI/2.0f));
+        data.push_back(cos(start_angle - PI / 2.0f));
+        data.push_back(sin(start_angle - PI / 2.0f));
         data.push_back(0.0f);
         data.push_back((0.5f + thickness) * cos(start_angle));
         data.push_back((0.5f + thickness) * sin(start_angle));
         data.push_back(0.0f);
-        data.push_back(cos(start_angle - PI/2.0f));
-        data.push_back(sin(start_angle - PI/2.0f));
+        data.push_back(cos(start_angle - PI / 2.0f));
+        data.push_back(sin(start_angle - PI / 2.0f));
         data.push_back(0.0f);
         data.push_back((0.5f + thickness) * cos(start_angle));
         data.push_back((0.5f + thickness) * sin(start_angle));
         data.push_back(1.0f);
-        data.push_back(cos(start_angle - PI/2.0f));
-        data.push_back(sin(start_angle - PI/2.0f));
+        data.push_back(cos(start_angle - PI / 2.0f));
+        data.push_back(sin(start_angle - PI / 2.0f));
         data.push_back(0.0f);
         indes.push_back(unsigned int(data.size() / 6 - 3));
         indes.push_back(unsigned int(data.size() / 6 - 2));
@@ -228,25 +228,17 @@ public:
         indes.push_back(unsigned int(data.size() / 6 - 3));
         indes.push_back(unsigned int(data.size() / 6 - 4));
 
-        vertex_buffer = Application::GenFloatBuffer();
+        vertex_buffer = Application::GenBuffer<float>(1);
         vertex_buffer->create(data);
-        vertex_buffer->set_format({{ShaderDataType::Float3, "position"},
-                                   {ShaderDataType::Float3, "normal"}});
+        vertex_buffer->set_format({{ShaderDataType::VEC3, "position"},
+                                   {ShaderDataType::VEC3, "normal"}});
 
-        index_buffer = Application::GenIndexBuffer();
+        index_buffer = Application::GenBuffer<unsigned int>(1);
         index_buffer->create(indes);
 
-        render_state = Application::GenRenderState();
         render_state->create();
         render_state->add_vertex_buffer(vertex_buffer);
         render_state->set_index_buffer(index_buffer);
-    }
-
-    ~TubeMesh()
-    {
-        delete vertex_buffer;
-        delete index_buffer;
-        delete render_state;
     }
 };
 } // namespace mare

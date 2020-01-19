@@ -20,6 +20,7 @@ set(SRC
 ./ext/glew-2.1.0/src/glew.c
 ./src/app/main.cpp
 ./src/mare/Application.cpp
+./src/mare/Buffer.cpp
 ./src/mare/Camera.cpp
 ./src/mare/CompositeMesh.cpp
 ./src/mare/Controls.cpp
@@ -27,6 +28,7 @@ set(SRC
 ./src/mare/Material.cpp
 ./src/mare/Mesh.cpp
 ./src/mare/Renderer.cpp
+./src/mare/SimpleMesh.cpp
 ./src/mare/GL/GLBuffer.cpp
 ./src/mare/GL/GLRenderer.cpp
 ./src/mare/GL/GLRenderState.cpp

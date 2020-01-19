@@ -5,7 +5,9 @@
 #include <bitset>
 // MARE
 #include "mare/Camera.hpp"
-#include "mare/Mesh.hpp"
+#include "mare/SimpleMesh.hpp"
+#include "mare/Buffer.hpp"
+#include "mare/RenderState.hpp"
 #include "mare/Material.hpp"
 // External Libraries
 #include "glm.hpp"
@@ -78,27 +80,39 @@ public:
     virtual void enable_face_culling(bool enable) = 0;
 
     // Buffers
-    virtual Buffer<float>* GenFloatBuffer() = 0;
-    virtual Buffer<int>* GenIntBuffer() = 0;
-    virtual Buffer<unsigned int>* GenIndexBuffer() = 0;
-    virtual Buffer<bool>* GenBoolBuffer() = 0;
-    virtual Buffer<glm::mat4>* GenMat4Buffer() = 0;
-    virtual Buffer<glm::mat3>* GenMat3Buffer() = 0;
-    virtual Buffer<glm::mat2>* GenMat2Buffer() = 0;
-    virtual Buffer<glm::vec2>* GenVec2Buffer() = 0;
-    virtual Buffer<glm::vec3>* GenVec3Buffer() = 0;
-    virtual Buffer<glm::vec4>* GenVec4Buffer() = 0;
+    virtual Buffer<float> *GenFloatBuffer(unsigned int count) = 0;
+    virtual Buffer<int> *GenIntBuffer(unsigned int count) = 0;
+    virtual Buffer<unsigned int> *GenIndexBuffer(unsigned int count) = 0;
+    virtual Buffer<bool> *GenBoolBuffer(unsigned int count) = 0;
+    virtual Buffer<glm::mat4> *GenMat4Buffer(unsigned int count) = 0;
+    virtual Buffer<glm::mat3> *GenMat3Buffer(unsigned int count) = 0;
+    virtual Buffer<glm::mat2> *GenMat2Buffer(unsigned int count) = 0;
+    virtual Buffer<glm::vec2> *GenVec2Buffer(unsigned int count) = 0;
+    virtual Buffer<glm::vec3> *GenVec3Buffer(unsigned int count) = 0;
+    virtual Buffer<glm::vec4> *GenVec4Buffer(unsigned int count) = 0;
 
-    // RenderState
-    virtual RenderState* GenRenderState() = 0;
+    // Render States
+    virtual RenderState<float> *GenFloatRenderState() = 0;
+    virtual RenderState<glm::vec2> *GenVec2RenderState() = 0;
+    virtual RenderState<glm::vec3> *GenVec3RenderState() = 0;
+    virtual RenderState<glm::vec4> *GenVec4RenderState() = 0;
 
-    // Rendering
-    virtual void render_mesh(Mesh* mesh, Material* material) = 0;
-    virtual void render_mesh(Mesh* mesh, Material* material, glm::mat4 parent_model) = 0;
-    virtual void render_mesh(Mesh* mesh, Material* material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4>* models) = 0;
+    // Rendering Meshes    
+    virtual void render_float_mesh(SimpleMesh<float> *mesh, Material *material) = 0;
+    virtual void render_float_mesh(SimpleMesh<float> *mesh, Material *material, glm::mat4 parent_model) = 0;
+    virtual void render_float_mesh(SimpleMesh<float> *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models) = 0;
+    virtual void render_vec2_mesh(SimpleMesh<glm::vec2> *mesh, Material *material) = 0;
+    virtual void render_vec2_mesh(SimpleMesh<glm::vec2> *mesh, Material *material, glm::mat4 parent_model) = 0;
+    virtual void render_vec2_mesh(SimpleMesh<glm::vec2> *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models) = 0;
+    virtual void render_vec3_mesh(SimpleMesh<glm::vec3> *mesh, Material *material) = 0;
+    virtual void render_vec3_mesh(SimpleMesh<glm::vec3> *mesh, Material *material, glm::mat4 parent_model) = 0;
+    virtual void render_vec3_mesh(SimpleMesh<glm::vec3> *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models) = 0;
+    virtual void render_vec4_mesh(SimpleMesh<glm::vec4> *mesh, Material *material) = 0;
+    virtual void render_vec4_mesh(SimpleMesh<glm::vec4> *mesh, Material *material, glm::mat4 parent_model) = 0;
+    virtual void render_vec4_mesh(SimpleMesh<glm::vec4> *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models) = 0;
 
     // Shaders
-    virtual Shader* GenShader(const char *directory) = 0;
+    virtual Shader *GenShader(const char *directory) = 0;
 
     // Coordinate conversions
     // get normalized device coordinates from window coordinates

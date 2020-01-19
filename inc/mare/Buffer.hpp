@@ -1,27 +1,39 @@
 #ifndef BUFFER
 #define BUFFER
 
-// Standar Library
+// Standard Library
 #include <vector>
 #include <string>
+
+// External Libraries
+#include "glm.hpp"
 
 namespace mare
 {
 enum class ShaderDataType
 {
-    None = 0,
-    Float,
-    Float2,
-    Float3,
-    Float4,
-    Mat3,
-    Mat4,
-    Int,
-    Int2,
-    Int3,
-    Int4,
-    Bool
+    NONE = 0,
+    FLOAT,
+    VEC2,
+    VEC3,
+    VEC4,
+    MAT2,
+    MAT3,
+    MAT4,
+    INT,
+    INT2,
+    INT3,
+    INT4,
+    BOOL,
+    CHAR,
+    BYTE,
+    SHORT,
+    UNSIGNED_SHORT,
+    UNSIGNED_INT
 };
+
+template <typename T>
+ShaderDataType glm_to_shader_type();
 
 struct BufferFormatElement
 {
@@ -40,28 +52,42 @@ struct BufferFormatElement
     {
         switch (type)
         {
-        case ShaderDataType::Float:
+        case ShaderDataType::FLOAT:
             return 4;
-        case ShaderDataType::Float2:
+        case ShaderDataType::VEC2:
             return 4 * 2;
-        case ShaderDataType::Float3:
+        case ShaderDataType::VEC3:
             return 4 * 3;
-        case ShaderDataType::Float4:
+        case ShaderDataType::VEC4:
             return 4 * 4;
-        case ShaderDataType::Mat3:
+        case ShaderDataType::MAT2:
+            return 4 * 2 * 2;
+        case ShaderDataType::MAT3:
             return 4 * 3 * 3;
-        case ShaderDataType::Mat4:
+        case ShaderDataType::MAT4:
             return 4 * 4 * 4;
-        case ShaderDataType::Int:
+        case ShaderDataType::INT:
             return 4;
-        case ShaderDataType::Int2:
+        case ShaderDataType::INT2:
             return 4 * 2;
-        case ShaderDataType::Int3:
+        case ShaderDataType::INT3:
             return 4 * 3;
-        case ShaderDataType::Int4:
+        case ShaderDataType::INT4:
             return 4 * 4;
-        case ShaderDataType::Bool:
+        case ShaderDataType::BOOL:
             return 1;
+        case ShaderDataType::CHAR:
+            return 1;
+        case ShaderDataType::BYTE:
+            return 1;
+        case ShaderDataType::UNSIGNED_SHORT:
+            return 2;
+        case ShaderDataType::SHORT:
+            return 2;
+        case ShaderDataType::UNSIGNED_INT:
+            return 4;
+        default:
+            return 0;
         }
         return 0;
     }
@@ -73,28 +99,42 @@ struct BufferFormatElement
     {
         switch (m_type)
         {
-        case ShaderDataType::Float:
+        case ShaderDataType::FLOAT:
             return 1;
-        case ShaderDataType::Float2:
+        case ShaderDataType::VEC2:
             return 2;
-        case ShaderDataType::Float3:
+        case ShaderDataType::VEC3:
             return 3;
-        case ShaderDataType::Float4:
+        case ShaderDataType::VEC4:
             return 4;
-        case ShaderDataType::Mat3:
+        case ShaderDataType::MAT2:
+            return 2 * 2;
+        case ShaderDataType::MAT3:
             return 3 * 3;
-        case ShaderDataType::Mat4:
+        case ShaderDataType::MAT4:
             return 4 * 4;
-        case ShaderDataType::Int:
+        case ShaderDataType::INT:
             return 1;
-        case ShaderDataType::Int2:
+        case ShaderDataType::INT2:
             return 2;
-        case ShaderDataType::Int3:
+        case ShaderDataType::INT3:
             return 3;
-        case ShaderDataType::Int4:
+        case ShaderDataType::INT4:
             return 4;
-        case ShaderDataType::Bool:
+        case ShaderDataType::BOOL:
             return 1;
+        case ShaderDataType::CHAR:
+            return 1;
+        case ShaderDataType::BYTE:
+            return 1;
+        case ShaderDataType::UNSIGNED_SHORT:
+            return 1;
+        case ShaderDataType::SHORT:
+            return 1;
+        case ShaderDataType::UNSIGNED_INT:
+            return 1;
+        default:
+            return 0;
         }
         return 0;
     }
@@ -141,7 +181,9 @@ public:
         m_count = unsigned int(m_data_size / format.stride());
     }
     virtual void create(std::vector<T> &data, size_t dynamic_size_in_bytes = 0) = 0;
+    virtual void create(T *data, size_t size_in_bytes, size_t dynamic_size_in_bytes = 0) = 0;
     virtual void update(std::vector<T> &data, unsigned int offset) = 0;
+    virtual void update(T *data, size_t size_in_bytes, unsigned int offset) = 0;
     inline const unsigned int count() const { return m_count; }
     inline unsigned int name() { return m_buffer_ID; }
     inline const BufferFormat &format() const { return m_format; }

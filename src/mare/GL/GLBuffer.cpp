@@ -39,6 +39,38 @@ void GLBuffer<T>::create(std::vector<T> &data, size_t dynamic_size_in_bytes)
     }
 }
 
+template <typename T>
+void GLBuffer<T>::create(T *data, size_t size_in_bytes, size_t dynamic_size_in_bytes)
+{
+    glDeleteBuffers(1, &m_buffer_ID);
+    glCreateBuffers(1, &m_buffer_ID);
+    if (dynamic_size_in_bytes)
+    {
+        glNamedBufferStorage(m_buffer_ID, dynamic_size_in_bytes, nullptr, GL_MAP_READ_BIT | GL_MAP_WRITE_BIT);
+        m_dynamic_size_in_bytes = dynamic_size_in_bytes;
+        is_dynamic = true;
+        if (size_in_bytes)
+        {
+            m_data_size = size_in_bytes;
+            update(data, size_in_bytes, 0);
+        }
+    }
+    else
+    {
+        glNamedBufferData(m_buffer_ID, size_in_bytes, data, GL_STATIC_DRAW);
+        m_data_size = size_in_bytes;
+        is_dynamic = false;
+    }
+    if (!m_format.stride())
+    {
+        m_count = unsigned int(m_data_size / sizeof(T));
+    }
+    else
+    {
+        m_count = unsigned int(m_data_size / m_format.stride());
+    }
+}
+
 // updates dynamic buffers with pre-allocated space. render count will increase but not decrease
 template <typename T>
 void GLBuffer<T>::update(std::vector<T> &data, unsigned int offset)
@@ -74,6 +106,40 @@ void GLBuffer<T>::update(std::vector<T> &data, unsigned int offset)
         std::cerr << "Cannot update a static buffer, set the dynamic size in bytes during buffer creation to create a dynamic buffer" << std::endl;
     }
 }
+template <typename T>
+void GLBuffer<T>::update(T *data, size_t size_in_bytes, unsigned int offset)
+{
+    if (is_dynamic)
+    {
+        if (size_in_bytes + offset > m_dynamic_size_in_bytes)
+        {
+            std::cerr << "Cannot update buffer, out of range" << std::endl;
+        }
+        else
+        {
+            // increase render count, does not decrease render count if updated with zeros
+            if (size_in_bytes + offset > m_data_size)
+            {
+                m_data_size = size_in_bytes + offset;
+                if (!m_format.stride())
+                {
+                    m_count = unsigned int(m_data_size / sizeof(T));
+                }
+                else
+                {
+                    m_count = unsigned int(m_data_size / m_format.stride());
+                }
+            }
+            void *p = glMapNamedBufferRange(m_buffer_ID, offset, size_in_bytes, GL_MAP_WRITE_BIT);
+            memcpy(p, data, size_in_bytes);
+            glUnmapNamedBuffer(m_buffer_ID);
+        }
+    }
+    else
+    {
+        std::cerr << "Cannot update a static buffer, set the dynamic size in bytes during buffer creation to create a dynamic buffer" << std::endl;
+    }
+}
 
 template <typename T>
 GLBuffer<T>::~GLBuffer()
@@ -86,28 +152,42 @@ unsigned int GLBuffer<T>::gl_type(ShaderDataType type)
 {
     switch (type)
     {
-    case ShaderDataType::Float:
+    case ShaderDataType::FLOAT:
         return GL_FLOAT;
-    case ShaderDataType::Float2:
+    case ShaderDataType::VEC2:
         return GL_FLOAT;
-    case ShaderDataType::Float3:
+    case ShaderDataType::VEC3:
         return GL_FLOAT;
-    case ShaderDataType::Float4:
+    case ShaderDataType::VEC4:
         return GL_FLOAT;
-    case ShaderDataType::Mat3:
+    case ShaderDataType::MAT2:
         return GL_FLOAT;
-    case ShaderDataType::Mat4:
+    case ShaderDataType::MAT3:
         return GL_FLOAT;
-    case ShaderDataType::Int:
+    case ShaderDataType::MAT4:
+        return GL_FLOAT;
+    case ShaderDataType::INT:
         return GL_INT;
-    case ShaderDataType::Int2:
+    case ShaderDataType::INT2:
         return GL_INT;
-    case ShaderDataType::Int3:
+    case ShaderDataType::INT3:
         return GL_INT;
-    case ShaderDataType::Int4:
+    case ShaderDataType::INT4:
         return GL_INT;
-    case ShaderDataType::Bool:
+    case ShaderDataType::BOOL:
         return GL_BOOL;
+    case ShaderDataType::CHAR:
+        return GL_BYTE;
+    case ShaderDataType::BYTE:
+        return GL_UNSIGNED_BYTE;
+    case ShaderDataType::SHORT:
+        return GL_SHORT;
+    case ShaderDataType::UNSIGNED_SHORT:
+        return GL_UNSIGNED_SHORT;
+    case ShaderDataType::UNSIGNED_INT:
+        return GL_UNSIGNED_INT;
+    default:
+        return GL_NONE;
     }
     return 0;
 }

@@ -93,32 +93,50 @@ protected:
     }
 
     // Buffers
-    Buffer<float> *GenFloatBuffer() override;
-    Buffer<int> *GenIntBuffer() override;
-    Buffer<unsigned int>* GenIndexBuffer() override;
-    Buffer<bool> *GenBoolBuffer() override;
-    Buffer<glm::mat4> *GenMat4Buffer() override;
-    Buffer<glm::mat3> *GenMat3Buffer() override;
-    Buffer<glm::mat2> *GenMat2Buffer() override;
-    Buffer<glm::vec2> *GenVec2Buffer() override;
-    Buffer<glm::vec3> *GenVec3Buffer() override;
-    Buffer<glm::vec4> *GenVec4Buffer() override;
+    Buffer<float> *GenFloatBuffer(unsigned int count) override;
+    Buffer<int> *GenIntBuffer(unsigned int count) override;
+    Buffer<unsigned int> *GenIndexBuffer(unsigned int count) override;
+    Buffer<bool> *GenBoolBuffer(unsigned int count) override;
+    Buffer<glm::mat4> *GenMat4Buffer(unsigned int count) override;
+    Buffer<glm::mat3> *GenMat3Buffer(unsigned int count) override;
+    Buffer<glm::mat2> *GenMat2Buffer(unsigned int count) override;
+    Buffer<glm::vec2> *GenVec2Buffer(unsigned int count) override;
+    Buffer<glm::vec3> *GenVec3Buffer(unsigned int count) override;
+    Buffer<glm::vec4> *GenVec4Buffer(unsigned int count) override;
 
-    // RenderState
-    RenderState *GenRenderState() override;
+    // Render States
+    RenderState<float> *GenFloatRenderState() override;
+    RenderState<glm::vec2> *GenVec2RenderState() override;
+    RenderState<glm::vec3> *GenVec3RenderState() override;
+    RenderState<glm::vec4> *GenVec4RenderState() override;
 
     // Meshes
-    void render_mesh(Mesh *mesh, Material *material) override;
-    void render_mesh(Mesh *mesh, Material *material, glm::mat4 parent_model) override;
-    void render_mesh(Mesh *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models) override;
+    void render_float_mesh(SimpleMesh<float> *mesh, Material *material) override;
+    void render_float_mesh(SimpleMesh<float> *mesh, Material *material, glm::mat4 parent_model) override;
+    void render_float_mesh(SimpleMesh<float> *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models) override;
+    void render_vec2_mesh(SimpleMesh<glm::vec2> *mesh, Material *material) override;
+    void render_vec2_mesh(SimpleMesh<glm::vec2> *mesh, Material *material, glm::mat4 parent_model) override;
+    void render_vec2_mesh(SimpleMesh<glm::vec2> *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models) override;
+    void render_vec3_mesh(SimpleMesh<glm::vec3> *mesh, Material *material) override;
+    void render_vec3_mesh(SimpleMesh<glm::vec3> *mesh, Material *material, glm::mat4 parent_model) override;
+    void render_vec3_mesh(SimpleMesh<glm::vec3> *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models) override;
+    void render_vec4_mesh(SimpleMesh<glm::vec4> *mesh, Material *material) override;
+    void render_vec4_mesh(SimpleMesh<glm::vec4> *mesh, Material *material, glm::mat4 parent_model) override;
+    void render_vec4_mesh(SimpleMesh<glm::vec4> *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models) override;
+
+
+    //template <typename T>
+    //void render_simple_mesh(SimpleMesh<T> *mesh, Material *material);
+    //template <typename T>
+    //void render_simple_mesh(SimpleMesh<T> *mesh, Material *material, glm::mat4 parent_model);
+    //template <typename T>
+    //void render_simple_mesh(SimpleMesh<T> *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models);
 
     // Shaders
     Shader *GenShader(const char *directory) override;
 
 private:
     static GLFWwindow *window;
-
-    GLenum GLDrawMethod(DrawMethod draw_method);
 
     // Debug functions
     static void GLAPIENTRY debug_message_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *userParam);
