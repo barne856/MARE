@@ -8,6 +8,7 @@
 #include "mare/Meshes/CylinderMesh.hpp"
 #include "mare/Meshes/SphereMesh.hpp"
 #include "mare/Meshes/TubeMesh.hpp"
+#include "mare/Meshes/ArrayMesh.hpp"
 #include "mare/Materials/BasicMaterial.hpp"
 #include "mare/Materials/PhongMaterial.hpp"
 #include "mare/InstancedMesh.hpp"
@@ -35,8 +36,7 @@ class Sandbox : public mare::Application
 {
     glm::vec4 bg_color{0.1f, 0.08f, 0.12f, 1.0f};
     glm::vec4 mesh_color{0.8f, 0.95f, 0.7f, 1.0f};
-    ConeMesh* cone;
-    InstancedMesh* inst_cones;
+    Mesh* a_mesh;
     PhongMaterial *phong_mat;
     Camera *main_camera;
     bool wireframe = false;
@@ -60,16 +60,21 @@ class Sandbox : public mare::Application
     {
         set_window_title("Sandbox");
 
-        cone = new ConeMesh(0.2f, 60);
-        cone->translate({0.0f, 0.0f, 0.05f});
+        std::vector<glm::vec3> vertices {};
+        vertices.push_back({-0.5f, -0.5f, 0.0f});
+        vertices.push_back({0.5f, -0.5f, 0.0f});
+        vertices.push_back({0.5f, 0.5f, 0.0f});
+        std::vector<glm::vec3> normals{};
+        normals.push_back({0.0f, 0.0f, 1.0f});
+        normals.push_back({0.0f, 0.0f, 1.0f});
+        normals.push_back({0.0f, 0.0f, 1.0f});
+        std::vector<unsigned int> indices{};
+        indices.push_back(0);
+        indices.push_back(1);
+        indices.push_back(2);
 
-        inst_cones = new InstancedMesh(5);
-        inst_cones->set_mesh(cone);
-        inst_cones->push_instance(glm::translate(glm::mat4(1.0f), {0.0f, 0.0f, 0.0f}));
-        inst_cones->push_instance(glm::translate(glm::mat4(1.0f), {0.5f, 0.0f, 0.0f}));
-        inst_cones->push_instance(glm::translate(glm::mat4(1.0f), {-0.5f, 0.0f, 0.0f}));
-        inst_cones->push_instance(glm::translate(glm::mat4(1.0f), {0.0f, 0.5f, 0.0f}));
-        inst_cones->push_instance(glm::translate(glm::mat4(1.0f), {0.0f, -0.5f, 0.0f}));
+        a_mesh = new ArrayMesh<glm::vec3>(DrawMethod::TRIANGLES, vertices, normals, indices);
+
 
         phong_mat = new PhongMaterial();
         
@@ -88,14 +93,14 @@ class Sandbox : public mare::Application
         clear_depth_buffer();
         phong_mat->bind();
         phong_mat->render();
-        inst_cones->render(phong_mat);
+        a_mesh->render(phong_mat);
+
     }
 
     void shutdown() override
     {
         // cleanup meshes, materials, and Cameras
-        delete cone;
-        delete inst_cones;
+        delete a_mesh;
         delete phong_mat;
         delete main_camera;
     }

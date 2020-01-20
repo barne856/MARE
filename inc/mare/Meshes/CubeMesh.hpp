@@ -126,16 +126,16 @@ public:
         indices.push_back(23);
         indices.push_back(20);
 
-        vertex_buffer = Application::GenBuffer<float>(1);
-        vertex_buffer->create(&data[0][0], data.size() * sizeof(glm::vec3));
-        vertex_buffer->set_format({{ShaderDataType::VEC3, "position"},
+        vertex_buffers = Application::GenBuffer<float>(1);
+        vertex_buffers->create(&data[0][0], data.size() * sizeof(glm::vec3));
+        vertex_buffers->set_format({{ShaderDataType::VEC3, "position"},
                                    {ShaderDataType::VEC3, "normal"}});
 
         index_buffer = Application::GenBuffer<unsigned int>(1);
         index_buffer->create(indices);
 
         render_state->create();
-        render_state->add_vertex_buffer(vertex_buffer);
+        render_state->add_vertex_buffer(vertex_buffers);
         render_state->set_index_buffer(index_buffer);
     }
 };

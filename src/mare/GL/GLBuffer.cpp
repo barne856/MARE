@@ -8,7 +8,7 @@
 namespace mare
 {
 template <typename T>
-void GLBuffer<T>::create(std::vector<T> &data, size_t dynamic_size_in_bytes)
+void GLBuffer<T>::create(std::vector<T>& data, size_t dynamic_size_in_bytes)
 {
     glDeleteBuffers(1, &m_buffer_ID);
     glCreateBuffers(1, &m_buffer_ID);
@@ -73,7 +73,7 @@ void GLBuffer<T>::create(T *data, size_t size_in_bytes, size_t dynamic_size_in_b
 
 // updates dynamic buffers with pre-allocated space. render count will increase but not decrease
 template <typename T>
-void GLBuffer<T>::update(std::vector<T> &data, unsigned int offset)
+void GLBuffer<T>::update(std::vector<T>& data, unsigned int offset)
 {
     if (is_dynamic)
     {

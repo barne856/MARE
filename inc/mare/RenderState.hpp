@@ -17,20 +17,7 @@ class RenderState
 {
 public:
     RenderState() : m_render_state_ID(0), m_vertex_buffer_count(0), m_attribute_index(0), m_vertex_render_count(0), m_index_render_count(0), m_is_indexed(false), vertex_buffers({}), index_buffer(nullptr) {}
-    virtual ~RenderState()
-    {
-        for (auto &buffer : vertex_buffers)
-        {
-            if (buffer)
-            {
-                delete[] buffer;
-            }
-        }
-        if(index_buffer)
-        {
-            delete[] index_buffer;
-        }
-    }
+    virtual ~RenderState() {}
     virtual void bind() const = 0;
     virtual void unbind() const = 0;
     virtual void create() = 0;

@@ -25,7 +25,7 @@ public:
 
 protected:
     RenderState<T> *render_state = nullptr;
-    Buffer<T> *vertex_buffer = nullptr;
+    Buffer<T> *vertex_buffers = nullptr;
     Buffer<unsigned int> *index_buffer = nullptr;
     DrawMethod draw_method;
 };

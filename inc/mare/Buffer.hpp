@@ -180,9 +180,9 @@ public:
         m_format = format;
         m_count = unsigned int(m_data_size / format.stride());
     }
-    virtual void create(std::vector<T> &data, size_t dynamic_size_in_bytes = 0) = 0;
+    virtual void create(std::vector<T>& data, size_t dynamic_size_in_bytes = 0) = 0;
     virtual void create(T *data, size_t size_in_bytes, size_t dynamic_size_in_bytes = 0) = 0;
-    virtual void update(std::vector<T> &data, unsigned int offset) = 0;
+    virtual void update(std::vector<T>& data, unsigned int offset) = 0;
     virtual void update(T *data, size_t size_in_bytes, unsigned int offset) = 0;
     inline const unsigned int count() const { return m_count; }
     inline unsigned int name() { return m_buffer_ID; }

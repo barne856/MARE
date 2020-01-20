@@ -5,14 +5,23 @@
 
 namespace mare
 {
-template<typename T>
+template <typename T>
 SimpleMesh<T>::SimpleMesh()
+    : draw_method(DrawMethod::TRIANGLES), index_buffer(nullptr), vertex_buffers(nullptr)
 {
     render_state = Application::GenRenderState<T>();
 }
-template<typename T>
+template <typename T>
 SimpleMesh<T>::~SimpleMesh()
 {
+    if (index_buffer)
+    {
+        delete index_buffer;
+    }
+    if (vertex_buffers)
+    {
+        delete[] vertex_buffers;
+    }
     delete render_state;
 }
 template <typename T>

@@ -100,13 +100,13 @@ public:
             data.push_back(vertices[3 * i][2]);
         }
 
-        vertex_buffer = Application::GenBuffer<float>(1);
-        vertex_buffer->create(data);
-        vertex_buffer->set_format({{ShaderDataType::VEC3, "position"},
+        vertex_buffers = Application::GenBuffer<float>(1);
+        vertex_buffers->create(data);
+        vertex_buffers->set_format({{ShaderDataType::VEC3, "position"},
                                    {ShaderDataType::VEC3, "normal"}});
 
         render_state->create();
-        render_state->add_vertex_buffer(vertex_buffer);
+        render_state->add_vertex_buffer(vertex_buffers);
     }
 
 private:

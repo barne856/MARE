@@ -48,10 +48,6 @@ void GLRenderState<T>::add_vertex_buffer(Buffer<T> *vbo)
 template <typename T>
 void GLRenderState<T>::set_index_buffer(Buffer<unsigned int> *ibo)
 {
-    if(index_buffer)
-    {
-        delete[] index_buffer;
-    }
     index_buffer = ibo;
     m_is_indexed = true;
     glVertexArrayElementBuffer(m_render_state_ID, ibo->name());
