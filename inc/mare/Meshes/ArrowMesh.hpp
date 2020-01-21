@@ -23,6 +23,11 @@ public:
         push_mesh(body);
         push_mesh(head);
     }
+    ~ArrowMesh()
+    {
+        delete body;
+        delete head;
+    }
 
 private:
     ConeMesh *head;

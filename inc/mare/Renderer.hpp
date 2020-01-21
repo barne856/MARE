@@ -16,6 +16,7 @@ namespace mare
 {
 
 class Application; // forward declaration
+class Scene;       // forward declaration
 
 enum class RendererName
 {
@@ -64,6 +65,7 @@ public:
     virtual void start_process(Application *app_pointer) = 0;
     static inline void end_process() { running = false; }
     static inline void set_camera(Camera *camera) { m_camera_pointer = camera; }
+    static inline void set_scene(Scene *scene) { m_scene = scene; }
 
     static inline RendererInfo &get_info() { return info; }
     static inline RendererInput &get_input() { return input; }
@@ -97,7 +99,7 @@ public:
     virtual RenderState<glm::vec3> *GenVec3RenderState() = 0;
     virtual RenderState<glm::vec4> *GenVec4RenderState() = 0;
 
-    // Rendering Meshes    
+    // Rendering Meshes
     virtual void render_float_mesh(SimpleMesh<float> *mesh, Material *material) = 0;
     virtual void render_float_mesh(SimpleMesh<float> *mesh, Material *material, glm::mat4 parent_model) = 0;
     virtual void render_float_mesh(SimpleMesh<float> *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models) = 0;
@@ -134,6 +136,7 @@ protected:
     static Application *m_app_pointer;
     static Camera *m_camera_pointer;
     static bool running;
+    static Scene *m_scene;
 };
 } // namespace mare
 

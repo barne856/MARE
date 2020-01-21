@@ -18,10 +18,11 @@
 #include "mare/CompositeMesh.hpp"
 
 // TODO:
-// add more primative meshes: arrow(from composite mesh)
-// Abstract Scene interface to create new renderable scenes
-// finish input implementation in GLRenderer
+// Abstract Scene interface to create new renderable scenes, need to make scenes render their UIs
+// Create "Object" to hold meshes that will render with multiple materials
 // add widgets and UI
+// Add more materials
+// finish input implementation in GLRenderer
 // textures and framebuffers
 // shadows and lights
 // implement pop instance and others in the instanced mesh
@@ -29,6 +30,7 @@
 // Add Text Thickness to CharMesh
 // Phong material should render point light not directional light
 // organize headers and cpp files, GL files should have protected inheritence from GLRenderer
+// fix compiling with gcc on linux
 // Cylinder, Cone, and Tube meshes should have an option for flat shading normals or smooth shading normals
 // add exception handling
 
@@ -62,8 +64,8 @@ class Sandbox : public mare::Application
     {
         set_window_title("Sandbox");
 
-        a_mesh = new ArrowMesh(0.4f, 0.1f, 0.3f, 0.3f, 40);
-        a_mesh->set_scale(glm::vec3(0.35f));
+        a_mesh = new ArrowMesh(0.4f, 0.1f, 0.3f, 0.3f, 3);
+        a_mesh->set_scale(glm::vec3(0.75f));
 
         phong_mat = new PhongMaterial();
         
@@ -82,6 +84,7 @@ class Sandbox : public mare::Application
         clear_depth_buffer();
         phong_mat->bind();
         phong_mat->render();
+        a_mesh->rotate({0.0f, 0.0f, 1.0f}, delta_time);
         a_mesh->render(phong_mat);
     }
 

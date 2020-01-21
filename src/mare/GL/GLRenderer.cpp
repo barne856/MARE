@@ -424,6 +424,10 @@ void GLRenderer::glfw_onKey(GLFWwindow *window, int key, int scancode, int actio
             input.W_PRESSED = false;
         }
     }
+    if (m_scene)
+    {
+        m_scene->on_key(input);
+    }
     m_app_pointer->on_key(input);
 }
 
@@ -441,6 +445,10 @@ void GLRenderer::glfw_onMouseButton(GLFWwindow *window, int button, int action, 
     {
         m_camera_pointer->interpret_input();
     }
+    if (m_scene)
+    {
+        m_scene->on_mouse_button(input);
+    }
     m_app_pointer->on_mouse_button(input);
 }
 
@@ -453,12 +461,20 @@ void GLRenderer::glfw_onMouseMove(GLFWwindow *window, double x, double y)
     {
         m_camera_pointer->interpret_input();
     }
+    if (m_scene)
+    {
+        m_scene->on_mouse_move(input);
+    }
     m_app_pointer->on_mouse_move(input);
     get_input().mouse_vel = glm::ivec2(0, 0);
 }
 
 void GLRenderer::glfw_onMouseWheel(GLFWwindow *window, double xoffset, double yoffset)
 {
+    if (m_scene)
+    {
+        m_scene->on_mouse_wheel(input);
+    }
     m_app_pointer->on_mouse_wheel(input);
 }
 

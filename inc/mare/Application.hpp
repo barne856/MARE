@@ -2,7 +2,7 @@
 #define APPLICATION
 
 // MARE
-#include "mare/Renderer.hpp"
+#include "mare/Scene.hpp"
 
 namespace mare
 {
@@ -33,6 +33,10 @@ public:
     static inline void set_camera(Camera *camera)
     {
         Renderer::set_camera(camera);
+    }
+    static inline void set_scene(Scene* scene)
+    {
+        Renderer::set_scene(scene);
     }
     static inline void set_cursor(CURSOR type)
     {
