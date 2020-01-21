@@ -4,7 +4,10 @@
 #include "mare/Meshes/TriangleMesh.hpp"
 #include "mare/Meshes/CircleMesh.hpp"
 #include "mare/Meshes/CubeMesh.hpp"
+#include "mare/Meshes/SlopeMesh.hpp"
+#include "mare/Meshes/TorusMesh.hpp"
 #include "mare/Meshes/ConeMesh.hpp"
+#include "mare/Meshes/ArrowMesh.hpp"
 #include "mare/Meshes/CylinderMesh.hpp"
 #include "mare/Meshes/SphereMesh.hpp"
 #include "mare/Meshes/TubeMesh.hpp"
@@ -15,8 +18,7 @@
 #include "mare/CompositeMesh.hpp"
 
 // TODO:
-// render state should own and delete buffers, fix arraymesh
-// add more primative meshes: Slope, Torus, arrow(from composite mesh), and array mesh
+// add more primative meshes: arrow(from composite mesh)
 // Abstract Scene interface to create new renderable scenes
 // finish input implementation in GLRenderer
 // add widgets and UI
@@ -60,21 +62,8 @@ class Sandbox : public mare::Application
     {
         set_window_title("Sandbox");
 
-        std::vector<glm::vec3> vertices {};
-        vertices.push_back({-0.5f, -0.5f, 0.0f});
-        vertices.push_back({0.5f, -0.5f, 0.0f});
-        vertices.push_back({0.5f, 0.5f, 0.0f});
-        std::vector<glm::vec3> normals{};
-        normals.push_back({0.0f, 0.0f, 1.0f});
-        normals.push_back({0.0f, 0.0f, 1.0f});
-        normals.push_back({0.0f, 0.0f, 1.0f});
-        std::vector<unsigned int> indices{};
-        indices.push_back(0);
-        indices.push_back(1);
-        indices.push_back(2);
-
-        a_mesh = new ArrayMesh<glm::vec3>(DrawMethod::TRIANGLES, vertices, normals, indices);
-
+        a_mesh = new ArrowMesh(0.4f, 0.1f, 0.3f, 0.3f, 40);
+        a_mesh->set_scale(glm::vec3(0.35f));
 
         phong_mat = new PhongMaterial();
         
@@ -94,7 +83,6 @@ class Sandbox : public mare::Application
         phong_mat->bind();
         phong_mat->render();
         a_mesh->render(phong_mat);
-
     }
 
     void shutdown() override

@@ -18,9 +18,9 @@ public:
         draw_method = method;
 
         vertex_buffers = Application::GenBuffer<T>(2);
-        vertex_buffers[0].create(vertices);
+        vertex_buffers[0].create(vertices, vertices.size()*sizeof(T));
         vertex_buffers[0].set_format({{glm_to_shader_type<T>(), "position"}});
-        vertex_buffers[1].create(normals);
+        vertex_buffers[1].create(normals, vertices.size()*sizeof(T));
         vertex_buffers[1].set_format({{glm_to_shader_type<T>(), "normals"}});
 
         render_state->create();
@@ -36,9 +36,9 @@ public:
         draw_method = method;
 
         vertex_buffers = Application::GenBuffer<T>(2);
-        vertex_buffers[0].create(vertices);
+        vertex_buffers[0].create(vertices, vertices.size()*sizeof(T));
         vertex_buffers[0].set_format({{glm_to_shader_type<T>(), "position"}});
-        vertex_buffers[1].create(normals);
+        vertex_buffers[1].create(normals, vertices.size()*sizeof(T));
         vertex_buffers[1].set_format({{glm_to_shader_type<T>(), "normals"}});
 
         render_state->create();

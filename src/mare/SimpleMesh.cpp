@@ -16,7 +16,7 @@ SimpleMesh<T>::~SimpleMesh()
 {
     if (index_buffer)
     {
-        delete index_buffer;
+        delete[] index_buffer;
     }
     if (vertex_buffers)
     {

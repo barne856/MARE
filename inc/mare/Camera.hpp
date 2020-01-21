@@ -56,7 +56,7 @@ public:
     {
         m_position = eye;
         m_direction = center - eye;
-        glm::normalize(m_direction);
+        m_direction = glm::normalize(m_direction);
         m_up = glm::normalize(up);
         recalculate_view();
     }
@@ -68,13 +68,13 @@ public:
     void set_direction(const glm::vec3 &direction)
     {
         m_direction = direction;
-        glm::normalize(m_direction);
+        m_direction = glm::normalize(m_direction);
         recalculate_view();
     }
     void set_up(const glm::vec3& up)
     {
         m_up = up;
-        glm::normalize(m_up);
+        m_up = glm::normalize(m_up);
         recalculate_view();
     }
     void set_forward_velocity(float velocity)

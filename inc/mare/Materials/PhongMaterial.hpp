@@ -14,8 +14,8 @@ class PhongMaterial : public virtual Material
 public:
     PhongMaterial() : Material("./res/Shaders/Phong")
     {
-        material.ambient = glm::vec4(0.01f, 0.05f, 0.2f, 1.0f);
-        material.diffuse = glm::vec4(0.2f, 0.3f, 0.75f, 1.0f);
+        material.ambient = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+        material.diffuse = glm::vec4(0.96f, 0.17f, 0.71f, 1.0f);
         material.specular = glm::vec4(1.0f);
         material.shininess = 32.0f;
         light.ambient = glm::vec4(1.0f);
