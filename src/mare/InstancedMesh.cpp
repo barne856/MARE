@@ -31,7 +31,7 @@ void InstancedMesh::render(Material *material)
 
 void InstancedMesh::render(Material *material, glm::mat4 parent_model)
 {
-    m_mesh->render(material, transform * parent_model, instance_count, instance_transforms);
+    m_mesh->render(material, parent_model * transform, instance_count, instance_transforms);
 }
 
 void InstancedMesh::render(Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models)

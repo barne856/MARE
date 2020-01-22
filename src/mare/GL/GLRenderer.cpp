@@ -269,6 +269,15 @@ void GLRenderer::start_process(Application *app_pointer)
         double time = glfwGetTime();
         double delta_time = time - info.current_time;
         m_camera_pointer->render(delta_time);
+        if(m_scene)
+        {
+            bool scene_running = m_scene->render(time, delta_time);
+            if(!scene_running)
+            {
+                m_scene->shutdown();
+                set_scene(nullptr);
+            }
+        }
         m_app_pointer->render(time, delta_time);
         info.current_time = time;
         glfwPollEvents();
@@ -427,6 +436,10 @@ void GLRenderer::glfw_onKey(GLFWwindow *window, int key, int scancode, int actio
     if (m_scene)
     {
         m_scene->on_key(input);
+        if (m_scene->get_UI())
+        {
+            m_scene->get_UI()->on_key(input);
+        }
     }
     m_app_pointer->on_key(input);
 }
@@ -448,6 +461,10 @@ void GLRenderer::glfw_onMouseButton(GLFWwindow *window, int button, int action, 
     if (m_scene)
     {
         m_scene->on_mouse_button(input);
+        if (m_scene->get_UI())
+        {
+            m_scene->get_UI()->on_mouse_button(input);
+        }
     }
     m_app_pointer->on_mouse_button(input);
 }
@@ -464,6 +481,10 @@ void GLRenderer::glfw_onMouseMove(GLFWwindow *window, double x, double y)
     if (m_scene)
     {
         m_scene->on_mouse_move(input);
+        if (m_scene->get_UI())
+        {
+            m_scene->get_UI()->on_mouse_move(input);
+        }
     }
     m_app_pointer->on_mouse_move(input);
     get_input().mouse_vel = glm::ivec2(0, 0);
@@ -474,6 +495,10 @@ void GLRenderer::glfw_onMouseWheel(GLFWwindow *window, double xoffset, double yo
     if (m_scene)
     {
         m_scene->on_mouse_wheel(input);
+        if (m_scene->get_UI())
+        {
+            m_scene->get_UI()->on_mouse_wheel(input);
+        }
     }
     m_app_pointer->on_mouse_wheel(input);
 }

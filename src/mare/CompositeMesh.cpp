@@ -22,7 +22,7 @@ void CompositeMesh::render(Material *material, glm::mat4 parent_model)
 {
     for (Mesh *mesh : m_meshes)
     {
-        mesh->render(material, transform * parent_model);
+        mesh->render(material, parent_model * transform);
     }
 }
 
@@ -30,7 +30,7 @@ void CompositeMesh::render(Material *material, glm::mat4 parent_model, unsigned 
 {
     for (Mesh *mesh : m_meshes)
     {
-        mesh->render(material, transform * parent_model, instance_count, models);
+        mesh->render(material, parent_model * transform, instance_count, models);
     }
 }
 

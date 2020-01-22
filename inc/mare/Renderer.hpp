@@ -65,7 +65,7 @@ public:
     virtual void start_process(Application *app_pointer) = 0;
     static inline void end_process() { running = false; }
     static inline void set_camera(Camera *camera) { m_camera_pointer = camera; }
-    static inline void set_scene(Scene *scene) { m_scene = scene; }
+    static void set_scene(Scene *scene);
 
     static inline RendererInfo &get_info() { return info; }
     static inline RendererInput &get_input() { return input; }

@@ -19,6 +19,6 @@ void main()
     }
     else
     {
-        gl_Position = projection * view * models[gl_InstanceID] * model * position;
+        gl_Position = projection * view * model * models[gl_InstanceID] * position;
     }
 }

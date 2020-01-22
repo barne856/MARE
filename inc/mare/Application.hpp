@@ -225,16 +225,16 @@ public:
     virtual void init(RendererInfo &info)
     {
         info.name = RendererName::OpenGL;
-        info.window_width = 800;
-        info.window_height = 600;
-        info.window_aspect = 800.0f / 600.0f;
+        info.window_width = 1280;
+        info.window_height = 720;
+        info.window_aspect = 1280.0f / 720.0f;
         info.major_version = 4;
         info.minor_version = 5;
-        info.samples = 0;
+        info.samples = 16;
         info.fullscreen = false;
         info.vsync = false;
         info.cursor = true;
-        info.debug_mode = 0;
+        info.debug_mode.set(0, 1);
     }
     virtual void startup() = 0;
     virtual void render(double current_time, double delta_time) = 0;

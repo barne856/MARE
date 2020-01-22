@@ -24,8 +24,8 @@ void main()
     }
     else
     {
-        P = models[gl_InstanceID] * model * position;
-        N = normalize(mat3(transpose(inverse(models[gl_InstanceID] * model))) * normal);
+        P = model * models[gl_InstanceID] * position;
+        N = normalize(mat3(transpose(inverse(model * models[gl_InstanceID]))) * normal);
         gl_Position = projection * view * P;
     }
 }
