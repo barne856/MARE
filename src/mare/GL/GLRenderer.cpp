@@ -268,17 +268,24 @@ void GLRenderer::start_process(Application *app_pointer)
     {
         double time = glfwGetTime();
         double delta_time = time - info.current_time;
-        m_camera_pointer->render(delta_time);
-        if(m_scene)
+        if (m_layer_stack)
         {
-            bool scene_running = m_scene->render(time, delta_time);
-            if(!scene_running)
+            bool render_result = true;
+            for (auto &layer : *m_layer_stack)
             {
-                m_scene->shutdown();
-                set_scene(nullptr);
+                render_result = layer->render(time, delta_time);
+                if (!render_result)
+                {
+                    m_layer_stack = nullptr;
+                    break;
+                }
             }
         }
         m_app_pointer->render(time, delta_time);
+        if (m_camera_pointer)
+        {
+            m_camera_pointer->render(delta_time);
+        }
         info.current_time = time;
         glfwPollEvents();
         glfwSwapBuffers(window);
@@ -416,7 +423,6 @@ void GLRenderer::glfw_onResize(GLFWwindow *window, int w, int h)
         m_camera_pointer->set_aspect(info.window_aspect);
         m_camera_pointer->recalculate_projection();
     }
-    m_app_pointer->on_resize(w, h);
 }
 
 void GLRenderer::glfw_onKey(GLFWwindow *window, int key, int scancode, int action, int mods)
@@ -433,15 +439,18 @@ void GLRenderer::glfw_onKey(GLFWwindow *window, int key, int scancode, int actio
             input.W_PRESSED = false;
         }
     }
-    if (m_scene)
+    if (m_layer_stack)
     {
-        m_scene->on_key(input);
-        if (m_scene->get_UI())
+        bool handled = false;
+        for (size_t i = m_layer_stack->size(); i--;)
         {
-            m_scene->get_UI()->on_key(input);
+            handled = m_layer_stack->at(i)->on_key(input);
+            if (handled)
+            {
+                break;
+            }
         }
     }
-    m_app_pointer->on_key(input);
 }
 
 void GLRenderer::glfw_onMouseButton(GLFWwindow *window, int button, int action, int mods)
@@ -458,15 +467,18 @@ void GLRenderer::glfw_onMouseButton(GLFWwindow *window, int button, int action, 
     {
         m_camera_pointer->interpret_input();
     }
-    if (m_scene)
+    if (m_layer_stack)
     {
-        m_scene->on_mouse_button(input);
-        if (m_scene->get_UI())
+        bool handled = false;
+        for (size_t i = m_layer_stack->size(); i--;)
         {
-            m_scene->get_UI()->on_mouse_button(input);
+            handled = m_layer_stack->at(i)->on_mouse_button(input);
+            if (handled)
+            {
+                break;
+            }
         }
     }
-    m_app_pointer->on_mouse_button(input);
 }
 
 void GLRenderer::glfw_onMouseMove(GLFWwindow *window, double x, double y)
@@ -478,29 +490,35 @@ void GLRenderer::glfw_onMouseMove(GLFWwindow *window, double x, double y)
     {
         m_camera_pointer->interpret_input();
     }
-    if (m_scene)
+    if (m_layer_stack)
     {
-        m_scene->on_mouse_move(input);
-        if (m_scene->get_UI())
+        bool handled = false;
+        for (size_t i = m_layer_stack->size(); i--;)
         {
-            m_scene->get_UI()->on_mouse_move(input);
+            handled = m_layer_stack->at(i)->on_mouse_move(input);
+            if (handled)
+            {
+                break;
+            }
         }
     }
-    m_app_pointer->on_mouse_move(input);
     get_input().mouse_vel = glm::ivec2(0, 0);
 }
 
 void GLRenderer::glfw_onMouseWheel(GLFWwindow *window, double xoffset, double yoffset)
 {
-    if (m_scene)
+    if (m_layer_stack)
     {
-        m_scene->on_mouse_wheel(input);
-        if (m_scene->get_UI())
+        bool handled = false;
+        for (size_t i = m_layer_stack->size(); i--;)
         {
-            m_scene->get_UI()->on_mouse_wheel(input);
+            handled = m_layer_stack->at(i)->on_mouse_wheel(input);
+            if (handled)
+            {
+                break;
+            }
         }
     }
-    m_app_pointer->on_mouse_wheel(input);
 }
 
 GLFWwindow *GLRenderer::window = nullptr;

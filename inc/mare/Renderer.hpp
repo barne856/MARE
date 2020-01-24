@@ -3,6 +3,7 @@
 
 // Standard Library
 #include <bitset>
+#include <vector>
 // MARE
 #include "mare/Camera.hpp"
 #include "mare/SimpleMesh.hpp"
@@ -16,7 +17,7 @@ namespace mare
 {
 
 class Application; // forward declaration
-class Scene;       // forward declaration
+class Layer;       // forward declaration
 
 enum class RendererName
 {
@@ -65,7 +66,8 @@ public:
     virtual void start_process(Application *app_pointer) = 0;
     static inline void end_process() { running = false; }
     static inline void set_camera(Camera *camera) { m_camera_pointer = camera; }
-    static void set_scene(Scene *scene);
+    static void set_layer_stack(std::vector<Layer *> *layer_stack);
+    static std::vector<Layer *> *get_layer_stack() { return m_layer_stack; }
 
     static inline RendererInfo &get_info() { return info; }
     static inline RendererInput &get_input() { return input; }
@@ -136,7 +138,7 @@ protected:
     static Application *m_app_pointer;
     static Camera *m_camera_pointer;
     static bool running;
-    static Scene *m_scene;
+    static std::vector<Layer *> *m_layer_stack;
 };
 } // namespace mare
 

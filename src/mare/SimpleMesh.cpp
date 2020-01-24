@@ -7,9 +7,10 @@ namespace mare
 {
 template <typename T>
 SimpleMesh<T>::SimpleMesh()
-    : draw_method(DrawMethod::TRIANGLES), index_buffer(nullptr), vertex_buffers(nullptr)
+    : index_buffer(nullptr), vertex_buffers(nullptr)
 {
     render_state = Application::GenRenderState<T>();
+    render_state->set_draw_method(DrawMethod::TRIANGLES);
 }
 template <typename T>
 SimpleMesh<T>::~SimpleMesh()

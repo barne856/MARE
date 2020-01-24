@@ -71,11 +71,38 @@ public:
         m_direction = glm::normalize(m_direction);
         recalculate_view();
     }
-    void set_up(const glm::vec3& up)
+    void set_up(const glm::vec3 &up)
     {
         m_up = up;
         m_up = glm::normalize(m_up);
         recalculate_view();
+    }
+    // Pespective FOV in y direction
+    void set_fov(float fovy)
+    {
+        m_fovy = fovy;
+        recalculate_projection();
+    }
+    // Orthographic scale in y direction
+    void set_scale(float scale)
+    {
+        m_scale = scale;
+        recalculate_projection();
+    }
+    void set_aspect(float aspect)
+    {
+        m_aspect = aspect;
+        recalculate_projection();
+    }
+    void set_near_clip_plan(float near)
+    {
+        m_near = near;
+        recalculate_projection();
+    }
+    void set_far_clip_plan(float far)
+    {
+        m_far = far;
+        recalculate_projection();
     }
     void set_forward_velocity(float velocity)
     {
@@ -90,18 +117,10 @@ public:
         m_angular_velocity = angular_velocity;
     }
 
-    // Pespective FOV in y direction
-    void set_fov(float fovy) { m_fovy = fovy; }
-    // Orthographic scale in y direction
-    void set_scale(float scale) { m_scale = scale; }
-
     void set_distance_to_center(float distance)
     {
         m_distance_to_center = distance;
     }
-    void set_aspect(float aspect) { m_aspect = aspect; }
-    void set_near_clip_plan(float near) { m_near = near; }
-    void set_far_clip_plan(float far) { m_far = far; }
 
     glm::vec3 get_position() const { return m_position; }
     glm::vec3 get_direction() const { return m_direction; }

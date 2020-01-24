@@ -75,7 +75,7 @@ public:
         this->str = str;
         this->color = glm::vec4(1.0f);
         std::vector<float> verts = string_to_verts(str);
-        draw_method = DrawMethod::LINES;
+        render_state->set_draw_method(DrawMethod::LINES);
 
         // if dynamic, create extra space to hold resized strings
         vertex_buffers = Application::GenBuffer<float>(1);

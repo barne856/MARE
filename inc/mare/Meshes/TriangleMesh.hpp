@@ -14,7 +14,7 @@ public:
     TriangleMesh(glm::vec2 v1, glm::vec2 v2, glm::vec2 v3)
     {
         std::vector<float> verts;
-        draw_method = DrawMethod::TRIANGLES;
+        render_state->set_draw_method(DrawMethod::TRIANGLES);
 
         verts.push_back(v1[0]);
         verts.push_back(v1[1]);

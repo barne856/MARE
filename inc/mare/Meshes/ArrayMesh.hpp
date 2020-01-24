@@ -15,7 +15,7 @@ class ArrayMesh : public SimpleMesh<T>
 public:
     ArrayMesh(DrawMethod method, std::vector<T> &vertices, std::vector<T> &normals, std::vector<unsigned int> &indices)
     {
-        draw_method = method;
+        render_state->set_draw_method(method);
 
         vertex_buffers = Application::GenBuffer<T>(2);
         vertex_buffers[0].create(vertices, vertices.size()*sizeof(T));

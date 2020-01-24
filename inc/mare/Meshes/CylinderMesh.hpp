@@ -15,7 +15,7 @@ public:
     {
         std::vector<float> data;
         std::vector<unsigned int> indices;
-        draw_method = DrawMethod::TRIANGLES;
+        render_state->set_draw_method(DrawMethod::TRIANGLES);
 
         float theta = end_angle - start_angle;
         float dtheta = theta / sides;

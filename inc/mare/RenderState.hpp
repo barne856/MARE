@@ -12,6 +12,18 @@
 
 namespace mare
 {
+enum class DrawMethod
+{
+    NONE,
+    POINTS,
+    LINES,
+    LINE_STRIP,
+    LINE_LOOP,
+    TRIANGLES,
+    TRIANGLE_STRIP,
+    TRIANGLE_FAN
+};
+
 template <typename T>
 class RenderState
 {
@@ -35,6 +47,8 @@ public:
         }
     }
     inline bool is_indexed() const { return m_is_indexed; }
+    inline void set_draw_method(DrawMethod method) { draw_method = method; }
+    inline DrawMethod get_draw_method() { return draw_method; }
 
 protected:
     unsigned int m_render_state_ID;
@@ -43,8 +57,9 @@ protected:
     unsigned int m_vertex_render_count;
     unsigned int m_index_render_count;
     bool m_is_indexed;
+    DrawMethod draw_method;
     std::vector<Buffer<T> *> vertex_buffers;
-    Buffer<unsigned int>* index_buffer;
+    Buffer<unsigned int> *index_buffer;
 };
 } // namespace mare
 

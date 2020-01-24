@@ -16,7 +16,7 @@ public:
     {
         std::vector<glm::vec3> data;
         std::vector<unsigned int> indices;
-        draw_method = DrawMethod::TRIANGLES;
+        render_state->set_draw_method(DrawMethod::TRIANGLES);
 
         // front face vertices and normals, counterclockwise around normal from bottom left
         data.push_back({-0.5f * scale, -0.5f * scale, 0.5f * scale});

@@ -15,7 +15,7 @@ public:
     SlopeMesh(float scale)
     {
         std::vector<glm::vec3> data;
-        draw_method = DrawMethod::TRIANGLES;
+        render_state->set_draw_method(DrawMethod::TRIANGLES);
         const float SQRT2 = 1.41421356237f;
 
         // front face

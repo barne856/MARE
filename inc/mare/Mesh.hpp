@@ -12,18 +12,6 @@
 namespace mare
 {
 
-enum class DrawMethod
-{
-    NONE,
-    POINTS,
-    LINES,
-    LINE_STRIP,
-    LINE_LOOP,
-    TRIANGLES,
-    TRIANGLE_STRIP,
-    TRIANGLE_FAN
-};
-
 class Mesh
 {
 public:

@@ -21,13 +21,13 @@ public:
 
     inline void bind() const { render_state->bind(); }
     inline RenderState<T> *get_state() const { return render_state; }
-    inline DrawMethod get_draw_method() const { return draw_method; }
+    inline DrawMethod get_draw_method() const { return render_state->get_draw_method(); }
 
 protected:
     RenderState<T> *render_state = nullptr;
     Buffer<T> *vertex_buffers = nullptr;
     Buffer<unsigned int> *index_buffer = nullptr;
-    DrawMethod draw_method;
+    
 };
 } // namespace mare
 

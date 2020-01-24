@@ -19,7 +19,7 @@ public:
         const float PI = 3.141592653f;
         std::vector<float> data;
         std::vector<unsigned int> indes;
-        draw_method = DrawMethod::TRIANGLES;
+        render_state->set_draw_method(DrawMethod::TRIANGLES);
 
         float theta = end_angle - start_angle;
         float dtheta = theta / sides;

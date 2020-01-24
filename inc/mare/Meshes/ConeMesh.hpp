@@ -17,7 +17,7 @@ public:
         std::vector<glm::vec3> verts{};
         std::vector<glm::vec3> normals{};
         std::vector<unsigned int> indices;
-        draw_method = DrawMethod::TRIANGLES;
+        render_state->set_draw_method(DrawMethod::TRIANGLES);
 
         const float PI = 3.141592653f;
         const float SQRT3 = 1.73205080757f;

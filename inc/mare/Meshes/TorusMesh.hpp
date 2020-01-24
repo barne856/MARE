@@ -17,7 +17,7 @@ public:
         std::vector<glm::vec3> vertices;
         std::vector<glm::vec3> normals;
         std::vector<unsigned int> indices;
-        draw_method = DrawMethod::TRIANGLE_STRIP;
+        render_state->set_draw_method(DrawMethod::TRIANGLE_STRIP);
 
         // Compute torus vertices and normals
         for (unsigned int i = 0; i <= p; ++i)

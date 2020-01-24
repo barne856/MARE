@@ -2,7 +2,7 @@
 #define APPLICATION
 
 // MARE
-#include "mare/Scene.hpp"
+#include "mare/Layer.hpp"
 
 namespace mare
 {
@@ -34,10 +34,11 @@ public:
     {
         Renderer::set_camera(camera);
     }
-    static inline void set_scene(Scene* scene)
+    static inline void set_layer_stack(std::vector<Layer *> *layer_stack)
     {
-        Renderer::set_scene(scene);
+        Renderer::set_layer_stack(layer_stack);
     }
+    static inline std::vector<Layer *> *get_layer_stack() { return Renderer::get_layer_stack(); }
     static inline void set_cursor(CURSOR type)
     {
         m_renderer_pointer->set_cursor(type);
@@ -240,13 +241,6 @@ public:
     virtual void render(double current_time, double delta_time) = 0;
     virtual void shutdown() = 0;
     void exit_appliction() { m_renderer_pointer->end_process(); }
-
-    // Application callback functions
-    virtual void on_resize(int width, int height) {}
-    virtual void on_key(const RendererInput &input) {}
-    virtual void on_mouse_button(const RendererInput &input) {}
-    virtual void on_mouse_move(const RendererInput &input) {}
-    virtual void on_mouse_wheel(const RendererInput &input) {}
 
 private:
     // Static Application data

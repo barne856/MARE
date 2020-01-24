@@ -14,7 +14,7 @@ public:
     CircleMesh(int sides, float radius)
     {
         std::vector<float> verts;
-        draw_method = DrawMethod::TRIANGLE_FAN;
+        render_state->set_draw_method(DrawMethod::TRIANGLE_FAN);
 
         verts.push_back(0.0f);
         verts.push_back(0.0f);

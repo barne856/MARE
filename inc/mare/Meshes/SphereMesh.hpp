@@ -13,7 +13,7 @@ class SphereMesh : public SimpleMesh<float>
 public:
     SphereMesh(unsigned int recursionLevel, float radius, bool force_flat = false)
     {
-        draw_method = DrawMethod::TRIANGLES;
+        render_state->set_draw_method(DrawMethod::TRIANGLES);
 
         const float X = 0.525731112119133606f;
         const float Z = 0.850650808352039932f;
