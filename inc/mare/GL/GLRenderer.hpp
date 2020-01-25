@@ -125,13 +125,6 @@ protected:
     void render_vec4_mesh(Layer* layer, SimpleMesh<glm::vec4> *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models) override;
 
 
-    //template <typename T>
-    //void render_simple_mesh(SimpleMesh<T> *mesh, Material *material);
-    //template <typename T>
-    //void render_simple_mesh(SimpleMesh<T> *mesh, Material *material, glm::mat4 parent_model);
-    //template <typename T>
-    //void render_simple_mesh(SimpleMesh<T> *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models);
-
     // Shaders
     Shader *GenShader(const char *directory) override;
 

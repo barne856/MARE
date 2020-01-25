@@ -8,7 +8,7 @@
 namespace mare
 {
 template <typename T>
-void GLBuffer<T>::create(std::vector<T>& data, size_t dynamic_size_in_bytes)
+void GLBuffer<T>::create(std::vector<T> &data, size_t dynamic_size_in_bytes)
 {
     glDeleteBuffers(1, &m_buffer_ID);
     glCreateBuffers(1, &m_buffer_ID);
@@ -73,7 +73,7 @@ void GLBuffer<T>::create(T *data, size_t size_in_bytes, size_t dynamic_size_in_b
 
 // updates dynamic buffers with pre-allocated space. render count will increase but not decrease
 template <typename T>
-void GLBuffer<T>::update(std::vector<T>& data, unsigned int offset)
+void GLBuffer<T>::update(std::vector<T> &data, unsigned int offset)
 {
     if (is_dynamic)
     {
@@ -139,6 +139,26 @@ void GLBuffer<T>::update(T *data, size_t size_in_bytes, unsigned int offset)
     {
         std::cerr << "Cannot update a static buffer, set the dynamic size in bytes during buffer creation to create a dynamic buffer" << std::endl;
     }
+}
+
+template <typename T>
+const T GLBuffer<T>::operator[](unsigned int i) const
+{
+    T result{};
+    if (is_dynamic)
+    {
+        if (i >= (unsigned int)(m_data_size / sizeof(T)))
+        {
+            std::cerr << "Buffer index out of bounds" << std::endl;
+            return result;
+        }
+        void *buffer_read_pointer = glMapNamedBufferRange(m_buffer_ID, i * sizeof(T), sizeof(T), GL_MAP_READ_BIT);
+        memcpy(&result, buffer_read_pointer, sizeof(T));
+        glUnmapNamedBuffer(m_buffer_ID);
+        return result;
+    }
+    std::cerr << "Cannot read from a static buffer, set the dynamic size in bytes during buffer creation to create a dynamic buffer" << std::endl;
+    return result;
 }
 
 template <typename T>

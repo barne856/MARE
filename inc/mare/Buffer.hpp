@@ -187,6 +187,8 @@ public:
     inline const unsigned int count() const { return m_count; }
     inline unsigned int name() { return m_buffer_ID; }
     inline const BufferFormat &format() const { return m_format; }
+    virtual const T operator[](unsigned int i) const = 0;
+
 
 protected:
     unsigned int m_buffer_ID;

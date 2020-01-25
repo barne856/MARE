@@ -1,29 +1,21 @@
-#ifndef SAMPLESCENE1
-#define SAMPLESCENE1
+#ifndef MARETEXTOBJECT
+#define MARETEXTOBJECT
 
-#include "mare/Application.hpp"
+// MARE
+#include "mare/Object.hpp"
 #include "mare/Materials/PhongMaterial.hpp"
 #include "mare/Meshes/SlopeMesh.hpp"
 #include "mare/Meshes/CubeMesh.hpp"
 #include "mare/CompositeMesh.hpp"
 #include "mare/InstancedMesh.hpp"
-#include "mare/Layer.hpp"
-#include "mare/Object.hpp"
-
-// create UI and run its startup, render and shutdown in here
 
 namespace mare
 {
-class SampleScene1 : public Layer
+class MareTextObject : public Object
 {
 public:
-    SampleScene1()
+    MareTextObject()
     {
-        // Create the camera and controls
-        set_camera(new Camera(CameraType::PERSPECTIVE));
-        get_camera()->set_controls(ControlsConfig::ORBITCONTROLS);
-        get_camera()->set_position(glm::vec3(0.0f, 0.0f, 1.0f));
-
         // Create the letter M
         const float SQRT2 = 1.41421356237f;
         const float PI = 3.141592653f;
@@ -46,52 +38,18 @@ public:
         letter_M_mesh->set_scale(glm::vec3(0.05f));
         letter_M_mesh->rotate({1.0f, 0.0f, 0.0f}, PI / 2.0f);
 
-        // Create the material
+        // Create the materials
         phong_mat = new PhongMaterial();
 
-        letter_M = new Object();
-        letter_M->push_primative(letter_M_mesh, phong_mat);
+        // push the letter M as a primative
+        push_primative(letter_M_mesh, phong_mat);
     }
 
-    bool render(double time, double dt) override
+    void set_light_intensity(float intensity)
     {
-        // Renderer properties
-        Application::enable_depth_testing(true);
-        Application::enable_face_culling(true);
-
-        // Render the letter M
-        letter_M->render(this);
-
-        // Run forever
-        return true;
-    }
-
-    ~SampleScene1()
-    {
-        // cleanup (deleting an object deletes all meshes and materials used to render it)
-        delete letter_M;
-    }
-
-    bool on_key(const RendererInput &input) override
-    {
-        if (input.W_PRESSED)
-        {
-            wireframe = !wireframe;
-        }
-        Application::wireframe_mode(wireframe);
-        // event is handled
-        return true;
-    }
-
-    bool on_mouse_button(const RendererInput &input) override
-    {
-        if (input.mouse_button == 1)
-        {
-            Application::set_focus(this);
-            return true;
-        }
-        Application::set_focus(nullptr);
-        return false;
+        phong_mat->light.ambient = glm::vec4(glm::vec3(intensity), 1.0f);
+        phong_mat->light.diffuse = glm::vec4(glm::vec3(intensity), 1.0f);
+        phong_mat->light.specular = glm::vec4(glm::vec3(intensity), 1.0f);
     }
 
 private:
@@ -105,8 +63,6 @@ private:
     Object *letter_M;
 
     PhongMaterial *phong_mat;
-
-    bool wireframe = false;
 };
 } // namespace mare
 

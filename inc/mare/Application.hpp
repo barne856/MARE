@@ -8,6 +8,7 @@ namespace mare
 {
 
 enum class CURSOR; // forward declaration
+class Scene;
 
 class Application
 {
@@ -29,11 +30,14 @@ public:
     {
         m_renderer_pointer->resize_window(width, height);
     }
-    static inline void set_layer_stack(std::vector<Layer *> *layer_stack)
+    static inline void set_scene(Scene *scene)
     {
-        Renderer::set_layer_stack(layer_stack);
+        Renderer::set_scene(scene);
     }
-    static inline std::vector<Layer *> *get_layer_stack() { return Renderer::get_layer_stack(); }
+    static inline Scene* get_scene()
+    {
+        return Renderer::get_scene();
+    }
     static inline void set_cursor(CURSOR type)
     {
         m_renderer_pointer->set_cursor(type);

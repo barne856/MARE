@@ -1,5 +1,5 @@
 #include "mare/Renderer.hpp"
-#include "mare/Layer.hpp"
+#include "mare/Scene.hpp"
 
 namespace mare
 {
@@ -7,11 +7,11 @@ RendererInfo Renderer::info{};
 RendererInput Renderer::input{};
 bool Renderer::running = false;
 Application *Renderer::m_app_pointer = nullptr;
-std::vector<Layer*>* Renderer::m_layer_stack = nullptr;
+Scene* Renderer::m_scene = nullptr;
 
-void Renderer::set_layer_stack(std::vector<Layer*>* layer_stack)
+void Renderer::set_scene(Scene* scene)
 {
-    m_layer_stack = layer_stack;
+    m_scene = scene;
 }
 
 } // namespace mare

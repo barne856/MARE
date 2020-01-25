@@ -48,7 +48,11 @@ void InstancedMesh::render(Layer *layer, Material *material, glm::mat4 parent_mo
 
 void InstancedMesh::render(Layer *layer, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models)
 {
-    // dunno how to render and instanced mesh of an instanced mesh
+    // rendering an instanced mesh of instanced meshes is infeasible and will not reduce draw calls, only render instances of simple meshes or composite meshes consisting only of simple meshes in their mesh trees.
+    for(unsigned int i = 0; i < instance_count; i++)
+    {
+        m_mesh->render(layer, material, (*models)[i]);
+    }
 }
 
 } // namespace mare

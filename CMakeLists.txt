@@ -25,6 +25,7 @@ set(SRC
 ./src/mare/CompositeMesh.cpp
 ./src/mare/Controls.cpp
 ./src/mare/InstancedMesh.cpp
+./src/mare/MareUtility.cpp
 ./src/mare/Material.cpp
 ./src/mare/Mesh.cpp
 ./src/mare/Renderer.cpp

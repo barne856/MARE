@@ -17,7 +17,7 @@ namespace mare
 {
 
 class Application; // forward declaration
-class Layer;       // forward declaration
+class Scene;       // forward declaration
 
 enum class RendererName
 {
@@ -66,8 +66,8 @@ public:
     virtual ~Renderer() {}
     virtual void start_process(Application *app_pointer) = 0;
     static inline void end_process() { running = false; }
-    static void set_layer_stack(std::vector<Layer *> *layer_stack);
-    static std::vector<Layer *> *get_layer_stack() { return m_layer_stack; }
+    static void set_scene(Scene *scene);
+    static Scene *get_scene() { return m_scene; }
     static inline void set_focus(Layer *layer) { input.focus = layer; }
 
     static inline RendererInfo &get_info() { return info; }
@@ -137,7 +137,7 @@ protected:
     static RendererInput input;
     static Application *m_app_pointer;
     static bool running;
-    static std::vector<Layer *> *m_layer_stack;
+    static Scene *m_scene;
 };
 } // namespace mare
 

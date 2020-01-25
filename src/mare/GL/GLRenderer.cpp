@@ -4,7 +4,7 @@
 #include "mare/GL/GLRenderState.hpp"
 #include "mare/Application.hpp"
 #include "mare/SimpleMesh.hpp"
-#include "mare/Layer.hpp"
+#include "mare/Scene.hpp"
 
 // Standard Library
 #include <iostream>
@@ -270,10 +270,10 @@ void GLRenderer::start_process(Application *app_pointer)
         double time = glfwGetTime();
         double delta_time = time - info.current_time;
         m_app_pointer->render(time, delta_time);
-        if (m_layer_stack)
+        if (m_scene)
         {
             bool render_result = true;
-            for (auto &layer : *m_layer_stack)
+            for (auto &layer : *(m_scene->get_layer_stack()) )
             {
                 if (layer->get_camera())
                 {
@@ -282,7 +282,7 @@ void GLRenderer::start_process(Application *app_pointer)
                 render_result = layer->render(time, delta_time);
                 if (!render_result)
                 {
-                    m_layer_stack = nullptr;
+                    m_scene = nullptr;
                     break;
                 }
             }
@@ -420,9 +420,11 @@ Shader *GLRenderer::GenShader(const char *directory)
 void GLRenderer::glfw_onResize(GLFWwindow *window, int w, int h)
 {
     m_app_pointer->resize_window(w, h);
-    if (m_layer_stack)
+    
+    if (m_scene)
     {
-        for (auto &layer : *m_layer_stack)
+        std::vector<Layer*>* layer_stack = m_scene->get_layer_stack();
+        for (auto &layer : *layer_stack)
         {
             if (layer->get_camera())
             {
@@ -432,9 +434,9 @@ void GLRenderer::glfw_onResize(GLFWwindow *window, int w, int h)
         }
 
         bool handled = false;
-        for (size_t i = m_layer_stack->size(); i--;)
+        for (size_t i = layer_stack->size(); i--;)
         {
-            handled = m_layer_stack->at(i)->on_resize(input);
+            handled = layer_stack->at(i)->on_resize(input);
             if (handled)
             {
                 break;
@@ -457,16 +459,17 @@ void GLRenderer::glfw_onKey(GLFWwindow *window, int key, int scancode, int actio
             input.W_PRESSED = false;
         }
     }
-    if (m_layer_stack)
+    if (m_scene)
     {
+        std::vector<Layer*>* layer_stack = m_scene->get_layer_stack();
         bool handled = false;
-        for (size_t i = m_layer_stack->size(); i--;)
+        for (size_t i = layer_stack->size(); i--;)
         {
-            if (m_layer_stack->at(i)->get_camera())
+            if (layer_stack->at(i)->get_camera())
             {
-                m_layer_stack->at(i)->get_camera()->interpret_input();
+                layer_stack->at(i)->get_camera()->interpret_input();
             }
-            handled = m_layer_stack->at(i)->on_key(input);
+            handled = layer_stack->at(i)->on_key(input);
             if (handled)
             {
                 break;
@@ -485,16 +488,17 @@ void GLRenderer::glfw_onMouseButton(GLFWwindow *window, int button, int action, 
     {
         input.mouse_button.set(0, 0);
     }
-    if (m_layer_stack)
+    if (m_scene)
     {
+        std::vector<Layer*>* layer_stack = m_scene->get_layer_stack();
         bool handled = false;
-        for (size_t i = m_layer_stack->size(); i--;)
+        for (size_t i = layer_stack->size(); i--;)
         {
-            if (m_layer_stack->at(i)->get_camera())
+            if (layer_stack->at(i)->get_camera())
             {
-                m_layer_stack->at(i)->get_camera()->interpret_input();
+                layer_stack->at(i)->get_camera()->interpret_input();
             }
-            handled = m_layer_stack->at(i)->on_mouse_button(input);
+            handled = layer_stack->at(i)->on_mouse_button(input);
             if (handled)
             {
                 break;
@@ -508,16 +512,17 @@ void GLRenderer::glfw_onMouseMove(GLFWwindow *window, double x, double y)
     glm::ivec2 old_pos = get_input().mouse_pos;
     get_input().mouse_pos = glm::ivec2(x, y);
     get_input().mouse_vel = glm::ivec2(x, y) - old_pos;
-    if (m_layer_stack)
+    if (m_scene)
     {
+        std::vector<Layer*>* layer_stack = m_scene->get_layer_stack();
         bool handled = false;
-        for (size_t i = m_layer_stack->size(); i--;)
+        for (size_t i = layer_stack->size(); i--;)
         {
-            if (m_layer_stack->at(i)->get_camera())
+            if (layer_stack->at(i)->get_camera())
             {
-                m_layer_stack->at(i)->get_camera()->interpret_input();
+                layer_stack->at(i)->get_camera()->interpret_input();
             }
-            handled = m_layer_stack->at(i)->on_mouse_move(input);
+            handled = layer_stack->at(i)->on_mouse_move(input);
             if (handled)
             {
                 break;
@@ -529,16 +534,17 @@ void GLRenderer::glfw_onMouseMove(GLFWwindow *window, double x, double y)
 
 void GLRenderer::glfw_onMouseWheel(GLFWwindow *window, double xoffset, double yoffset)
 {
-    if (m_layer_stack)
+    if (m_scene)
     {
+        std::vector<Layer*>* layer_stack = m_scene->get_layer_stack();
         bool handled = false;
-        for (size_t i = m_layer_stack->size(); i--;)
+        for (size_t i = layer_stack->size(); i--;)
         {
-            if (m_layer_stack->at(i)->get_camera())
+            if (layer_stack->at(i)->get_camera())
             {
-                m_layer_stack->at(i)->get_camera()->interpret_input();
+                layer_stack->at(i)->get_camera()->interpret_input();
             }
-            handled = m_layer_stack->at(i)->on_mouse_wheel(input);
+            handled = layer_stack->at(i)->on_mouse_wheel(input);
             if (handled)
             {
                 break;

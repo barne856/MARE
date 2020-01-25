@@ -33,7 +33,6 @@ public:
         upload_vec4("light_position", light_position);
     }
 
-protected:
     struct
     {
         glm::vec4 ambient;
