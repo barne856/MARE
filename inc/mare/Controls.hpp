@@ -9,6 +9,7 @@ struct RendererInput; // forward declaration
 
 enum class ControlsConfig
 {
+    NONE,
     ORBITCONTROLS
 };
 

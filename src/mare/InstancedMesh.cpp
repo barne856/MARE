@@ -14,7 +14,14 @@ InstancedMesh::InstancedMesh(unsigned int max_instances)
 
 InstancedMesh::~InstancedMesh()
 {
-    delete[] instance_transforms;
+    if (instance_transforms)
+    {
+        delete[] instance_transforms;
+    }
+    if(m_mesh)
+    {
+        delete m_mesh;
+    }
 }
 
 void InstancedMesh::push_instance(glm::mat4 model)
@@ -24,17 +31,22 @@ void InstancedMesh::push_instance(glm::mat4 model)
     instance_count++;
 }
 
-void InstancedMesh::render(Material *material)
+void InstancedMesh::update_instance(unsigned int index, glm::mat4 model)
 {
-    m_mesh->render(material, transform, instance_count, instance_transforms);
+    instance_transforms->update(&model, (size_t)sizeof(glm::mat4), (unsigned int)(index*sizeof(glm::mat4)));
 }
 
-void InstancedMesh::render(Material *material, glm::mat4 parent_model)
+void InstancedMesh::render(Layer *layer, Material *material)
 {
-    m_mesh->render(material, parent_model * transform, instance_count, instance_transforms);
+    m_mesh->render(layer, material, transform, instance_count, instance_transforms);
 }
 
-void InstancedMesh::render(Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models)
+void InstancedMesh::render(Layer *layer, Material *material, glm::mat4 parent_model)
+{
+    m_mesh->render(layer, material, parent_model * transform, instance_count, instance_transforms);
+}
+
+void InstancedMesh::render(Layer *layer, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models)
 {
     // dunno how to render and instanced mesh of an instanced mesh
 }

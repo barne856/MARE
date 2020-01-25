@@ -26,19 +26,19 @@ SimpleMesh<T>::~SimpleMesh()
     delete render_state;
 }
 template <typename T>
-void SimpleMesh<T>::render(Material *material)
+void SimpleMesh<T>::render(Layer* layer, Material *material)
 {
-    Application::render_mesh(this, material);
+    Application::render_mesh(layer, this, material);
 }
 template <typename T>
-void SimpleMesh<T>::render(Material *material, glm::mat4 parent_model)
+void SimpleMesh<T>::render(Layer* layer, Material *material, glm::mat4 parent_model)
 {
-    Application::render_mesh(this, material, parent_model);
+    Application::render_mesh(layer, this, material, parent_model);
 }
 template <typename T>
-void SimpleMesh<T>::render(Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models)
+void SimpleMesh<T>::render(Layer* layer, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models)
 {
-    Application::render_mesh(this, material, parent_model, instance_count, models);
+    Application::render_mesh(layer, this, material, parent_model, instance_count, models);
 }
 
 template class SimpleMesh<float>;

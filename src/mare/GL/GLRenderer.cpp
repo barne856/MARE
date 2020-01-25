@@ -4,6 +4,7 @@
 #include "mare/GL/GLRenderState.hpp"
 #include "mare/Application.hpp"
 #include "mare/SimpleMesh.hpp"
+#include "mare/Layer.hpp"
 
 // Standard Library
 #include <iostream>
@@ -39,14 +40,14 @@ GLenum GLDrawMethod(DrawMethod draw_method)
 // Meshes
 // normal rendering
 template <typename T>
-void render_mesh(SimpleMesh<T> *mesh, Material *material)
+void render_mesh(Layer *layer, SimpleMesh<T> *mesh, Material *material)
 {
     mesh->bind();
     material->bind();
-    if (Application::get_camera())
+    if (layer->get_camera())
     {
-        material->upload_mat4("projection", Application::get_camera()->projection());
-        material->upload_mat4("view", Application::get_camera()->view());
+        material->upload_mat4("projection", layer->get_camera()->projection());
+        material->upload_mat4("view", layer->get_camera()->view());
     }
     material->upload_mat4("model", mesh->get_model());
     if (mesh->get_state()->is_indexed())
@@ -60,14 +61,14 @@ void render_mesh(SimpleMesh<T> *mesh, Material *material)
 }
 // composite rendering
 template <typename T>
-void render_mesh(SimpleMesh<T> *mesh, Material *material, glm::mat4 parent_model)
+void render_mesh(Layer *layer, SimpleMesh<T> *mesh, Material *material, glm::mat4 parent_model)
 {
     mesh->bind();
     material->bind();
-    if (Application::get_camera())
+    if (layer->get_camera())
     {
-        material->upload_mat4("projection", Application::get_camera()->projection());
-        material->upload_mat4("view", Application::get_camera()->view());
+        material->upload_mat4("projection", layer->get_camera()->projection());
+        material->upload_mat4("view", layer->get_camera()->view());
     }
     material->upload_mat4("model", parent_model * mesh->get_model());
     if (mesh->get_state()->is_indexed())
@@ -81,14 +82,14 @@ void render_mesh(SimpleMesh<T> *mesh, Material *material, glm::mat4 parent_model
 }
 // instanced rendering
 template <typename T>
-void render_mesh(SimpleMesh<T> *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models)
+void render_mesh(Layer *layer, SimpleMesh<T> *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models)
 {
     mesh->bind();
     material->bind();
-    if (Application::get_camera())
+    if (layer->get_camera())
     {
-        material->upload_mat4("projection", Application::get_camera()->projection());
-        material->upload_mat4("view", Application::get_camera()->view());
+        material->upload_mat4("projection", layer->get_camera()->projection());
+        material->upload_mat4("view", layer->get_camera()->view());
     }
     material->upload_mat4("model", parent_model * mesh->get_model());
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, models->name());
@@ -268,11 +269,16 @@ void GLRenderer::start_process(Application *app_pointer)
     {
         double time = glfwGetTime();
         double delta_time = time - info.current_time;
+        m_app_pointer->render(time, delta_time);
         if (m_layer_stack)
         {
             bool render_result = true;
             for (auto &layer : *m_layer_stack)
             {
+                if (layer->get_camera())
+                {
+                    layer->get_camera()->render(delta_time);
+                }
                 render_result = layer->render(time, delta_time);
                 if (!render_result)
                 {
@@ -281,11 +287,7 @@ void GLRenderer::start_process(Application *app_pointer)
                 }
             }
         }
-        m_app_pointer->render(time, delta_time);
-        if (m_camera_pointer)
-        {
-            m_camera_pointer->render(delta_time);
-        }
+
         info.current_time = time;
         glfwPollEvents();
         glfwSwapBuffers(window);
@@ -360,53 +362,53 @@ RenderState<glm::vec4> *GLRenderer::GenVec4RenderState()
 }
 
 // Render Meshes
-void GLRenderer::render_float_mesh(SimpleMesh<float> *mesh, Material *material)
+void GLRenderer::render_float_mesh(Layer *layer, SimpleMesh<float> *mesh, Material *material)
 {
-    GL::render_mesh(mesh, material);
+    GL::render_mesh(layer, mesh, material);
 }
-void GLRenderer::render_float_mesh(SimpleMesh<float> *mesh, Material *material, glm::mat4 parent_model)
+void GLRenderer::render_float_mesh(Layer *layer, SimpleMesh<float> *mesh, Material *material, glm::mat4 parent_model)
 {
-    GL::render_mesh(mesh, material, parent_model);
+    GL::render_mesh(layer, mesh, material, parent_model);
 }
-void GLRenderer::render_float_mesh(SimpleMesh<float> *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models)
+void GLRenderer::render_float_mesh(Layer *layer, SimpleMesh<float> *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models)
 {
-    GL::render_mesh(mesh, material, parent_model, instance_count, models);
+    GL::render_mesh(layer, mesh, material, parent_model, instance_count, models);
 }
-void GLRenderer::render_vec2_mesh(SimpleMesh<glm::vec2> *mesh, Material *material)
+void GLRenderer::render_vec2_mesh(Layer *layer, SimpleMesh<glm::vec2> *mesh, Material *material)
 {
-    GL::render_mesh(mesh, material);
+    GL::render_mesh(layer, mesh, material);
 }
-void GLRenderer::render_vec2_mesh(SimpleMesh<glm::vec2> *mesh, Material *material, glm::mat4 parent_model)
+void GLRenderer::render_vec2_mesh(Layer *layer, SimpleMesh<glm::vec2> *mesh, Material *material, glm::mat4 parent_model)
 {
-    GL::render_mesh(mesh, material, parent_model);
+    GL::render_mesh(layer, mesh, material, parent_model);
 }
-void GLRenderer::render_vec2_mesh(SimpleMesh<glm::vec2> *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models)
+void GLRenderer::render_vec2_mesh(Layer *layer, SimpleMesh<glm::vec2> *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models)
 {
-    GL::render_mesh(mesh, material, parent_model, instance_count, models);
+    GL::render_mesh(layer, mesh, material, parent_model, instance_count, models);
 }
-void GLRenderer::render_vec3_mesh(SimpleMesh<glm::vec3> *mesh, Material *material)
+void GLRenderer::render_vec3_mesh(Layer *layer, SimpleMesh<glm::vec3> *mesh, Material *material)
 {
-    GL::render_mesh(mesh, material);
+    GL::render_mesh(layer, mesh, material);
 }
-void GLRenderer::render_vec3_mesh(SimpleMesh<glm::vec3> *mesh, Material *material, glm::mat4 parent_model)
+void GLRenderer::render_vec3_mesh(Layer *layer, SimpleMesh<glm::vec3> *mesh, Material *material, glm::mat4 parent_model)
 {
-    GL::render_mesh(mesh, material, parent_model);
+    GL::render_mesh(layer, mesh, material, parent_model);
 }
-void GLRenderer::render_vec3_mesh(SimpleMesh<glm::vec3> *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models)
+void GLRenderer::render_vec3_mesh(Layer *layer, SimpleMesh<glm::vec3> *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models)
 {
-    GL::render_mesh(mesh, material, parent_model, instance_count, models);
+    GL::render_mesh(layer, mesh, material, parent_model, instance_count, models);
 }
-void GLRenderer::render_vec4_mesh(SimpleMesh<glm::vec4> *mesh, Material *material)
+void GLRenderer::render_vec4_mesh(Layer *layer, SimpleMesh<glm::vec4> *mesh, Material *material)
 {
-    GL::render_mesh(mesh, material);
+    GL::render_mesh(layer, mesh, material);
 }
-void GLRenderer::render_vec4_mesh(SimpleMesh<glm::vec4> *mesh, Material *material, glm::mat4 parent_model)
+void GLRenderer::render_vec4_mesh(Layer *layer, SimpleMesh<glm::vec4> *mesh, Material *material, glm::mat4 parent_model)
 {
-    GL::render_mesh(mesh, material, parent_model);
+    GL::render_mesh(layer, mesh, material, parent_model);
 }
-void GLRenderer::render_vec4_mesh(SimpleMesh<glm::vec4> *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models)
+void GLRenderer::render_vec4_mesh(Layer *layer, SimpleMesh<glm::vec4> *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models)
 {
-    GL::render_mesh(mesh, material, parent_model, instance_count, models);
+    GL::render_mesh(layer, mesh, material, parent_model, instance_count, models);
 }
 
 Shader *GLRenderer::GenShader(const char *directory)
@@ -418,10 +420,26 @@ Shader *GLRenderer::GenShader(const char *directory)
 void GLRenderer::glfw_onResize(GLFWwindow *window, int w, int h)
 {
     m_app_pointer->resize_window(w, h);
-    if (m_camera_pointer)
+    if (m_layer_stack)
     {
-        m_camera_pointer->set_aspect(info.window_aspect);
-        m_camera_pointer->recalculate_projection();
+        for (auto &layer : *m_layer_stack)
+        {
+            if (layer->get_camera())
+            {
+                layer->get_camera()->set_aspect(info.window_aspect);
+                layer->get_camera()->recalculate_projection();
+            }
+        }
+
+        bool handled = false;
+        for (size_t i = m_layer_stack->size(); i--;)
+        {
+            handled = m_layer_stack->at(i)->on_resize(input);
+            if (handled)
+            {
+                break;
+            }
+        }
     }
 }
 
@@ -444,6 +462,10 @@ void GLRenderer::glfw_onKey(GLFWwindow *window, int key, int scancode, int actio
         bool handled = false;
         for (size_t i = m_layer_stack->size(); i--;)
         {
+            if (m_layer_stack->at(i)->get_camera())
+            {
+                m_layer_stack->at(i)->get_camera()->interpret_input();
+            }
             handled = m_layer_stack->at(i)->on_key(input);
             if (handled)
             {
@@ -463,15 +485,15 @@ void GLRenderer::glfw_onMouseButton(GLFWwindow *window, int button, int action, 
     {
         input.mouse_button.set(0, 0);
     }
-    if (m_camera_pointer)
-    {
-        m_camera_pointer->interpret_input();
-    }
     if (m_layer_stack)
     {
         bool handled = false;
         for (size_t i = m_layer_stack->size(); i--;)
         {
+            if (m_layer_stack->at(i)->get_camera())
+            {
+                m_layer_stack->at(i)->get_camera()->interpret_input();
+            }
             handled = m_layer_stack->at(i)->on_mouse_button(input);
             if (handled)
             {
@@ -486,15 +508,15 @@ void GLRenderer::glfw_onMouseMove(GLFWwindow *window, double x, double y)
     glm::ivec2 old_pos = get_input().mouse_pos;
     get_input().mouse_pos = glm::ivec2(x, y);
     get_input().mouse_vel = glm::ivec2(x, y) - old_pos;
-    if (m_camera_pointer)
-    {
-        m_camera_pointer->interpret_input();
-    }
     if (m_layer_stack)
     {
         bool handled = false;
         for (size_t i = m_layer_stack->size(); i--;)
         {
+            if (m_layer_stack->at(i)->get_camera())
+            {
+                m_layer_stack->at(i)->get_camera()->interpret_input();
+            }
             handled = m_layer_stack->at(i)->on_mouse_move(input);
             if (handled)
             {
@@ -512,6 +534,10 @@ void GLRenderer::glfw_onMouseWheel(GLFWwindow *window, double xoffset, double yo
         bool handled = false;
         for (size_t i = m_layer_stack->size(); i--;)
         {
+            if (m_layer_stack->at(i)->get_camera())
+            {
+                m_layer_stack->at(i)->get_camera()->interpret_input();
+            }
             handled = m_layer_stack->at(i)->on_mouse_wheel(input);
             if (handled)
             {

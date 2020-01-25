@@ -57,6 +57,7 @@ struct RendererInput
     glm::ivec2 mouse_pos{};        // window coordinates of mouse position (in pixels from top left corner)
     glm::ivec2 mouse_vel{};        // window coordinates of mouse velocity (in pixels from top left corner)
     bool W_PRESSED = false;
+    Layer *focus = nullptr;
 };
 
 class Renderer
@@ -65,13 +66,12 @@ public:
     virtual ~Renderer() {}
     virtual void start_process(Application *app_pointer) = 0;
     static inline void end_process() { running = false; }
-    static inline void set_camera(Camera *camera) { m_camera_pointer = camera; }
     static void set_layer_stack(std::vector<Layer *> *layer_stack);
     static std::vector<Layer *> *get_layer_stack() { return m_layer_stack; }
+    static inline void set_focus(Layer *layer) { input.focus = layer; }
 
     static inline RendererInfo &get_info() { return info; }
     static inline RendererInput &get_input() { return input; }
-    static inline Camera *get_camera() { return m_camera_pointer; }
 
     // Renderer Commands
     virtual void set_window_title(const char *title) = 0;
@@ -102,18 +102,18 @@ public:
     virtual RenderState<glm::vec4> *GenVec4RenderState() = 0;
 
     // Rendering Meshes
-    virtual void render_float_mesh(SimpleMesh<float> *mesh, Material *material) = 0;
-    virtual void render_float_mesh(SimpleMesh<float> *mesh, Material *material, glm::mat4 parent_model) = 0;
-    virtual void render_float_mesh(SimpleMesh<float> *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models) = 0;
-    virtual void render_vec2_mesh(SimpleMesh<glm::vec2> *mesh, Material *material) = 0;
-    virtual void render_vec2_mesh(SimpleMesh<glm::vec2> *mesh, Material *material, glm::mat4 parent_model) = 0;
-    virtual void render_vec2_mesh(SimpleMesh<glm::vec2> *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models) = 0;
-    virtual void render_vec3_mesh(SimpleMesh<glm::vec3> *mesh, Material *material) = 0;
-    virtual void render_vec3_mesh(SimpleMesh<glm::vec3> *mesh, Material *material, glm::mat4 parent_model) = 0;
-    virtual void render_vec3_mesh(SimpleMesh<glm::vec3> *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models) = 0;
-    virtual void render_vec4_mesh(SimpleMesh<glm::vec4> *mesh, Material *material) = 0;
-    virtual void render_vec4_mesh(SimpleMesh<glm::vec4> *mesh, Material *material, glm::mat4 parent_model) = 0;
-    virtual void render_vec4_mesh(SimpleMesh<glm::vec4> *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models) = 0;
+    virtual void render_float_mesh(Layer *layer, SimpleMesh<float> *mesh, Material *material) = 0;
+    virtual void render_float_mesh(Layer *layer, SimpleMesh<float> *mesh, Material *material, glm::mat4 parent_model) = 0;
+    virtual void render_float_mesh(Layer *layer, SimpleMesh<float> *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models) = 0;
+    virtual void render_vec2_mesh(Layer *layer, SimpleMesh<glm::vec2> *mesh, Material *material) = 0;
+    virtual void render_vec2_mesh(Layer *layer, SimpleMesh<glm::vec2> *mesh, Material *material, glm::mat4 parent_model) = 0;
+    virtual void render_vec2_mesh(Layer *layer, SimpleMesh<glm::vec2> *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models) = 0;
+    virtual void render_vec3_mesh(Layer *layer, SimpleMesh<glm::vec3> *mesh, Material *material) = 0;
+    virtual void render_vec3_mesh(Layer *layer, SimpleMesh<glm::vec3> *mesh, Material *material, glm::mat4 parent_model) = 0;
+    virtual void render_vec3_mesh(Layer *layer, SimpleMesh<glm::vec3> *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models) = 0;
+    virtual void render_vec4_mesh(Layer *layer, SimpleMesh<glm::vec4> *mesh, Material *material) = 0;
+    virtual void render_vec4_mesh(Layer *layer, SimpleMesh<glm::vec4> *mesh, Material *material, glm::mat4 parent_model) = 0;
+    virtual void render_vec4_mesh(Layer *layer, SimpleMesh<glm::vec4> *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models) = 0;
 
     // Shaders
     virtual Shader *GenShader(const char *directory) = 0;
@@ -136,7 +136,6 @@ protected:
     static RendererInfo info;
     static RendererInput input;
     static Application *m_app_pointer;
-    static Camera *m_camera_pointer;
     static bool running;
     static std::vector<Layer *> *m_layer_stack;
 };

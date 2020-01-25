@@ -11,16 +11,16 @@
 
 namespace mare
 {
-
+class Layer; // forward declaration
 class Mesh
 {
 public:
     Mesh() : translation(glm::vec3(0.0f)), rotation(glm::mat4(1.0f)), scale(glm::vec3(1.0f)), transform(glm::mat4(1.0f)) {}
     virtual ~Mesh() {}
 
-    virtual void render(Material *material) = 0;
-    virtual void render(Material *material, glm::mat4 parent_model) = 0;
-    virtual void render(Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models) = 0;
+    virtual void render(Layer* layer, Material *material) = 0;
+    virtual void render(Layer* layer, Material *material, glm::mat4 parent_model) = 0;
+    virtual void render(Layer* layer, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models) = 0;
     void translate(glm::vec3 translation);
     void set_position(glm::vec3 position);
     void rotate(glm::vec3 axis, float angle);

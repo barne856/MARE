@@ -111,18 +111,18 @@ protected:
     RenderState<glm::vec4> *GenVec4RenderState() override;
 
     // Meshes
-    void render_float_mesh(SimpleMesh<float> *mesh, Material *material) override;
-    void render_float_mesh(SimpleMesh<float> *mesh, Material *material, glm::mat4 parent_model) override;
-    void render_float_mesh(SimpleMesh<float> *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models) override;
-    void render_vec2_mesh(SimpleMesh<glm::vec2> *mesh, Material *material) override;
-    void render_vec2_mesh(SimpleMesh<glm::vec2> *mesh, Material *material, glm::mat4 parent_model) override;
-    void render_vec2_mesh(SimpleMesh<glm::vec2> *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models) override;
-    void render_vec3_mesh(SimpleMesh<glm::vec3> *mesh, Material *material) override;
-    void render_vec3_mesh(SimpleMesh<glm::vec3> *mesh, Material *material, glm::mat4 parent_model) override;
-    void render_vec3_mesh(SimpleMesh<glm::vec3> *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models) override;
-    void render_vec4_mesh(SimpleMesh<glm::vec4> *mesh, Material *material) override;
-    void render_vec4_mesh(SimpleMesh<glm::vec4> *mesh, Material *material, glm::mat4 parent_model) override;
-    void render_vec4_mesh(SimpleMesh<glm::vec4> *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models) override;
+    void render_float_mesh(Layer* layer, SimpleMesh<float> *mesh, Material *material) override;
+    void render_float_mesh(Layer* layer, SimpleMesh<float> *mesh, Material *material, glm::mat4 parent_model) override;
+    void render_float_mesh(Layer* layer, SimpleMesh<float> *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models) override;
+    void render_vec2_mesh(Layer* layer, SimpleMesh<glm::vec2> *mesh, Material *material) override;
+    void render_vec2_mesh(Layer* layer, SimpleMesh<glm::vec2> *mesh, Material *material, glm::mat4 parent_model) override;
+    void render_vec2_mesh(Layer* layer, SimpleMesh<glm::vec2> *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models) override;
+    void render_vec3_mesh(Layer* layer, SimpleMesh<glm::vec3> *mesh, Material *material) override;
+    void render_vec3_mesh(Layer* layer, SimpleMesh<glm::vec3> *mesh, Material *material, glm::mat4 parent_model) override;
+    void render_vec3_mesh(Layer* layer, SimpleMesh<glm::vec3> *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models) override;
+    void render_vec4_mesh(Layer* layer, SimpleMesh<glm::vec4> *mesh, Material *material) override;
+    void render_vec4_mesh(Layer* layer, SimpleMesh<glm::vec4> *mesh, Material *material, glm::mat4 parent_model) override;
+    void render_vec4_mesh(Layer* layer, SimpleMesh<glm::vec4> *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models) override;
 
 
     //template <typename T>

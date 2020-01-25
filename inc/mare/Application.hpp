@@ -2,7 +2,7 @@
 #define APPLICATION
 
 // MARE
-#include "mare/Layer.hpp"
+#include "mare/Renderer.hpp"
 
 namespace mare
 {
@@ -21,7 +21,6 @@ public:
     static inline Application *get_app() { return m_app_pointer; }
     static inline RendererInfo &get_info() { return m_renderer_pointer->get_info(); }
     static inline RendererInput &get_input() { return m_renderer_pointer->get_input(); }
-    static inline Camera *get_camera() { return m_renderer_pointer->get_camera(); }
     static inline void set_window_title(const char *title)
     {
         m_renderer_pointer->set_window_title(title);
@@ -29,10 +28,6 @@ public:
     static inline void resize_window(int width, int height)
     {
         m_renderer_pointer->resize_window(width, height);
-    }
-    static inline void set_camera(Camera *camera)
-    {
-        Renderer::set_camera(camera);
     }
     static inline void set_layer_stack(std::vector<Layer *> *layer_stack)
     {
@@ -62,6 +57,10 @@ public:
     static inline void enable_face_culling(bool enable)
     {
         m_renderer_pointer->enable_face_culling(enable);
+    }
+    static inline void set_focus(Layer* layer)
+    {
+        m_renderer_pointer->set_focus(layer);
     }
 
     // Buffers
@@ -150,70 +149,70 @@ public:
 
     // Meshes
     template <typename T>
-    static void render_mesh(SimpleMesh<T> *mesh, Material *material) {}
+    static void render_mesh(Layer* layer, SimpleMesh<T> *mesh, Material *material) {}
     template <>
-    static void render_mesh<float>(SimpleMesh<float> *mesh, Material *material)
+    static void render_mesh<float>(Layer* layer, SimpleMesh<float> *mesh, Material *material)
     {
-        m_renderer_pointer->render_float_mesh(mesh, material);
+        m_renderer_pointer->render_float_mesh(layer, mesh, material);
     }
     template <>
-    static void render_mesh<glm::vec2>(SimpleMesh<glm::vec2> *mesh, Material *material)
+    static void render_mesh<glm::vec2>(Layer* layer, SimpleMesh<glm::vec2> *mesh, Material *material)
     {
-        m_renderer_pointer->render_vec2_mesh(mesh, material);
+        m_renderer_pointer->render_vec2_mesh(layer, mesh, material);
     }
     template <>
-    static void render_mesh<glm::vec3>(SimpleMesh<glm::vec3> *mesh, Material *material)
+    static void render_mesh<glm::vec3>(Layer* layer, SimpleMesh<glm::vec3> *mesh, Material *material)
     {
-        m_renderer_pointer->render_vec3_mesh(mesh, material);
+        m_renderer_pointer->render_vec3_mesh(layer, mesh, material);
     }
     template <>
-    static void render_mesh<glm::vec4>(SimpleMesh<glm::vec4> *mesh, Material *material)
+    static void render_mesh<glm::vec4>(Layer* layer, SimpleMesh<glm::vec4> *mesh, Material *material)
     {
-        m_renderer_pointer->render_vec4_mesh(mesh, material);
-    }
-    template <typename T>
-    static void render_mesh(SimpleMesh<T> *mesh, Material *material, glm::mat4 parent_model) {}
-    template <>
-    static void render_mesh<float>(SimpleMesh<float> *mesh, Material *material, glm::mat4 parent_model)
-    {
-        m_renderer_pointer->render_float_mesh(mesh, material, parent_model);
-    }
-    template <>
-    static void render_mesh<glm::vec2>(SimpleMesh<glm::vec2> *mesh, Material *material, glm::mat4 parent_model)
-    {
-        m_renderer_pointer->render_vec2_mesh(mesh, material, parent_model);
-    }
-    template <>
-    static void render_mesh<glm::vec3>(SimpleMesh<glm::vec3> *mesh, Material *material, glm::mat4 parent_model)
-    {
-        m_renderer_pointer->render_vec3_mesh(mesh, material, parent_model);
-    }
-    template <>
-    static void render_mesh<glm::vec4>(SimpleMesh<glm::vec4> *mesh, Material *material, glm::mat4 parent_model)
-    {
-        m_renderer_pointer->render_vec4_mesh(mesh, material, parent_model);
+        m_renderer_pointer->render_vec4_mesh(layer, mesh, material);
     }
     template <typename T>
-    static void render_mesh(SimpleMesh<T> *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models) {}
+    static void render_mesh(Layer* layer, SimpleMesh<T> *mesh, Material *material, glm::mat4 parent_model) {}
     template <>
-    static void render_mesh<float>(SimpleMesh<float> *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models)
+    static void render_mesh<float>(Layer* layer, SimpleMesh<float> *mesh, Material *material, glm::mat4 parent_model)
     {
-        m_renderer_pointer->render_float_mesh(mesh, material, parent_model, instance_count, models);
+        m_renderer_pointer->render_float_mesh(layer, mesh, material, parent_model);
     }
     template <>
-    static void render_mesh<glm::vec2>(SimpleMesh<glm::vec2> *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models)
+    static void render_mesh<glm::vec2>(Layer* layer, SimpleMesh<glm::vec2> *mesh, Material *material, glm::mat4 parent_model)
     {
-        m_renderer_pointer->render_vec2_mesh(mesh, material, parent_model, instance_count, models);
+        m_renderer_pointer->render_vec2_mesh(layer, mesh, material, parent_model);
     }
     template <>
-    static void render_mesh<glm::vec3>(SimpleMesh<glm::vec3> *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models)
+    static void render_mesh<glm::vec3>(Layer* layer, SimpleMesh<glm::vec3> *mesh, Material *material, glm::mat4 parent_model)
     {
-        m_renderer_pointer->render_vec3_mesh(mesh, material, parent_model, instance_count, models);
+        m_renderer_pointer->render_vec3_mesh(layer, mesh, material, parent_model);
     }
     template <>
-    static void render_mesh<glm::vec4>(SimpleMesh<glm::vec4> *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models)
+    static void render_mesh<glm::vec4>(Layer* layer, SimpleMesh<glm::vec4> *mesh, Material *material, glm::mat4 parent_model)
     {
-        m_renderer_pointer->render_vec4_mesh(mesh, material, parent_model, instance_count, models);
+        m_renderer_pointer->render_vec4_mesh(layer, mesh, material, parent_model);
+    }
+    template <typename T>
+    static void render_mesh(Layer* layer, SimpleMesh<T> *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models) {}
+    template <>
+    static void render_mesh<float>(Layer* layer, SimpleMesh<float> *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models)
+    {
+        m_renderer_pointer->render_float_mesh(layer, mesh, material, parent_model, instance_count, models);
+    }
+    template <>
+    static void render_mesh<glm::vec2>(Layer* layer, SimpleMesh<glm::vec2> *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models)
+    {
+        m_renderer_pointer->render_vec2_mesh(layer, mesh, material, parent_model, instance_count, models);
+    }
+    template <>
+    static void render_mesh<glm::vec3>(Layer* layer, SimpleMesh<glm::vec3> *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models)
+    {
+        m_renderer_pointer->render_vec3_mesh(layer, mesh, material, parent_model, instance_count, models);
+    }
+    template <>
+    static void render_mesh<glm::vec4>(Layer* layer, SimpleMesh<glm::vec4> *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models)
+    {
+        m_renderer_pointer->render_vec4_mesh(layer, mesh, material, parent_model, instance_count, models);
     }
 
     // Materials

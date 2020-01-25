@@ -25,11 +25,13 @@ public:
         if (m_controls)
         {
             delete m_controls;
+            m_controls = nullptr;
         }
     }
 
     glm::mat4 inline projection() const { return m_projection; }
     glm::mat4 inline view() const { return m_view; }
+    glm::vec3 screen_to_world(glm::ivec2 screen_coords);
 
     void set_controls(ControlsConfig config)
     {
@@ -45,7 +47,7 @@ public:
             m_controls = new OrbitControls();
             break;
         default:
-            m_controls = new OrbitControls();
+            m_controls = nullptr;
             break;
         }
     }
@@ -144,8 +146,8 @@ private:
 
     float m_scale = 1.0f;
     float m_aspect = 1.0f;
-    float m_near = 0.01f;
-    float m_far = 1000.0f;
+    float m_near = -1.0f;
+    float m_far = 1.0f;
     float m_fovy = 45.0f;
     float m_distance_to_center = 1.0f;
 

@@ -15,9 +15,9 @@ public:
     SimpleMesh();
     ~SimpleMesh();
 
-    void render(Material *material) override;
-    void render(Material *material, glm::mat4 parent_model) override;
-    void render(Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models) override;
+    void render(Layer* layer, Material *material) override;
+    void render(Layer* layer, Material *material, glm::mat4 parent_model) override;
+    void render(Layer* layer, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models) override;
 
     inline void bind() const { render_state->bind(); }
     inline RenderState<T> *get_state() const { return render_state; }
