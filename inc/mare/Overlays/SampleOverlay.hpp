@@ -25,6 +25,7 @@ public:
         // Create Widgets
         push_widget(new SliderUI(this));
         on_resize(Application::get_input());
+        get_widget(0)->set_value(0.5f);
     }
 
 

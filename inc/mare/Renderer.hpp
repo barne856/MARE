@@ -10,6 +10,7 @@
 #include "mare/Buffer.hpp"
 #include "mare/RenderState.hpp"
 #include "mare/Material.hpp"
+#include "mare/Texture.hpp"
 // External Libraries
 #include "glm.hpp"
 
@@ -82,6 +83,7 @@ public:
     virtual void enable_depth_testing(bool enable) = 0;
     virtual void clear_depth_buffer() = 0;
     virtual void enable_face_culling(bool enable) = 0;
+    virtual void enable_blending(bool enable) = 0;
 
     // Buffers
     virtual Buffer<float> *GenFloatBuffer(unsigned int count) = 0;
@@ -117,6 +119,9 @@ public:
 
     // Shaders
     virtual Shader *GenShader(const char *directory) = 0;
+
+    // Textures
+    virtual Texture* GenTexture(const char* image_filepath) = 0;
 
     // Coordinate conversions
     // get normalized device coordinates from window coordinates

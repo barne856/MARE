@@ -62,6 +62,10 @@ public:
     {
         m_renderer_pointer->enable_face_culling(enable);
     }
+    static inline void enable_blending(bool enable)
+    {
+        m_renderer_pointer->enable_blending(enable);
+    }
     static inline void set_focus(Layer* layer)
     {
         m_renderer_pointer->set_focus(layer);
@@ -219,10 +223,16 @@ public:
         m_renderer_pointer->render_vec4_mesh(layer, mesh, material, parent_model, instance_count, models);
     }
 
-    // Materials
+    // Shaders
     static Shader *GenShader(const char *directory)
     {
         return m_renderer_pointer->GenShader(directory);
+    }
+
+    // Textures
+    static Texture* GenTexture(const char* image_filepath)
+    {
+        return m_renderer_pointer->GenTexture(image_filepath);
     }
 
     // Application main functions

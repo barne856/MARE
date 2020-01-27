@@ -1,6 +1,7 @@
 #include "mare/GL/GLRenderer.hpp"
 #include "mare/GL/GLBuffer.hpp"
 #include "mare/GL/GLShader.hpp"
+#include "mare/GL/GLTexture.hpp"
 #include "mare/GL/GLRenderState.hpp"
 #include "mare/Application.hpp"
 #include "mare/SimpleMesh.hpp"
@@ -414,6 +415,11 @@ void GLRenderer::render_vec4_mesh(Layer *layer, SimpleMesh<glm::vec4> *mesh, Mat
 Shader *GLRenderer::GenShader(const char *directory)
 {
     return new GLShader(directory);
+}
+
+Texture* GLRenderer::GenTexture(const char* image_filepath)
+{
+    return new GLTexture(image_filepath);
 }
 
 // Renderer callback functions

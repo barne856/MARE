@@ -8,7 +8,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-include_directories("./inc" "./ext/glfw/include" "./ext/glew-2.1.0/include" "./ext/glm/glm")
+include_directories("./inc" "./ext/glfw/include" "./ext/glew-2.1.0/include" "./ext/glm/glm" "./ext/loaders/stb")
 
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
@@ -33,7 +33,8 @@ set(SRC
 ./src/mare/GL/GLBuffer.cpp
 ./src/mare/GL/GLRenderer.cpp
 ./src/mare/GL/GLRenderState.cpp
-./src/mare/GL/GLShader.cpp)
+./src/mare/GL/GLShader.cpp
+./src/mare/GL/GLTexture.cpp)
 
 add_executable(APP ${SRC})
 # UNIX libraries

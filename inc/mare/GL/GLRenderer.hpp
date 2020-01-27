@@ -91,6 +91,18 @@ protected:
             glDisable(GL_CULL_FACE);
         }
     }
+    void enable_blending(bool enable)
+    {
+        if (enable)
+        {
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        }
+        else
+        {
+            glDisable(GL_BLEND);
+        }
+    }
 
     // Buffers
     Buffer<float> *GenFloatBuffer(unsigned int count) override;
@@ -127,6 +139,9 @@ protected:
 
     // Shaders
     Shader *GenShader(const char *directory) override;
+
+    // Textures
+    Texture* GenTexture(const char* image_filepath) override;
 
 private:
     static GLFWwindow *window;

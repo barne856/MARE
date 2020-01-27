@@ -5,7 +5,9 @@
 
 #include "mare/Scene.hpp"
 #include "mare/Objects/MareTextObject.hpp"
+#include "mare/Meshes/TorusMesh.hpp"
 #include "mare/Overlays/SampleOverlay.hpp"
+#include "mare/Materials/PhongMaterial.hpp"
 
 namespace mare
 {
@@ -21,6 +23,8 @@ public:
 
         // create objects
         mare_text = new MareTextObject();
+        torus = new TorusMesh(100, 200, 0.1f, 0.2f);
+        material = new PhongMaterial();
 
         // Push overlays to the layer stack
         push_layer(new SampleOverlay());
@@ -28,6 +32,8 @@ public:
     ~SampleScene()
     {
         delete mare_text;
+        delete material;
+        delete torus;
         mare_text = nullptr;
     }
 
@@ -39,10 +45,16 @@ public:
 
         // get UI values
         float v = std::get<float>(get_widget_value(0, 0));
-        mare_text->set_light_intensity(v);
+        torus->set_scale(glm::vec3(2.0f * v + 0.05f));
+        //material->light.ambient = glm::vec4(glm::vec3(v), 1.0f);
+        //material->light.diffuse = glm::vec4(glm::vec3(v), 1.0f);
+        //material->light.specular = glm::vec4(glm::vec3(v), 1.0f);
 
         // Render objects
-        mare_text->render(this);
+        //mare_text->render(this);
+        material->bind();
+        material->render();
+        torus->render(this, material);
 
         // Run forever
         return true;
@@ -73,6 +85,8 @@ public:
 private:
     // Objects
     MareTextObject *mare_text = nullptr;
+    TorusMesh *torus = nullptr;
+    PhongMaterial *material = nullptr;
     bool wireframe = false;
 };
 } // namespace mare

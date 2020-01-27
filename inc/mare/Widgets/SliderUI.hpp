@@ -55,6 +55,11 @@ public:
         }
         return false;
     }
+    void set_value(widget_value value) override
+    {
+        this->value = value;
+        slider_mesh->update_instance(0, glm::translate(glm::mat4(1.0f), {std::get<float>(value) - 0.5f, 0.0f, 0.0f}) * glm::scale(glm::mat4(1.0f), glm::vec3(0.1f)));
+    }
 
 private:
     QuadrangleMesh *quad_mesh;

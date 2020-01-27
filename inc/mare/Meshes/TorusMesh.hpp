@@ -16,6 +16,7 @@ public:
     {
         std::vector<glm::vec3> vertices;
         std::vector<glm::vec3> normals;
+        std::vector<glm::vec3> texcoords;
         std::vector<unsigned int> indices;
         render_state->set_draw_method(DrawMethod::TRIANGLE_STRIP);
 
@@ -49,7 +50,7 @@ public:
 
                 vertices.push_back(glm::vec3(x, y, z));
                 normals.push_back(glm::vec3(nx, ny, nz));
-                //texcoords.push_back(glm::vec2(u, v));
+                texcoords.push_back(glm::vec3(u, v, 0.0f));
             }
         }
 
@@ -61,11 +62,13 @@ public:
             indices.push_back(static_cast<unsigned int>((i + q + 1) % n_vertices));
         }
 
-        vertex_buffers = Application::GenBuffer<glm::vec3>(2);
+        vertex_buffers = Application::GenBuffer<glm::vec3>(3);
         vertex_buffers[0].create(vertices);
         vertex_buffers[0].set_format({{ShaderDataType::VEC3, "position"}});
         vertex_buffers[1].create(normals);
         vertex_buffers[1].set_format({{ShaderDataType::VEC3, "normal"}});
+        vertex_buffers[2].create(texcoords);
+        vertex_buffers[2].set_format({{ShaderDataType::VEC3, "texcoords"}});
 
         index_buffer = Application::GenBuffer<unsigned int>(1);
         index_buffer->create(indices);
@@ -73,6 +76,7 @@ public:
         render_state->create();
         render_state->add_vertex_buffer(&vertex_buffers[0]);
         render_state->add_vertex_buffer(&vertex_buffers[1]);
+        render_state->add_vertex_buffer(&vertex_buffers[2]);
         render_state->set_index_buffer(index_buffer);
     }
 

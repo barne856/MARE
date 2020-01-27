@@ -85,6 +85,7 @@ public:
         return true;
     }
     widget_value get_value() { return value; }
+    virtual void set_value(widget_value value) { this->value = value; }
 
 protected:
     widget_value value{};
