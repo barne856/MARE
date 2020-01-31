@@ -9,11 +9,11 @@
 
 namespace mare
 {
-class GLTexture : public Texture
+class GLTexture2D : public Texture2D
 {
 public:
-    GLTexture(const char *image_filepath);
-    ~GLTexture();
+    GLTexture2D(const char *image_filepath);
+    ~GLTexture2D();
     void bind(unsigned int binding_index) override;
 
 private:

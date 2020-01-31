@@ -3,11 +3,11 @@
 
 namespace mare
 {
-class Texture
+class Texture2D
 {
 public:
-    Texture(const char *image_filepath) {}
-    virtual ~Texture() {}
+    Texture2D(const char *image_filepath) {}
+    virtual ~Texture2D() {}
     virtual void bind(unsigned int binding_index) = 0;
 
 protected:

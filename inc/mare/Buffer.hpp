@@ -187,7 +187,7 @@ public:
     inline const unsigned int count() const { return m_count; }
     inline unsigned int name() { return m_buffer_ID; }
     inline const BufferFormat &format() const { return m_format; }
-    virtual const T operator[](unsigned int i) const = 0;
+    virtual const T operator[](unsigned int i) const = 0; // read from buffer using subscript operator if buffer is dynamic
 
 
 protected:

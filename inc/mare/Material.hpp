@@ -16,6 +16,7 @@ public:
     void upload_float(const char *name, float value) { m_shader->upload_float(name, value); }
     void upload_vec3(const char *name, glm::vec3 value) { m_shader->upload_vec3(name, value); }
     void upload_vec4(const char *name, glm::vec4 value) { m_shader->upload_vec4(name, value); }
+    void upload_mat3(const char *name, glm::mat3 value) { m_shader->upload_mat3(name, value); }
     void upload_mat4(const char *name, glm::mat4 value) { m_shader->upload_mat4(name, value); }
     void upload_mat4_array(const char *name, float *data, int count) { m_shader->upload_mat4_array(name, data, count); }
     void bind_buffer_block(const char *name, size_t size) { m_shader->bind_buffer_block(name, size); }

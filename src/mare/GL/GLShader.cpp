@@ -210,6 +210,20 @@ void GLShader::upload_vec4(const char *name, glm::vec4 value)
     }
 }
 
+void GLShader::upload_mat3(const char *name, glm::mat3 value)
+{
+    if (!uniform_cache.count(name))
+    {
+        // cache the location;
+        uniform_cache.insert_or_assign(name, glGetUniformLocation(m_program_ID, name));
+    }
+    glUniformMatrix3fv(uniform_cache[name], 1, GL_FALSE, glm::value_ptr(value));
+    if (uniform_cache[name] == -1)
+    {
+        std::cerr << "SHADER WARNING: No uniform '" << name << "' exists in the shader" << std::endl;
+    }
+}
+
 void GLShader::upload_mat4(const char *name, glm::mat4 value)
 {
     if (!uniform_cache.count(name))

@@ -51,6 +51,7 @@ void render_mesh(Layer *layer, SimpleMesh<T> *mesh, Material *material)
         material->upload_mat4("view", layer->get_camera()->view());
     }
     material->upload_mat4("model", mesh->get_model());
+    material->upload_mat3("normal_matrix", glm::mat3(mesh->get_normal()));
     if (mesh->get_state()->is_indexed())
     {
         glDrawElements(GLDrawMethod(mesh->get_draw_method()), GLsizei(mesh->get_state()->render_count()), GL_UNSIGNED_INT, nullptr);
@@ -72,6 +73,7 @@ void render_mesh(Layer *layer, SimpleMesh<T> *mesh, Material *material, glm::mat
         material->upload_mat4("view", layer->get_camera()->view());
     }
     material->upload_mat4("model", parent_model * mesh->get_model());
+    material->upload_mat3("normal_matrix", glm::transpose(glm::inverse( glm::mat3( parent_model * (mesh->get_model()) ) ) ) );
     if (mesh->get_state()->is_indexed())
     {
         glDrawElements(GLDrawMethod(mesh->get_draw_method()), GLsizei(mesh->get_state()->render_count()), GL_UNSIGNED_INT, nullptr);
@@ -93,6 +95,7 @@ void render_mesh(Layer *layer, SimpleMesh<T> *mesh, Material *material, glm::mat
         material->upload_mat4("view", layer->get_camera()->view());
     }
     material->upload_mat4("model", parent_model * mesh->get_model());
+    material->upload_mat3("normal_matrix", glm::transpose(glm::inverse( glm::mat3( parent_model * (mesh->get_model()) ) ) ) );
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, models->name());
     if (mesh->get_state()->is_indexed())
     {
@@ -417,9 +420,9 @@ Shader *GLRenderer::GenShader(const char *directory)
     return new GLShader(directory);
 }
 
-Texture* GLRenderer::GenTexture(const char* image_filepath)
+Texture2D* GLRenderer::GenTexture2D(const char* image_filepath)
 {
-    return new GLTexture(image_filepath);
+    return new GLTexture2D(image_filepath);
 }
 
 // Renderer callback functions

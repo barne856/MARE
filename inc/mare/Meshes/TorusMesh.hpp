@@ -8,15 +8,13 @@
 
 namespace mare
 {
-class TorusMesh : public SimpleMesh<glm::vec3>
+class TorusMesh : public SimpleMesh<float>
 {
 public:
     TorusMesh(unsigned int n_segments, unsigned int n_rings, float inner_radius, float outer_radius)
         : r(outer_radius), R(inner_radius), q(n_segments), p(n_rings)
     {
-        std::vector<glm::vec3> vertices;
-        std::vector<glm::vec3> normals;
-        std::vector<glm::vec3> texcoords;
+        std::vector<float> vertex_data;
         std::vector<unsigned int> indices;
         render_state->set_draw_method(DrawMethod::TRIANGLE_STRIP);
 
@@ -48,35 +46,37 @@ public:
                 float ny = sin(u_angle) * cos(v_angle);
                 float nz = sin(v_angle);
 
-                vertices.push_back(glm::vec3(x, y, z));
-                normals.push_back(glm::vec3(nx, ny, nz));
-                texcoords.push_back(glm::vec3(u, v, 0.0f));
+                // add vertex data to vector
+                vertex_data.push_back(x);  // position
+                vertex_data.push_back(y);  // position
+                vertex_data.push_back(z);  // position
+                vertex_data.push_back(nx); // normal
+                vertex_data.push_back(ny); // normal
+                vertex_data.push_back(nz); // normal
+                vertex_data.push_back(u);  // texture coord
+                vertex_data.push_back(v);  // texture coord
             }
         }
 
         // Compute torus indices
-        unsigned int n_vertices = static_cast<unsigned int>(vertices.size());
+        unsigned int n_vertices = static_cast<unsigned int>(vertex_data.size() / 8);
         for (unsigned int i = 0; i <= n_vertices; ++i)
         {
             indices.push_back(static_cast<unsigned int>(i % n_vertices));
             indices.push_back(static_cast<unsigned int>((i + q + 1) % n_vertices));
         }
 
-        vertex_buffers = Application::GenBuffer<glm::vec3>(3);
-        vertex_buffers[0].create(vertices);
-        vertex_buffers[0].set_format({{ShaderDataType::VEC3, "position"}});
-        vertex_buffers[1].create(normals);
-        vertex_buffers[1].set_format({{ShaderDataType::VEC3, "normal"}});
-        vertex_buffers[2].create(texcoords);
-        vertex_buffers[2].set_format({{ShaderDataType::VEC3, "texcoords"}});
+        vertex_buffers = Application::GenBuffer<float>(1);
+        vertex_buffers->create(&vertex_data[0], vertex_data.size() * sizeof(float));
+        vertex_buffers->set_format({{ShaderDataType::VEC3, "position"},
+                                    {ShaderDataType::VEC3, "normal"},
+                                    {ShaderDataType::VEC2, "texcoords"}});
 
         index_buffer = Application::GenBuffer<unsigned int>(1);
         index_buffer->create(indices);
 
         render_state->create();
-        render_state->add_vertex_buffer(&vertex_buffers[0]);
-        render_state->add_vertex_buffer(&vertex_buffers[1]);
-        render_state->add_vertex_buffer(&vertex_buffers[2]);
+        render_state->add_vertex_buffer(vertex_buffers);
         render_state->set_index_buffer(index_buffer);
     }
 

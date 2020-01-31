@@ -141,7 +141,7 @@ protected:
     Shader *GenShader(const char *directory) override;
 
     // Textures
-    Texture* GenTexture(const char* image_filepath) override;
+    Texture2D* GenTexture2D(const char* image_filepath) override;
 
 private:
     static GLFWwindow *window;

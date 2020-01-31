@@ -5,8 +5,8 @@
 
 namespace mare
 {
-GLTexture::GLTexture(const char *image_filepath)
-    : Texture(image_filepath), m_image_data(nullptr)
+GLTexture2D::GLTexture2D(const char *image_filepath)
+    : Texture2D(image_filepath), m_image_data(nullptr)
 {
     m_image_data = stbi_load(image_filepath, &width, &height, &channels, 4);
     if (m_image_data == NULL)
@@ -19,12 +19,12 @@ GLTexture::GLTexture(const char *image_filepath)
     stbi_image_free(m_image_data);
 }
 
-GLTexture::~GLTexture()
+GLTexture2D::~GLTexture2D()
 {
     glDeleteTextures(1, &m_texture_ID);
 }
 
-void GLTexture::bind(unsigned int binding_index)
+void GLTexture2D::bind(unsigned int binding_index)
 {
     glBindTextureUnit(binding_index, m_texture_ID);
 }

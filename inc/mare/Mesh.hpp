@@ -15,7 +15,7 @@ class Layer; // forward declaration
 class Mesh
 {
 public:
-    Mesh() : translation(glm::vec3(0.0f)), rotation(glm::mat4(1.0f)), scale(glm::vec3(1.0f)), transform(glm::mat4(1.0f)) {}
+    Mesh() : translation(glm::vec3(0.0f)), rotation(glm::mat4(1.0f)), scale(glm::vec3(1.0f)), transform(glm::mat4(1.0f)), normal(glm::mat3(1.0f)) {}
     virtual ~Mesh() {}
 
     virtual void render(Layer* layer, Material *material) = 0;
@@ -28,17 +28,20 @@ public:
     inline glm::vec3 get_position() const { return translation; }
     inline glm::vec3 get_scale() const { return scale; }
     inline glm::mat4 get_model() const { return transform; }
+    inline glm::mat3 get_normal() const { return normal; }
 
 protected:
     void update_model_matrix()
     {
         transform = glm::translate(glm::mat4(1.0f), translation) * rotation * glm::scale(glm::mat4(1.0f), scale);
+        normal = glm::transpose(glm::inverse(glm::mat3(rotation * glm::scale(glm::mat4(1.0f), scale))));
     }
 
     glm::vec3 translation;
     glm::mat4 rotation;
     glm::vec3 scale;
     glm::mat4 transform;
+    glm::mat3 normal;
 };
 
 } // namespace mare

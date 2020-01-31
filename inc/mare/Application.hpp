@@ -230,9 +230,9 @@ public:
     }
 
     // Textures
-    static Texture* GenTexture(const char* image_filepath)
+    static Texture2D* GenTexture2D(const char* image_filepath)
     {
-        return m_renderer_pointer->GenTexture(image_filepath);
+        return m_renderer_pointer->GenTexture2D(image_filepath);
     }
 
     // Application main functions

@@ -6,55 +6,53 @@
 
 #include "glm.hpp"
 
+#include <iostream>
+
 namespace mare
 {
 
-template <typename T>
-class ArrayMesh : public SimpleMesh<T>
+class ArrayMesh : public SimpleMesh<float>
 {
 public:
-    ArrayMesh(DrawMethod method, std::vector<T> &vertices, std::vector<T> &normals, std::vector<unsigned int> &indices)
+    ArrayMesh(DrawMethod method, const std::vector<glm::vec3> &vertices, const std::vector<glm::vec3> &normals, const std::vector<glm::vec2> &texture_coords, std::vector<unsigned int> *indices)
     {
-        render_state->set_draw_method(method);
+        if (normals.size() != vertices.size())
+        {
+            std::cerr << "normals must be the same size as vertices" << std::endl;
+            return;
+        }
 
-        vertex_buffers = Application::GenBuffer<T>(2);
-        vertex_buffers[0].create(vertices, vertices.size()*sizeof(T));
-        vertex_buffers[0].set_format({{glm_to_shader_type<T>(), "position"}});
-        vertex_buffers[1].create(normals, vertices.size()*sizeof(T));
-        vertex_buffers[1].set_format({{glm_to_shader_type<T>(), "normals"}});
+        if (texture_coords.size() != vertices.size())
+        {
+            std::cerr << "texture_coords must be the same size as vertices" << std::endl;
+            return;
+        }
 
-        render_state->create();
-        render_state->add_vertex_buffer(&vertex_buffers[0]);
-        render_state->add_vertex_buffer(&vertex_buffers[1]);
-
-        index_buffer = Application::GenBuffer<unsigned int>(1);
-        index_buffer->create(indices);
-        render_state->set_index_buffer(index_buffer);
-    }
-    ArrayMesh(DrawMethod method, std::vector<T> &vertices, std::vector<T> &normals)
-    {
-        draw_method = method;
-
-        vertex_buffers = Application::GenBuffer<T>(2);
-        vertex_buffers[0].create(vertices, vertices.size()*sizeof(T));
-        vertex_buffers[0].set_format({{glm_to_shader_type<T>(), "position"}});
-        vertex_buffers[1].create(normals, vertices.size()*sizeof(T));
-        vertex_buffers[1].set_format({{glm_to_shader_type<T>(), "normals"}});
-
-        render_state->create();
-        render_state->add_vertex_buffer(&vertex_buffers[0]);
-        render_state->add_vertex_buffer(&vertex_buffers[1]);
-    }
-    ArrayMesh(DrawMethod method, std::vector<T> &vertices)
-    {
-        draw_method = method;
-
-        vertex_buffers = Application::GenBuffer<T>(1);
-        vertex_buffers->create(vertices);
-        vertex_buffers->set_format({{glm_to_shader_type<T>(), "position"}});
-
+        // interleave data
+        std::vector<float> vertex_data{};
+        for (size_t i = 0; i < vertices.size(); i++)
+        {
+            vertex_data.push_back(vertices[i][0]);
+            vertex_data.push_back(vertices[i][1]);
+            vertex_data.push_back(normals[i][0]);
+            vertex_data.push_back(normals[i][1]);
+            vertex_data.push_back(normals[i][2]);
+            vertex_data.push_back(texture_coords[i][0]);
+            vertex_data.push_back(texture_coords[i][1]);
+        }
+        vertex_buffers = Application::GenBuffer<float>(1);
+        vertex_buffers->create(&vertex_data[0], vertex_data.size() * sizeof(float), vertex_data.size() * sizeof(float));
+        vertex_buffers->set_format({{ShaderDataType::VEC3, "position"},
+                                    {ShaderDataType::VEC3, "normals"},
+                                    {ShaderDataType::VEC2, "texture_coords"}});
         render_state->create();
         render_state->add_vertex_buffer(vertex_buffers);
+        if (indices)
+        {
+            index_buffer = Application::GenBuffer<unsigned int>(1);
+            index_buffer->create(*indices);
+            render_state->set_index_buffer(index_buffer);
+        }
     }
 };
 

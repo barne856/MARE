@@ -30,6 +30,7 @@ public:
     void upload_float(const char *name, float value) override;
     void upload_vec3(const char *name, glm::vec3 value) override;
     void upload_vec4(const char *name, glm::vec4 value) override;
+    void upload_mat3(const char *name, glm::mat3 value) override;
     void upload_mat4(const char *name, glm::mat4 value) override;
     void upload_mat4_array(const char *name, float *data, int count) override;
     void bind_buffer_block(const char *name, size_t size) override;

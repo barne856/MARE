@@ -121,7 +121,7 @@ public:
     virtual Shader *GenShader(const char *directory) = 0;
 
     // Textures
-    virtual Texture* GenTexture(const char* image_filepath) = 0;
+    virtual Texture2D* GenTexture2D(const char* image_filepath) = 0;
 
     // Coordinate conversions
     // get normalized device coordinates from window coordinates
