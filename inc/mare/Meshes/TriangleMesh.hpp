@@ -2,13 +2,13 @@
 #define TRIANGLEMESH
 
 #include "mare/SimpleMesh.hpp"
-#include "mare/Application.hpp"
+#include "mare/Renderer.hpp"
 
 #include "glm.hpp"
 
 namespace mare
 {
-class TriangleMesh : public SimpleMesh<float>
+class TriangleMesh : public SimpleMesh
 {
 public:
     TriangleMesh(glm::vec2 v1, glm::vec2 v2, glm::vec2 v3)
@@ -23,7 +23,7 @@ public:
         verts.push_back(v3[0]);
         verts.push_back(v3[1]);
 
-        vertex_buffers = Application::GenBuffer<float>(1);
+        vertex_buffers = Renderer::API->GenFloatBuffer(1);
         vertex_buffers->create(verts);
         vertex_buffers->set_format({{ShaderDataType::VEC2, "position"}});
 

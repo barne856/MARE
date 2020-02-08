@@ -8,30 +8,28 @@
 
 namespace mare
 {
-template <typename T>
-GLRenderState<T>::~GLRenderState()
+GLRenderState::~GLRenderState()
 {
     glDeleteVertexArrays(1, &m_render_state_ID);
 }
-template <typename T>
-void GLRenderState<T>::bind() const
+void GLRenderState::bind() const
 {
     glBindVertexArray(m_render_state_ID);
 }
-template <typename T>
-void GLRenderState<T>::unbind() const
+
+void GLRenderState::unbind() const
 {
     glBindVertexArray(0);
 }
-template <typename T>
-void GLRenderState<T>::create()
+
+void GLRenderState::create()
 {
     // Delete vertex array if one exists
     glDeleteVertexArrays(1, &m_render_state_ID);
     glCreateVertexArrays(1, &m_render_state_ID);
 }
-template <typename T>
-void GLRenderState<T>::add_vertex_buffer(Buffer<T> *vbo)
+
+void GLRenderState::add_vertex_buffer(Buffer<float> *vbo)
 {
     vertex_buffers.push_back(vbo);
     for (const auto &element : vbo->format())
@@ -45,18 +43,12 @@ void GLRenderState<T>::add_vertex_buffer(Buffer<T> *vbo)
     m_vertex_buffer_count++;
     m_vertex_render_count = vbo->count();
 }
-template <typename T>
-void GLRenderState<T>::set_index_buffer(Buffer<unsigned int> *ibo)
+void GLRenderState::set_index_buffer(Buffer<unsigned int> *ibo)
 {
     index_buffer = ibo;
     m_is_indexed = true;
     glVertexArrayElementBuffer(m_render_state_ID, ibo->name());
     m_index_render_count = ibo->count();
 }
-
-template class GLRenderState<float>;
-template class GLRenderState<glm::vec2>;
-template class GLRenderState<glm::vec3>;
-template class GLRenderState<glm::vec4>;
 
 } // namespace mare

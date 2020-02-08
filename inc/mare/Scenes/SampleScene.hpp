@@ -1,7 +1,7 @@
 #ifndef SAMPLESCENE
 #define SAMPLESCENE
 
-#include "mare/Application.hpp"
+#include "mare/Renderer.hpp"
 
 #include "mare/Scene.hpp"
 #include "mare/Objects/MareTextObject.hpp"
@@ -41,7 +41,7 @@ public:
         // OpenGL Depth Texture
         glGenTextures(1, &depth_texture);
         glBindTexture(GL_TEXTURE_2D, depth_texture);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, Application::get_info().window_width, Application::get_info().window_height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, Renderer::API->get_info().window_width, Renderer::API->get_info().window_height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
@@ -99,8 +99,12 @@ public:
     bool render(double time, double dt) override
     {
         // Renderer properties
-        Application::enable_depth_testing(true);
-        Application::enable_face_culling(true);
+        Renderer::API->enable_blending(true);
+        Renderer::API->enable_depth_testing(true);
+        Renderer::API->enable_face_culling(true);
+        // Clear color and depth buffer
+        Renderer::API->clear_color_buffer(bg_color);
+        Renderer::API->clear_depth_buffer();
 
         // get UI values
         float v = std::get<float>(get_widget_value(0, 0));
@@ -116,12 +120,12 @@ public:
         shadow_material->upload_mat4("projection", shadow_camera->projection());
         shadow_material->upload_mat4("view", shadow_camera->view());
         glBindFramebuffer(GL_FRAMEBUFFER, depth_fbo);
-        glViewport(0, 0, Application::get_info().window_width, Application::get_info().window_height);
+        glViewport(0, 0, Renderer::API->get_info().window_width, Renderer::API->get_info().window_height);
         glClearDepth(1.0f);
         glClear(GL_DEPTH_BUFFER_BIT);
         glEnable(GL_POLYGON_OFFSET_FILL);
         glPolygonOffset(2.0f, 4.0f);
-        Camera* temp_cam = get_camera();
+        Camera *temp_cam = get_camera();
         set_camera(nullptr);
         torus->render(this, shadow_material);
         cube->render(this, shadow_material);
@@ -148,7 +152,7 @@ public:
         {
             wireframe = !wireframe;
         }
-        Application::wireframe_mode(wireframe);
+        Renderer::API->wireframe_mode(wireframe);
         // event is handled
         return true;
     }
@@ -157,10 +161,10 @@ public:
     {
         if (input.mouse_button == 1)
         {
-            Application::set_focus(this);
+            Renderer::API->get_info().focus = this;
             return true;
         }
-        Application::set_focus(nullptr);
+        Renderer::API->get_info().focus = nullptr;
         return false;
     }
 
@@ -176,6 +180,7 @@ private:
     bool wireframe = false;
     GLuint depth_texture;
     GLuint depth_fbo;
+    glm::vec4 bg_color{0.0f, 0.0f, 0.0f, 1.0f};
 };
 } // namespace mare
 

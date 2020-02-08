@@ -1,5 +1,5 @@
 #include "mare/InstancedMesh.hpp"
-#include "mare/Application.hpp"
+#include "mare/Renderer.hpp"
 
 namespace mare
 {
@@ -7,7 +7,7 @@ namespace mare
 InstancedMesh::InstancedMesh(unsigned int max_instances)
     : instance_count(0), instance_transforms(nullptr), m_mesh(nullptr), m_max_instances(max_instances)
 {
-    instance_transforms = Application::GenBuffer<glm::mat4>(1);
+    instance_transforms = Renderer::API->GenMat4Buffer(1);
     std::vector<glm::mat4> empty{};
     instance_transforms->create(empty, max_instances * sizeof(glm::mat4));
 }

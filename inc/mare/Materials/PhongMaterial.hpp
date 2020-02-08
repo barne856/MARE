@@ -7,7 +7,7 @@
 // MARE
 #include "mare/Material.hpp"
 #include "mare/Texture.hpp"
-#include "mare/Application.hpp"
+#include "mare/Renderer.hpp"
 
 namespace mare
 {
@@ -16,9 +16,9 @@ class PhongMaterial : public virtual Material
 public:
     PhongMaterial() : Material("./res/Shaders/Phong")
     {
-        texture = Application::GenTexture2D("./res/Textures/checkerboard.png");
+        texture = Renderer::API->GenTexture2D("./res/Textures/checkerboard.png");
         material.ambient = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-        material.diffuse = glm::vec4(0.5f, 0.5f, 0.5f, 1.0f);
+        material.diffuse = glm::vec4(0.1f, 0.1f, 0.5f, 1.0f);
         material.specular = glm::vec4(1.0f);
         material.shininess = 32.0f;
         light.ambient = glm::vec4(1.0f);

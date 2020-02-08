@@ -2,7 +2,7 @@
 #define ARRAYMESH
 
 #include "mare/SimpleMesh.hpp"
-#include "mare/Application.hpp"
+#include "mare/Renderer.hpp"
 
 #include "glm.hpp"
 
@@ -11,7 +11,7 @@
 namespace mare
 {
 
-class ArrayMesh : public SimpleMesh<float>
+class ArrayMesh : public SimpleMesh
 {
 public:
     ArrayMesh(DrawMethod method, const std::vector<glm::vec3> &vertices, const std::vector<glm::vec3> &normals, const std::vector<glm::vec2> &texture_coords, std::vector<unsigned int> *indices)
@@ -40,7 +40,7 @@ public:
             vertex_data.push_back(texture_coords[i][0]);
             vertex_data.push_back(texture_coords[i][1]);
         }
-        vertex_buffers = Application::GenBuffer<float>(1);
+        vertex_buffers = Renderer::API->GenFloatBuffer(1);
         vertex_buffers->create(&vertex_data[0], vertex_data.size() * sizeof(float), vertex_data.size() * sizeof(float));
         vertex_buffers->set_format({{ShaderDataType::VEC3, "position"},
                                     {ShaderDataType::VEC3, "normals"},
@@ -49,7 +49,7 @@ public:
         render_state->add_vertex_buffer(vertex_buffers);
         if (indices)
         {
-            index_buffer = Application::GenBuffer<unsigned int>(1);
+            index_buffer = Renderer::API->GenIndexBuffer(1);
             index_buffer->create(*indices);
             render_state->set_index_buffer(index_buffer);
         }

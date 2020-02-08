@@ -8,7 +8,6 @@
 
 namespace mare
 {
-template <typename T>
 class SimpleMesh : public Mesh
 {
 public:
@@ -20,12 +19,12 @@ public:
     void render(Layer* layer, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models) override;
 
     inline void bind() const { render_state->bind(); }
-    inline RenderState<T> *get_state() const { return render_state; }
+    inline RenderState *get_state() const { return render_state; }
     inline DrawMethod get_draw_method() const { return render_state->get_draw_method(); }
 
 protected:
-    RenderState<T> *render_state = nullptr;
-    Buffer<T> *vertex_buffers = nullptr;
+    RenderState *render_state = nullptr;
+    Buffer<float> *vertex_buffers = nullptr;
     Buffer<unsigned int> *index_buffer = nullptr;
     
 };

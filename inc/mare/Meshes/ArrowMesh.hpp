@@ -4,7 +4,6 @@
 #include "mare/CompositeMesh.hpp"
 #include "mare/Meshes/ConeMesh.hpp"
 #include "mare/Meshes/CylinderMesh.hpp"
-#include "mare/Application.hpp"
 
 #include "glm.hpp"
 

@@ -1,17 +1,22 @@
 #include "mare/Renderer.hpp"
-#include "mare/Scene.hpp"
 
 namespace mare
 {
-RendererInfo Renderer::info{};
-RendererInput Renderer::input{};
-bool Renderer::running = false;
-Application *Renderer::m_app_pointer = nullptr;
-Scene* Renderer::m_scene = nullptr;
 
-void Renderer::set_scene(Scene* scene)
+// Run the application using the specified Graphics API
+void Renderer::run()
 {
-    m_scene = scene;
+    API->start_process();
 }
 
+// Static methods
+void Renderer::end_process() { running = false; }
+RendererInfo &Renderer::get_info() { return info; }
+RendererInput &Renderer::get_input() { return input; }
+
+// Static variables
+RendererInfo Renderer::info{};    // Renderer and window information
+RendererInput Renderer::input{};  // Inputs from keyboard and mouse and focued layer
+bool Renderer::running{false};    // Program is running?
+Renderer *Renderer::API{nullptr}; // The implemented API
 } // namespace mare

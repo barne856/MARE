@@ -1,5 +1,4 @@
 #include "mare/CompositeMesh.hpp"
-#include "mare/Application.hpp"
 
 namespace mare
 {

@@ -2,13 +2,13 @@
 #define CYLINDERMESH
 
 #include "mare/SimpleMesh.hpp"
-#include "mare/Application.hpp"
+#include "mare/Renderer.hpp"
 
 #include "glm.hpp"
 
 namespace mare
 {
-class CylinderMesh : public SimpleMesh<float>
+class CylinderMesh : public SimpleMesh
 {
 public:
     CylinderMesh(float start_angle, float end_angle, int sides)
@@ -109,12 +109,12 @@ public:
             indices.push_back(3 * (sides + 1) + i + 3);
         }
 
-        vertex_buffers = Application::GenBuffer<float>(1);
+        vertex_buffers = Renderer::API->GenFloatBuffer(1);
         vertex_buffers->create(data);
         vertex_buffers->set_format({{ShaderDataType::VEC3, "position"},
                                    {ShaderDataType::VEC3, "normal"}});
 
-        index_buffer = Application::GenBuffer<unsigned int>(1);
+        index_buffer = Renderer::API->GenIndexBuffer(1);
         index_buffer->create(indices);
 
         render_state->create();

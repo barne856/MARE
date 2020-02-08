@@ -1,9 +1,9 @@
 #include "mare/Material.hpp"
-#include "mare/Application.hpp"
+#include "mare/Renderer.hpp"
 
 namespace mare
 {
-Material::Material(const char *directory) : m_shader(Application::GenShader(directory))
+Material::Material(const char *directory) : m_shader(Renderer::API->GenShader(directory))
 {
     m_shader->use();
 }

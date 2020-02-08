@@ -1,7 +1,7 @@
 #ifndef SAMPLEOVERLAY
 #define SAMPLEOVERLAY
 
-#include "mare/Application.hpp"
+#include "mare/Renderer.hpp"
 #include "mare/Materials/PhongMaterial.hpp"
 #include "mare/Meshes/SlopeMesh.hpp"
 #include "mare/Meshes/CubeMesh.hpp"
@@ -24,7 +24,7 @@ public:
 
         // Create Widgets
         push_widget(new SliderUI(this));
-        on_resize(Application::get_input());
+        on_resize(Renderer::API->get_input());
         get_widget(0)->set_value(0.5f);
     }
 
@@ -32,7 +32,7 @@ public:
     bool on_resize(const RendererInput &input) override
     {
         // position widgets on the screen
-        glm::ivec2 screen_size = glm::ivec2(Application::get_info().window_width, Application::get_info().window_height);
+        glm::ivec2 screen_size = glm::ivec2(Renderer::API->get_info().window_width, Renderer::API->get_info().window_height);
         glm::vec3 world_size = get_camera()->screen_to_world(screen_size);
         get_widget(0)->set_position({-world_size.x + 0.6f, -0.9f, 0.0f});
         return false;

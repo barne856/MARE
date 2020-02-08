@@ -13,96 +13,19 @@ namespace mare
 class GLRenderer : public Renderer
 {
 public:
-    void start_process(Application *app_pointer) override;
+GLRenderer();
+    void start_process() override;
 
-protected:
-    void set_window_title(const char *title) override
-    {
-        glfwSetWindowTitle(window, title);
-    }
-    void set_cursor(CURSOR type) override
-    {
-        switch (type)
-        {
-        case CURSOR::ARROW:
-            glfwSetCursor(window, arrow_cursor);
-            break;
-
-        case CURSOR::HZ_RESIZE:
-            glfwSetCursor(window, hz_resize_cursor);
-            break;
-
-        case CURSOR::HAND:
-            glfwSetCursor(window, hand_cursor);
-            break;
-
-        case CURSOR::CROSSHAIRS:
-            glfwSetCursor(window, crosshair_cursor);
-            break;
-        }
-    }
-    void clear_color_buffer(glm::vec4 color) override
-    {
-        glClearBufferfv(GL_COLOR, 0, &color[0]);
-    }
-    void clear_depth_buffer() override
-    {
-        glClear(GL_DEPTH_BUFFER_BIT);
-    }
-    void resize_window(int width, int height) override
-    {
-        info.window_width = width;
-        info.window_height = height;
-        info.window_aspect = float(info.window_width) / float(info.window_height);
-        glViewport(0, 0, width, height);
-    }
-    void wireframe_mode(bool wireframe) override
-    {
-        if (wireframe)
-        {
-            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        }
-        else
-        {
-            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        }
-    }
-    void enable_depth_testing(bool enable) override
-    {
-        if (enable)
-        {
-            glEnable(GL_DEPTH_TEST);
-            glDepthFunc(GL_LESS);
-        }
-        else
-        {
-            glDisable(GL_DEPTH_TEST);
-        }
-    }
-    void enable_face_culling(bool enable) override
-    {
-        if (enable)
-        {
-            glEnable(GL_CULL_FACE);
-            glCullFace(GL_BACK);
-        }
-        else
-        {
-            glDisable(GL_CULL_FACE);
-        }
-    }
-    void enable_blending(bool enable)
-    {
-        if (enable)
-        {
-            glEnable(GL_BLEND);
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        }
-        else
-        {
-            glDisable(GL_BLEND);
-        }
-    }
+    // Renderer Commands
+    void set_window_title(const char *title) override;
+    void set_cursor(CURSOR type) override;
+    void clear_color_buffer(glm::vec4 color) override;
+    void clear_depth_buffer() override;
+    void resize_window(int width, int height) override;
+    void wireframe_mode(bool wireframe) override;
+    void enable_depth_testing(bool enable) override;
+    void enable_face_culling(bool enable) override;
+    void enable_blending(bool enable) override;
 
     // Buffers
     Buffer<float> *GenFloatBuffer(unsigned int count) override;
@@ -116,32 +39,19 @@ protected:
     Buffer<glm::vec3> *GenVec3Buffer(unsigned int count) override;
     Buffer<glm::vec4> *GenVec4Buffer(unsigned int count) override;
 
+    // Textures
+    Texture2D *GenTexture2D(const char *image_filepath) override;
+
     // Render States
-    RenderState<float> *GenFloatRenderState() override;
-    RenderState<glm::vec2> *GenVec2RenderState() override;
-    RenderState<glm::vec3> *GenVec3RenderState() override;
-    RenderState<glm::vec4> *GenVec4RenderState() override;
-
-    // Meshes
-    void render_float_mesh(Layer* layer, SimpleMesh<float> *mesh, Material *material) override;
-    void render_float_mesh(Layer* layer, SimpleMesh<float> *mesh, Material *material, glm::mat4 parent_model) override;
-    void render_float_mesh(Layer* layer, SimpleMesh<float> *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models) override;
-    void render_vec2_mesh(Layer* layer, SimpleMesh<glm::vec2> *mesh, Material *material) override;
-    void render_vec2_mesh(Layer* layer, SimpleMesh<glm::vec2> *mesh, Material *material, glm::mat4 parent_model) override;
-    void render_vec2_mesh(Layer* layer, SimpleMesh<glm::vec2> *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models) override;
-    void render_vec3_mesh(Layer* layer, SimpleMesh<glm::vec3> *mesh, Material *material) override;
-    void render_vec3_mesh(Layer* layer, SimpleMesh<glm::vec3> *mesh, Material *material, glm::mat4 parent_model) override;
-    void render_vec3_mesh(Layer* layer, SimpleMesh<glm::vec3> *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models) override;
-    void render_vec4_mesh(Layer* layer, SimpleMesh<glm::vec4> *mesh, Material *material) override;
-    void render_vec4_mesh(Layer* layer, SimpleMesh<glm::vec4> *mesh, Material *material, glm::mat4 parent_model) override;
-    void render_vec4_mesh(Layer* layer, SimpleMesh<glm::vec4> *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models) override;
-
+    RenderState *GenRenderState() override;
 
     // Shaders
     Shader *GenShader(const char *directory) override;
 
-    // Textures
-    Texture2D* GenTexture2D(const char* image_filepath) override;
+    // Rendering Simple Meshes with no Composite or Instanced Meshes (Composite and Instanced Meshes are rendered by themselves)
+    void render_simple_mesh(Layer *layer, SimpleMesh *mesh, Material *material) override;
+    void render_simple_mesh(Layer *layer, SimpleMesh *mesh, Material *material, glm::mat4 parent_model) override;
+    void render_simple_mesh(Layer *layer, SimpleMesh *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models) override;
 
 private:
     static GLFWwindow *window;

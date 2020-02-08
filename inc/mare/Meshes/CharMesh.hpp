@@ -56,14 +56,14 @@
 #define CHARMESH
 
 #include "mare/SimpleMesh.hpp"
-#include "mare/Application.hpp"
+#include "mare/Renderer.hpp"
 #include <unordered_map>
 #include <vector>
 
 namespace mare
 {
 
-class CharMesh : public SimpleMesh<float>
+class CharMesh : public SimpleMesh
 {
 public:
     CharMesh(std::string str, float keying = 1.0f) //, bool dynamic, size_t size_in_bytes)
@@ -78,7 +78,7 @@ public:
         render_state->set_draw_method(DrawMethod::LINES);
 
         // if dynamic, create extra space to hold resized strings
-        vertex_buffers = Application::GenBuffer<float>(1);
+        vertex_buffers = Renderer::API->GenFloatBuffer(1);
         vertex_buffers->create(verts);
         vertex_buffers->set_format({{ShaderDataType::VEC2, "position"}});
 

@@ -6,6 +6,7 @@
 #include "mare/Meshes/QuadrangleMesh.hpp"
 #include "mare/InstancedMesh.hpp"
 #include "mare/Materials/BasicMaterial.hpp"
+#include "mare/Renderer.hpp"
 
 namespace mare
 {
@@ -36,15 +37,15 @@ public:
     {
         if (input.mouse_button == 1 && is_in_bounds(input.mouse_pos))
         {
-            Application::set_focus(this);
+            Renderer::API->get_info().focus = this;
             return on_mouse_move(input);
         }
-        Application::set_focus(nullptr);
+        Renderer::API->get_info().focus = nullptr;
         return false;
     }
     bool on_mouse_move(const RendererInput &input)
     {
-        if (input.focus == this)
+        if (Renderer::API->get_info().focus == this)
         {
             glm::vec2 relative_position = get_widget_coords(input.mouse_pos);
             float x = glm::clamp(relative_position.x, -0.5f, 0.5f);

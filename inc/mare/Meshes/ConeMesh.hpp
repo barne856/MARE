@@ -2,13 +2,13 @@
 #define CONEMESH
 
 #include "mare/SimpleMesh.hpp"
-#include "mare/Application.hpp"
+#include "mare/Renderer.hpp"
 
 #include "glm.hpp"
 
 namespace mare
 {
-class ConeMesh : public SimpleMesh<glm::vec3>
+class ConeMesh : public SimpleMesh
 {
 public:
     // height is always equal to the sqrt(3)*radius
@@ -48,10 +48,10 @@ public:
             angle -= delta_angle;
         }
 
-        vertex_buffers = Application::GenBuffer<glm::vec3>(2);
-        vertex_buffers[0].create(verts);
+        vertex_buffers = Renderer::API->GenFloatBuffer(2);
+        vertex_buffers[0].create(&verts[0][0], verts.size() * sizeof(glm::vec3));
         vertex_buffers[0].set_format({{ShaderDataType::VEC3, "position"}});
-        vertex_buffers[1].create(normals);
+        vertex_buffers[1].create(&normals[0][0], normals.size() * sizeof(glm::vec3));
         vertex_buffers[1].set_format({{ShaderDataType::VEC3, "normal"}});
 
         render_state->create();

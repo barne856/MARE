@@ -1,9 +1,9 @@
+// MARE
 #include "mare/GL/GLRenderer.hpp"
 #include "mare/GL/GLBuffer.hpp"
 #include "mare/GL/GLShader.hpp"
 #include "mare/GL/GLTexture.hpp"
 #include "mare/GL/GLRenderState.hpp"
-#include "mare/Application.hpp"
 #include "mare/SimpleMesh.hpp"
 #include "mare/Scene.hpp"
 
@@ -11,9 +11,6 @@
 #include <iostream>
 
 namespace mare
-{
-
-namespace GL
 {
 
 GLenum GLDrawMethod(DrawMethod draw_method)
@@ -38,10 +35,269 @@ GLenum GLDrawMethod(DrawMethod draw_method)
         return GL_POINTS;
     }
 }
-// Meshes
-// normal rendering
-template <typename T>
-void render_mesh(Layer *layer, SimpleMesh<T> *mesh, Material *material)
+
+GLRenderer::GLRenderer()
+{
+    running = true;
+
+    if (!glfwInit())
+    {
+        std::cerr << "GLFW Failed to initialize." << std::endl;
+        running = false;
+        return;
+    }
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
+    if (info.debug_mode.any())
+    {
+        glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
+    }
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+    glfwWindowHint(GLFW_SAMPLES, info.samples);
+    glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_TRUE);
+    window = glfwCreateWindow(info.window_width, info.window_height, "Untitled", info.fullscreen ? glfwGetPrimaryMonitor() : NULL, NULL);
+    if (!window)
+    {
+        std::cerr << "Failed to open window." << std::endl;
+        running = false;
+        return;
+    }
+    glfwMakeContextCurrent(window);
+    glfwSetWindowSizeCallback(window, glfw_onResize);
+    glfwSetKeyCallback(window, glfw_onKey);
+    glfwSetMouseButtonCallback(window, glfw_onMouseButton);
+    glfwSetCursorPosCallback(window, glfw_onMouseMove);
+    glfwSetScrollCallback(window, glfw_onMouseWheel);
+    if (!info.cursor)
+    {
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+    }
+    hz_resize_cursor = glfwCreateStandardCursor(GLFW_HRESIZE_CURSOR);
+    arrow_cursor = glfwCreateStandardCursor(GLFW_ARROW_CURSOR);
+    hand_cursor = glfwCreateStandardCursor(GLFW_HAND_CURSOR);
+    crosshair_cursor = glfwCreateStandardCursor(GLFW_CROSSHAIR_CURSOR);
+    if (info.vsync)
+    {
+        glfwSwapInterval(1);
+    }
+    else
+    {
+        glfwSwapInterval(0);
+    }
+
+    if (glewInit() != GLEW_OK)
+    {
+        std::cerr << "GLEW failed to initialize." << std::endl;
+    }
+
+    if (info.debug_mode.any())
+    {
+        glEnable(GL_DEBUG_OUTPUT);
+        glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+        glDebugMessageCallback(debug_message_callback, this);
+        std::cout << "GL VENDOR: " << glGetString(GL_VENDOR) << "\n";
+        std::cout << "GL VERSION: " << glGetString(GL_VERSION) << "\n";
+        std::cout << "GL RENDERER: " << glGetString(GL_RENDERER) << std::endl;
+    }
+}
+
+void GLRenderer::start_process()
+{
+    set_window_title(info.window_title);
+    info.current_time = glfwGetTime();
+    do
+    {
+        double time = glfwGetTime();
+        double delta_time = time - info.current_time;
+        if (info.scene)
+        {
+            bool render_result = true;
+            for (auto &layer : *(info.scene->get_layer_stack()))
+            {
+                if (layer->get_camera())
+                {
+                    layer->get_camera()->render(delta_time);
+                }
+                render_result = layer->render(time, delta_time);
+                if (!render_result)
+                {
+                    info.scene = nullptr;
+                    break;
+                }
+            }
+        }
+
+        info.current_time = time;
+        glfwPollEvents();
+        glfwSwapBuffers(window);
+    } while (running && !glfwWindowShouldClose(window));
+    glfwDestroyCursor(hz_resize_cursor);
+    glfwDestroyCursor(arrow_cursor);
+    glfwDestroyCursor(hand_cursor);
+    glfwDestroyCursor(crosshair_cursor);
+    glfwDestroyWindow(window);
+    glfwTerminate();
+}
+
+void GLRenderer::set_window_title(const char *title)
+{
+    glfwSetWindowTitle(window, title);
+}
+
+void GLRenderer::set_cursor(CURSOR type)
+{
+    switch (type)
+    {
+    case CURSOR::ARROW:
+        glfwSetCursor(window, arrow_cursor);
+        break;
+
+    case CURSOR::HZ_RESIZE:
+        glfwSetCursor(window, hz_resize_cursor);
+        break;
+
+    case CURSOR::HAND:
+        glfwSetCursor(window, hand_cursor);
+        break;
+
+    case CURSOR::CROSSHAIRS:
+        glfwSetCursor(window, crosshair_cursor);
+        break;
+    }
+}
+
+void GLRenderer::clear_color_buffer(glm::vec4 color)
+{
+    glClearBufferfv(GL_COLOR, 0, &color[0]);
+}
+
+void GLRenderer::clear_depth_buffer()
+{
+    glClear(GL_DEPTH_BUFFER_BIT);
+}
+
+void GLRenderer::resize_window(int width, int height)
+{
+    info.window_width = width;
+    info.window_height = height;
+    info.window_aspect = float(info.window_width) / float(info.window_height);
+    glViewport(0, 0, width, height);
+}
+
+void GLRenderer::wireframe_mode(bool wireframe)
+{
+    if (wireframe)
+    {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    }
+    else
+    {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    }
+}
+
+void GLRenderer::enable_depth_testing(bool enable)
+{
+    if (enable)
+    {
+        glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_LESS);
+    }
+    else
+    {
+        glDisable(GL_DEPTH_TEST);
+    }
+}
+
+void GLRenderer::enable_face_culling(bool enable)
+{
+    if (enable)
+    {
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
+    }
+    else
+    {
+        glDisable(GL_CULL_FACE);
+    }
+}
+
+void GLRenderer::enable_blending(bool enable)
+{
+    if (enable)
+    {
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    }
+    else
+    {
+        glDisable(GL_BLEND);
+    }
+}
+
+// Buffers
+Buffer<float> *GLRenderer::GenFloatBuffer(unsigned int count)
+{
+    return new GLBuffer<float>[count];
+}
+Buffer<int> *GLRenderer::GenIntBuffer(unsigned int count)
+{
+    return new GLBuffer<int>[count];
+}
+Buffer<unsigned int> *GLRenderer::GenIndexBuffer(unsigned int count)
+{
+    return new GLBuffer<unsigned int>[count];
+}
+Buffer<bool> *GLRenderer::GenBoolBuffer(unsigned int count)
+{
+    return new GLBuffer<bool>[count];
+}
+Buffer<glm::mat4> *GLRenderer::GenMat4Buffer(unsigned int count)
+{
+    return new GLBuffer<glm::mat4>[count];
+}
+Buffer<glm::mat3> *GLRenderer::GenMat3Buffer(unsigned int count)
+{
+    return new GLBuffer<glm::mat3>[count];
+}
+Buffer<glm::mat2> *GLRenderer::GenMat2Buffer(unsigned int count)
+{
+    return new GLBuffer<glm::mat2>[count];
+}
+Buffer<glm::vec2> *GLRenderer::GenVec2Buffer(unsigned int count)
+{
+    return new GLBuffer<glm::vec2>[count];
+}
+Buffer<glm::vec3> *GLRenderer::GenVec3Buffer(unsigned int count)
+{
+    return new GLBuffer<glm::vec3>[count];
+}
+Buffer<glm::vec4> *GLRenderer::GenVec4Buffer(unsigned int count)
+{
+    return new GLBuffer<glm::vec4>[count];
+}
+
+// Textures
+Texture2D *GLRenderer::GenTexture2D(const char *image_filepath)
+{
+    return new GLTexture2D(image_filepath);
+}
+
+// Render States
+RenderState *GLRenderer::GenRenderState()
+{
+    return new GLRenderState();
+}
+
+// Shaders
+Shader *GLRenderer::GenShader(const char *directory)
+{
+    return new GLShader(directory);
+}
+
+// normal rendering of simple meshes
+void GLRenderer::render_simple_mesh(Layer *layer, SimpleMesh *mesh, Material *material)
 {
     mesh->bind();
     material->bind();
@@ -62,8 +318,7 @@ void render_mesh(Layer *layer, SimpleMesh<T> *mesh, Material *material)
     }
 }
 // composite rendering
-template <typename T>
-void render_mesh(Layer *layer, SimpleMesh<T> *mesh, Material *material, glm::mat4 parent_model)
+void GLRenderer::render_simple_mesh(Layer *layer, SimpleMesh *mesh, Material *material, glm::mat4 parent_model)
 {
     mesh->bind();
     material->bind();
@@ -73,7 +328,7 @@ void render_mesh(Layer *layer, SimpleMesh<T> *mesh, Material *material, glm::mat
         material->upload_mat4("view", layer->get_camera()->view());
     }
     material->upload_mat4("model", parent_model * mesh->get_model());
-    material->upload_mat3("normal_matrix", glm::transpose(glm::inverse( glm::mat3( parent_model * (mesh->get_model()) ) ) ) );
+    material->upload_mat3("normal_matrix", glm::transpose(glm::inverse(glm::mat3(parent_model * (mesh->get_model())))));
     if (mesh->get_state()->is_indexed())
     {
         glDrawElements(GLDrawMethod(mesh->get_draw_method()), GLsizei(mesh->get_state()->render_count()), GL_UNSIGNED_INT, nullptr);
@@ -84,8 +339,7 @@ void render_mesh(Layer *layer, SimpleMesh<T> *mesh, Material *material, glm::mat
     }
 }
 // instanced rendering
-template <typename T>
-void render_mesh(Layer *layer, SimpleMesh<T> *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models)
+void GLRenderer::render_simple_mesh(Layer *layer, SimpleMesh *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models)
 {
     mesh->bind();
     material->bind();
@@ -95,7 +349,7 @@ void render_mesh(Layer *layer, SimpleMesh<T> *mesh, Material *material, glm::mat
         material->upload_mat4("view", layer->get_camera()->view());
     }
     material->upload_mat4("model", parent_model * mesh->get_model());
-    material->upload_mat3("normal_matrix", glm::transpose(glm::inverse( glm::mat3( parent_model * (mesh->get_model()) ) ) ) );
+    material->upload_mat3("normal_matrix", glm::transpose(glm::inverse(glm::mat3(parent_model * (mesh->get_model())))));
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, models->name());
     if (mesh->get_state()->is_indexed())
     {
@@ -107,8 +361,6 @@ void render_mesh(Layer *layer, SimpleMesh<T> *mesh, Material *material, glm::mat
     }
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, 0);
 }
-
-} // namespace GL
 
 // Debug functions
 std::string GLRenderer::debug_source_string(GLenum source)
@@ -202,237 +454,14 @@ GLRenderer::debug_message_callback(GLenum source,
     }
 }
 
-void GLRenderer::start_process(Application *app_pointer)
-{
-    running = true;
-    m_app_pointer = app_pointer;
-
-    if (!glfwInit())
-    {
-        std::cerr << "GLFW Failed to initialize." << std::endl;
-        running = false;
-        return;
-    }
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, info.major_version);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, info.minor_version);
-    if (info.debug_mode.any())
-    {
-        glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
-    }
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-    glfwWindowHint(GLFW_SAMPLES, info.samples);
-    glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_TRUE);
-    window = glfwCreateWindow(info.window_width, info.window_height, "Untitled", info.fullscreen ? glfwGetPrimaryMonitor() : NULL, NULL);
-    if (!window)
-    {
-        std::cerr << "Failed to open window." << std::endl;
-        running = false;
-        return;
-    }
-    glfwMakeContextCurrent(window);
-    glfwSetWindowSizeCallback(window, glfw_onResize);
-    glfwSetKeyCallback(window, glfw_onKey);
-    glfwSetMouseButtonCallback(window, glfw_onMouseButton);
-    glfwSetCursorPosCallback(window, glfw_onMouseMove);
-    glfwSetScrollCallback(window, glfw_onMouseWheel);
-    if (!info.cursor)
-    {
-        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
-    }
-    hz_resize_cursor = glfwCreateStandardCursor(GLFW_HRESIZE_CURSOR);
-    arrow_cursor = glfwCreateStandardCursor(GLFW_ARROW_CURSOR);
-    hand_cursor = glfwCreateStandardCursor(GLFW_HAND_CURSOR);
-    crosshair_cursor = glfwCreateStandardCursor(GLFW_CROSSHAIR_CURSOR);
-    if (info.vsync)
-    {
-        glfwSwapInterval(1);
-    }
-    else
-    {
-        glfwSwapInterval(0);
-    }
-
-    if (glewInit() != GLEW_OK)
-    {
-        std::cerr << "GLEW failed to initialize." << std::endl;
-    }
-
-    if (info.debug_mode.any())
-    {
-        glEnable(GL_DEBUG_OUTPUT);
-        glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-        glDebugMessageCallback(debug_message_callback, this);
-        std::cout << "GL VENDOR: " << glGetString(GL_VENDOR) << "\n";
-        std::cout << "GL VERSION: " << glGetString(GL_VERSION) << "\n";
-        std::cout << "GL RENDERER: " << glGetString(GL_RENDERER) << std::endl;
-    }
-    m_app_pointer->startup();
-    info.current_time = glfwGetTime();
-    do
-    {
-        double time = glfwGetTime();
-        double delta_time = time - info.current_time;
-        m_app_pointer->render(time, delta_time);
-        if (m_scene)
-        {
-            bool render_result = true;
-            for (auto &layer : *(m_scene->get_layer_stack()) )
-            {
-                if (layer->get_camera())
-                {
-                    layer->get_camera()->render(delta_time);
-                }
-                render_result = layer->render(time, delta_time);
-                if (!render_result)
-                {
-                    m_scene = nullptr;
-                    break;
-                }
-            }
-        }
-
-        info.current_time = time;
-        glfwPollEvents();
-        glfwSwapBuffers(window);
-    } while (running && !glfwWindowShouldClose(window));
-    m_app_pointer->shutdown();
-    glfwDestroyCursor(hz_resize_cursor);
-    glfwDestroyCursor(arrow_cursor);
-    glfwDestroyCursor(hand_cursor);
-    glfwDestroyCursor(crosshair_cursor);
-    glfwDestroyWindow(window);
-    glfwTerminate();
-}
-
-// Buffers
-Buffer<float> *GLRenderer::GenFloatBuffer(unsigned int count)
-{
-    return new GLBuffer<float>[count];
-}
-Buffer<int> *GLRenderer::GenIntBuffer(unsigned int count)
-{
-    return new GLBuffer<int>[count];
-}
-Buffer<unsigned int> *GLRenderer::GenIndexBuffer(unsigned int count)
-{
-    return new GLBuffer<unsigned int>[count];
-}
-Buffer<bool> *GLRenderer::GenBoolBuffer(unsigned int count)
-{
-    return new GLBuffer<bool>[count];
-}
-Buffer<glm::mat4> *GLRenderer::GenMat4Buffer(unsigned int count)
-{
-    return new GLBuffer<glm::mat4>[count];
-}
-Buffer<glm::mat3> *GLRenderer::GenMat3Buffer(unsigned int count)
-{
-    return new GLBuffer<glm::mat3>[count];
-}
-Buffer<glm::mat2> *GLRenderer::GenMat2Buffer(unsigned int count)
-{
-    return new GLBuffer<glm::mat2>[count];
-}
-Buffer<glm::vec2> *GLRenderer::GenVec2Buffer(unsigned int count)
-{
-    return new GLBuffer<glm::vec2>[count];
-}
-Buffer<glm::vec3> *GLRenderer::GenVec3Buffer(unsigned int count)
-{
-    return new GLBuffer<glm::vec3>[count];
-}
-Buffer<glm::vec4> *GLRenderer::GenVec4Buffer(unsigned int count)
-{
-    return new GLBuffer<glm::vec4>[count];
-}
-
-// Render States
-RenderState<float> *GLRenderer::GenFloatRenderState()
-{
-    return new GLRenderState<float>();
-}
-RenderState<glm::vec2> *GLRenderer::GenVec2RenderState()
-{
-    return new GLRenderState<glm::vec2>();
-}
-RenderState<glm::vec3> *GLRenderer::GenVec3RenderState()
-{
-    return new GLRenderState<glm::vec3>();
-}
-RenderState<glm::vec4> *GLRenderer::GenVec4RenderState()
-{
-    return new GLRenderState<glm::vec4>();
-}
-
-// Render Meshes
-void GLRenderer::render_float_mesh(Layer *layer, SimpleMesh<float> *mesh, Material *material)
-{
-    GL::render_mesh(layer, mesh, material);
-}
-void GLRenderer::render_float_mesh(Layer *layer, SimpleMesh<float> *mesh, Material *material, glm::mat4 parent_model)
-{
-    GL::render_mesh(layer, mesh, material, parent_model);
-}
-void GLRenderer::render_float_mesh(Layer *layer, SimpleMesh<float> *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models)
-{
-    GL::render_mesh(layer, mesh, material, parent_model, instance_count, models);
-}
-void GLRenderer::render_vec2_mesh(Layer *layer, SimpleMesh<glm::vec2> *mesh, Material *material)
-{
-    GL::render_mesh(layer, mesh, material);
-}
-void GLRenderer::render_vec2_mesh(Layer *layer, SimpleMesh<glm::vec2> *mesh, Material *material, glm::mat4 parent_model)
-{
-    GL::render_mesh(layer, mesh, material, parent_model);
-}
-void GLRenderer::render_vec2_mesh(Layer *layer, SimpleMesh<glm::vec2> *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models)
-{
-    GL::render_mesh(layer, mesh, material, parent_model, instance_count, models);
-}
-void GLRenderer::render_vec3_mesh(Layer *layer, SimpleMesh<glm::vec3> *mesh, Material *material)
-{
-    GL::render_mesh(layer, mesh, material);
-}
-void GLRenderer::render_vec3_mesh(Layer *layer, SimpleMesh<glm::vec3> *mesh, Material *material, glm::mat4 parent_model)
-{
-    GL::render_mesh(layer, mesh, material, parent_model);
-}
-void GLRenderer::render_vec3_mesh(Layer *layer, SimpleMesh<glm::vec3> *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models)
-{
-    GL::render_mesh(layer, mesh, material, parent_model, instance_count, models);
-}
-void GLRenderer::render_vec4_mesh(Layer *layer, SimpleMesh<glm::vec4> *mesh, Material *material)
-{
-    GL::render_mesh(layer, mesh, material);
-}
-void GLRenderer::render_vec4_mesh(Layer *layer, SimpleMesh<glm::vec4> *mesh, Material *material, glm::mat4 parent_model)
-{
-    GL::render_mesh(layer, mesh, material, parent_model);
-}
-void GLRenderer::render_vec4_mesh(Layer *layer, SimpleMesh<glm::vec4> *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models)
-{
-    GL::render_mesh(layer, mesh, material, parent_model, instance_count, models);
-}
-
-Shader *GLRenderer::GenShader(const char *directory)
-{
-    return new GLShader(directory);
-}
-
-Texture2D* GLRenderer::GenTexture2D(const char* image_filepath)
-{
-    return new GLTexture2D(image_filepath);
-}
-
 // Renderer callback functions
 void GLRenderer::glfw_onResize(GLFWwindow *window, int w, int h)
 {
-    m_app_pointer->resize_window(w, h);
-    
-    if (m_scene)
+    Renderer::API->resize_window(w, h);
+
+    if (info.scene)
     {
-        std::vector<Layer*>* layer_stack = m_scene->get_layer_stack();
+        std::vector<Layer *> *layer_stack = info.scene->get_layer_stack();
         for (auto &layer : *layer_stack)
         {
             if (layer->get_camera())
@@ -468,9 +497,9 @@ void GLRenderer::glfw_onKey(GLFWwindow *window, int key, int scancode, int actio
             input.W_PRESSED = false;
         }
     }
-    if (m_scene)
+    if (info.scene)
     {
-        std::vector<Layer*>* layer_stack = m_scene->get_layer_stack();
+        std::vector<Layer *> *layer_stack = info.scene->get_layer_stack();
         bool handled = false;
         for (size_t i = layer_stack->size(); i--;)
         {
@@ -497,9 +526,9 @@ void GLRenderer::glfw_onMouseButton(GLFWwindow *window, int button, int action, 
     {
         input.mouse_button.set(0, 0);
     }
-    if (m_scene)
+    if (info.scene)
     {
-        std::vector<Layer*>* layer_stack = m_scene->get_layer_stack();
+        std::vector<Layer *> *layer_stack = info.scene->get_layer_stack();
         bool handled = false;
         for (size_t i = layer_stack->size(); i--;)
         {
@@ -521,9 +550,9 @@ void GLRenderer::glfw_onMouseMove(GLFWwindow *window, double x, double y)
     glm::ivec2 old_pos = get_input().mouse_pos;
     get_input().mouse_pos = glm::ivec2(x, y);
     get_input().mouse_vel = glm::ivec2(x, y) - old_pos;
-    if (m_scene)
+    if (info.scene)
     {
-        std::vector<Layer*>* layer_stack = m_scene->get_layer_stack();
+        std::vector<Layer *> *layer_stack = info.scene->get_layer_stack();
         bool handled = false;
         for (size_t i = layer_stack->size(); i--;)
         {
@@ -543,9 +572,9 @@ void GLRenderer::glfw_onMouseMove(GLFWwindow *window, double x, double y)
 
 void GLRenderer::glfw_onMouseWheel(GLFWwindow *window, double xoffset, double yoffset)
 {
-    if (m_scene)
+    if (info.scene)
     {
-        std::vector<Layer*>* layer_stack = m_scene->get_layer_stack();
+        std::vector<Layer *> *layer_stack = info.scene->get_layer_stack();
         bool handled = false;
         for (size_t i = layer_stack->size(); i--;)
         {
@@ -562,6 +591,7 @@ void GLRenderer::glfw_onMouseWheel(GLFWwindow *window, double xoffset, double yo
     }
 }
 
+// Initialize static variable for the window
 GLFWwindow *GLRenderer::window = nullptr;
 
 } // namespace mare

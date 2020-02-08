@@ -2,13 +2,13 @@
 #define QUADRANGLEMESH
 
 #include "mare/SimpleMesh.hpp"
-#include "mare/Application.hpp"
+#include "mare/Renderer.hpp"
 
 #include "glm.hpp"
 
 namespace mare
 {
-class QuadrangleMesh : public SimpleMesh<float>
+class QuadrangleMesh : public SimpleMesh
 {
 public:
     QuadrangleMesh()
@@ -29,7 +29,7 @@ public:
         verts.push_back(-0.5f);
         verts.push_back(-0.5f);
 
-        vertex_buffers = Application::GenBuffer<float>(1);
+        vertex_buffers = Renderer::API->GenFloatBuffer(1);
         vertex_buffers->create(verts);
         vertex_buffers->set_format({{ShaderDataType::VEC2, "position"}});
 
@@ -54,7 +54,7 @@ public:
         verts.push_back(v1[0]);
         verts.push_back(v1[1]);
 
-        vertex_buffers = Application::GenBuffer<float>(1);
+        vertex_buffers = Renderer::API->GenFloatBuffer(1);
         vertex_buffers->create(verts);
         vertex_buffers->set_format({{ShaderDataType::VEC2, "position"}});
 

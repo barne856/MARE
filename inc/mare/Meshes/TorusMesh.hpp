@@ -2,13 +2,13 @@
 #define TORUSMESH
 
 #include "mare/SimpleMesh.hpp"
-#include "mare/Application.hpp"
+#include "mare/Renderer.hpp"
 
 #include "glm.hpp"
 
 namespace mare
 {
-class TorusMesh : public SimpleMesh<float>
+class TorusMesh : public SimpleMesh
 {
 public:
     TorusMesh(unsigned int n_segments, unsigned int n_rings, float inner_radius, float outer_radius)
@@ -66,13 +66,13 @@ public:
             indices.push_back(static_cast<unsigned int>((i + q + 1) % n_vertices));
         }
 
-        vertex_buffers = Application::GenBuffer<float>(1);
+        vertex_buffers = Renderer::API->GenFloatBuffer(1);
         vertex_buffers->create(&vertex_data[0], vertex_data.size() * sizeof(float));
         vertex_buffers->set_format({{ShaderDataType::VEC3, "position"},
                                     {ShaderDataType::VEC3, "normal"},
                                     {ShaderDataType::VEC2, "texcoords"}});
 
-        index_buffer = Application::GenBuffer<unsigned int>(1);
+        index_buffer = Renderer::API->GenIndexBuffer(1);
         index_buffer->create(indices);
 
         render_state->create();

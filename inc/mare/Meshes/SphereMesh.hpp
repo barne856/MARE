@@ -2,13 +2,13 @@
 #define SPHEREMESH
 
 #include "mare/SimpleMesh.hpp"
-#include "mare/Application.hpp"
+#include "mare/Renderer.hpp"
 
 #include "glm.hpp"
 
 namespace mare
 {
-class SphereMesh : public SimpleMesh<float>
+class SphereMesh : public SimpleMesh
 {
 public:
     SphereMesh(unsigned int recursionLevel, float radius, bool force_flat = false)
@@ -100,7 +100,7 @@ public:
             data.push_back(vertices[3 * i][2]);
         }
 
-        vertex_buffers = Application::GenBuffer<float>(1);
+        vertex_buffers = Renderer::API->GenFloatBuffer(1);
         vertex_buffers->create(data);
         vertex_buffers->set_format({{ShaderDataType::VEC3, "position"},
                                    {ShaderDataType::VEC3, "normal"}});

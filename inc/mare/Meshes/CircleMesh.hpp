@@ -2,13 +2,13 @@
 #define CIRCLEMESH
 
 #include "mare/SimpleMesh.hpp"
-#include "mare/Application.hpp"
+#include "mare/Renderer.hpp"
 
 #include "glm.hpp"
 
 namespace mare
 {
-class CircleMesh : public SimpleMesh<float>
+class CircleMesh : public SimpleMesh
 {
 public:
     CircleMesh(int sides, float radius)
@@ -28,7 +28,7 @@ public:
         verts.push_back(radius);
         verts.push_back(0.0f);
 
-        vertex_buffers = Application::GenBuffer<float>(1);
+        vertex_buffers = Renderer::API->GenFloatBuffer(1);
         vertex_buffers->create(verts);
         vertex_buffers->set_format({{ShaderDataType::VEC2, "position"}});
 

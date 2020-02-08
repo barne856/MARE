@@ -4,7 +4,7 @@
 // MARE
 #include "mare/Layer.hpp"
 #include "mare/Widget.hpp"
-#include "mare/Application.hpp"
+#include "mare/Renderer.hpp"
 
 // Standard Library
 #include <vector>
@@ -31,8 +31,8 @@ public:
     bool render(double time, double dt) override
     {
         // Renderer properties
-        Application::enable_depth_testing(false);
-        Application::enable_face_culling(true);
+        Renderer::API->enable_depth_testing(false);
+        Renderer::API->enable_face_culling(true);
 
         // render widgets
         for (auto &widget : *m_widget_stack)

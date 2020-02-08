@@ -24,7 +24,6 @@ enum class DrawMethod
     TRIANGLE_FAN
 };
 
-template <typename T>
 class RenderState
 {
 public:
@@ -33,7 +32,7 @@ public:
     virtual void bind() const = 0;
     virtual void unbind() const = 0;
     virtual void create() = 0;
-    virtual void add_vertex_buffer(Buffer<T> *vbo) = 0;
+    virtual void add_vertex_buffer(Buffer<float> *vbo) = 0;
     virtual void set_index_buffer(Buffer<unsigned int> *ibo) = 0;
     inline unsigned int render_count() const
     {
@@ -58,7 +57,7 @@ protected:
     unsigned int m_index_render_count;
     bool m_is_indexed;
     DrawMethod draw_method;
-    std::vector<Buffer<T> *> vertex_buffers;
+    std::vector<Buffer<float> *> vertex_buffers;
     Buffer<unsigned int> *index_buffer;
 };
 } // namespace mare
