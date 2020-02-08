@@ -13,7 +13,7 @@ namespace mare
 class GLRenderer : public Renderer
 {
 public:
-GLRenderer();
+    void init() override;
     void start_process() override;
 
     // Renderer Commands

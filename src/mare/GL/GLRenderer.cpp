@@ -36,9 +36,9 @@ GLenum GLDrawMethod(DrawMethod draw_method)
     }
 }
 
-GLRenderer::GLRenderer()
+void GLRenderer::init()
 {
-    running = true;
+        running = true;
 
     if (!glfwInit())
     {

@@ -20,122 +20,52 @@ class Camera
 {
 public:
     Camera(CameraType type);
-    ~Camera()
-    {
-        if (m_controls)
-        {
-            delete m_controls;
-            m_controls = nullptr;
-        }
-    }
+    ~Camera();
 
-    glm::mat4 inline projection() const { return m_projection; }
-    glm::mat4 inline view() const { return m_view; }
-    glm::vec3 screen_to_world(glm::ivec2 screen_coords);
+    // Get projection and view matrices from the camera
+    glm::mat4 projection() const;
+    glm::mat4 view() const;
 
-    void set_controls(ControlsConfig config)
-    {
-        if (m_controls)
-        {
-            delete m_controls;
-            m_controls = nullptr;
-        }
+    // Set the controls for the camera
+    void set_controls(ControlsConfig config);
 
-        switch (config)
-        {
-        case ControlsConfig::ORBITCONTROLS:
-            m_controls = new OrbitControls();
-            break;
-        default:
-            m_controls = nullptr;
-            break;
-        }
-    }
-
+    // Interpret input from renderer using camera controls
     void interpret_input();
 
-    void set_view(const glm::vec3 &eye, const glm::vec3 &center, const glm::vec3 &up)
-    {
-        m_position = eye;
-        m_direction = center - eye;
-        m_direction = glm::normalize(m_direction);
-        m_up = glm::normalize(up);
-        recalculate_view();
-    }
-    void set_position(const glm::vec3 &position)
-    {
-        m_position = position;
-        recalculate_view();
-    }
-    void set_direction(const glm::vec3 &direction)
-    {
-        m_direction = direction;
-        m_direction = glm::normalize(m_direction);
-        recalculate_view();
-    }
-    void set_up(const glm::vec3 &up)
-    {
-        m_up = up;
-        m_up = glm::normalize(m_up);
-        recalculate_view();
-    }
-    // Pespective FOV in y direction
-    void set_fov(float fovy)
-    {
-        m_fovy = fovy;
-        recalculate_projection();
-    }
-    // Orthographic scale in y direction
-    void set_scale(float scale)
-    {
-        m_scale = scale;
-        recalculate_projection();
-    }
-    void set_aspect(float aspect)
-    {
-        m_aspect = aspect;
-        recalculate_projection();
-    }
-    void set_near_clip_plan(float near)
-    {
-        m_near = near;
-        recalculate_projection();
-    }
-    void set_far_clip_plan(float far)
-    {
-        m_far = far;
-        recalculate_projection();
-    }
-    void set_forward_velocity(float velocity)
-    {
-        m_linear_velocity = m_direction * velocity;
-    }
-    void set_linear_velocity(const glm::vec3 &linear_velocity)
-    {
-        m_linear_velocity = linear_velocity;
-    }
-    void set_angular_velocity(float angular_velocity)
-    {
-        m_angular_velocity = angular_velocity;
-    }
+    // Set camera properties
+    void set_view(const glm::vec3 &eye, const glm::vec3 &center, const glm::vec3 &up);
+    void set_position(const glm::vec3 &position);
+    void set_direction(const glm::vec3 &direction);
+    void set_up(const glm::vec3 &up);
+    void set_fov(float fovy);    // Pespective FOV in y direction
+    void set_scale(float scale); // Orthographic scale in y direction
+    void set_aspect(float aspect);
+    void set_near_clip_plan(float near);
+    void set_far_clip_plan(float far);
+    void set_forward_velocity(float velocity);
+    void set_linear_velocity(const glm::vec3 &linear_velocity);
+    void set_angular_velocity(float angular_velocity);
+    void set_distance_to_center(float distance);
 
-    void set_distance_to_center(float distance)
-    {
-        m_distance_to_center = distance;
-    }
+    // Get camera properties
+    glm::vec3 get_position() const;
+    glm::vec3 get_direction() const;
+    glm::vec3 get_up() const;
+    float get_distance_to_center() const;
 
-    glm::vec3 get_position() const { return m_position; }
-    glm::vec3 get_direction() const { return m_direction; }
-    glm::vec3 get_up() const { return m_up; }
-    float get_distance_to_center() const { return m_distance_to_center; }
+    // Update the camera
+    void render(double dt);        //Physics
+    void recalculate_projection(); // projection
+    void recalculate_view();       // view
 
-    void render(double dt);
-    void recalculate_projection();
-    void recalculate_view();
+    // Raycast screen coordinates to a 3D point in world space
+    glm::vec3 screen_to_world(glm::ivec2 screen_coords);
 
 private:
+    // Camera Controls
     Controls *m_controls;
 
+    // Camera Properties
     glm::mat4 m_projection;
     glm::mat4 m_view;
     glm::vec3 m_linear_velocity;
@@ -143,7 +73,6 @@ private:
     glm::vec3 m_position;
     glm::vec3 m_direction;
     glm::vec3 m_up;
-
     float m_scale = 1.0f;
     float m_aspect = 1.0f;
     float m_near = -1.0f;
@@ -151,6 +80,7 @@ private:
     float m_fovy = 45.0f;
     float m_distance_to_center = 1.0f;
 
+    // Camera type
     CameraType m_type;
 };
 } // namespace mare

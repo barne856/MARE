@@ -166,6 +166,7 @@ public:
 
     // Start and end the program
     static void run();
+    virtual void init() = 0;
     virtual void start_process() = 0;
     static void end_process();
 
