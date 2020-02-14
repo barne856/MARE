@@ -78,12 +78,10 @@ public:
         render_state->set_draw_method(DrawMethod::LINES);
 
         // if dynamic, create extra space to hold resized strings
-        vertex_buffers = Renderer::API->GenFloatBuffer(1);
-        vertex_buffers->create(verts);
-        vertex_buffers->set_format({{ShaderDataType::VEC2, "position"}});
+        Buffer<float>* vb = Renderer::API->GenFloatBuffer(&verts);
+        vb->set_format({{LinalgDataType::VEC2, "position"}});
 
-        render_state->create();
-        render_state->add_vertex_buffer(vertex_buffers);
+        render_state->set_vertex_buffer(vb);
     }
     glm::vec2 get_center() const
     {

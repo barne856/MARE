@@ -40,18 +40,15 @@ public:
             vertex_data.push_back(texture_coords[i][0]);
             vertex_data.push_back(texture_coords[i][1]);
         }
-        vertex_buffers = Renderer::API->GenFloatBuffer(1);
-        vertex_buffers->create(&vertex_data[0], vertex_data.size() * sizeof(float), vertex_data.size() * sizeof(float));
-        vertex_buffers->set_format({{ShaderDataType::VEC3, "position"},
-                                    {ShaderDataType::VEC3, "normals"},
-                                    {ShaderDataType::VEC2, "texture_coords"}});
-        render_state->create();
-        render_state->add_vertex_buffer(vertex_buffers);
+        Buffer<float>* vb = Renderer::API->GenFloatBuffer(&vertex_data);
+        vb->set_format({{LinalgDataType::VEC3, "position"},
+                                    {LinalgDataType::VEC3, "normals"},
+                                    {LinalgDataType::VEC2, "texture_coords"}});
+        render_state->set_vertex_buffer(vb);
         if (indices)
         {
-            index_buffer = Renderer::API->GenIndexBuffer(1);
-            index_buffer->create(*indices);
-            render_state->set_index_buffer(index_buffer);
+            Buffer<unsigned int>* ib = Renderer::API->GenIndexBuffer(indices);
+            render_state->set_index_buffer(ib);
         }
     }
 };

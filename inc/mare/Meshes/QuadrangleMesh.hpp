@@ -29,12 +29,10 @@ public:
         verts.push_back(-0.5f);
         verts.push_back(-0.5f);
 
-        vertex_buffers = Renderer::API->GenFloatBuffer(1);
-        vertex_buffers->create(verts);
-        vertex_buffers->set_format({{ShaderDataType::VEC2, "position"}});
+        Buffer<float> *vertex_buffer = Renderer::API->GenFloatBuffer(&verts);
+        vertex_buffer->set_format({{LinalgDataType::VEC2, "position"}});
 
-        render_state->create();
-        render_state->add_vertex_buffer(vertex_buffers);
+        render_state->set_vertex_buffer(vertex_buffer);
     }
     QuadrangleMesh(glm::vec2 v1, glm::vec2 v2, glm::vec2 v3, glm::vec2 v4)
     {
@@ -54,12 +52,10 @@ public:
         verts.push_back(v1[0]);
         verts.push_back(v1[1]);
 
-        vertex_buffers = Renderer::API->GenFloatBuffer(1);
-        vertex_buffers->create(verts);
-        vertex_buffers->set_format({{ShaderDataType::VEC2, "position"}});
+        Buffer<float> *vertex_buffer = Renderer::API->GenFloatBuffer(&verts);
+        vertex_buffer->set_format({{LinalgDataType::VEC2, "position"}});
 
-        render_state->create();
-        render_state->add_vertex_buffer(vertex_buffers);
+        render_state->set_vertex_buffer(vertex_buffer);
     }
 };
 } // namespace mare

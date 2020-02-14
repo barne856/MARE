@@ -126,16 +126,22 @@ public:
         indices.push_back(23);
         indices.push_back(20);
 
-        vertex_buffers = Renderer::API->GenFloatBuffer(1);
-        vertex_buffers->create(&data[0][0], data.size() * sizeof(glm::vec3));
-        vertex_buffers->set_format({{ShaderDataType::VEC3, "position"},
-                                   {ShaderDataType::VEC3, "normal"}});
+        // create float vector
+        std::vector<float> vertex_data{};
+        for (auto &vert : data)
+        {
+            vertex_data.push_back(vert[0]);
+            vertex_data.push_back(vert[1]);
+            vertex_data.push_back(vert[2]);
+        }
 
-        index_buffer = Renderer::API->GenIndexBuffer(1);
-        index_buffer->create(indices);
+        Buffer<float> *vertex_buffer = Renderer::API->GenFloatBuffer(&vertex_data);
+        vertex_buffer->set_format({{LinalgDataType::VEC3, "position"},
+                                   {LinalgDataType::VEC3, "normal"}});
 
-        render_state->create();
-        render_state->add_vertex_buffer(vertex_buffers);
+        Buffer<unsigned int> *index_buffer = Renderer::API->GenIndexBuffer(&indices);
+
+        render_state->set_vertex_buffer(vertex_buffer);
         render_state->set_index_buffer(index_buffer);
     }
 };

@@ -48,15 +48,23 @@ public:
             angle -= delta_angle;
         }
 
-        vertex_buffers = Renderer::API->GenFloatBuffer(2);
-        vertex_buffers[0].create(&verts[0][0], verts.size() * sizeof(glm::vec3));
-        vertex_buffers[0].set_format({{ShaderDataType::VEC3, "position"}});
-        vertex_buffers[1].create(&normals[0][0], normals.size() * sizeof(glm::vec3));
-        vertex_buffers[1].set_format({{ShaderDataType::VEC3, "normal"}});
+        // interleave vertex positions and normals
+        std::vector<float> vertex_data{};
+        for (size_t i = 0; i < verts.size(); i++)
+        {
+            vertex_data.push_back(verts[i][0]);
+            vertex_data.push_back(verts[i][1]);
+            vertex_data.push_back(verts[i][2]);
+            vertex_data.push_back(normals[i][0]);
+            vertex_data.push_back(normals[i][1]);
+            vertex_data.push_back(normals[i][2]);
+        }
 
-        render_state->create();
-        render_state->add_vertex_buffer(&vertex_buffers[0]);
-        render_state->add_vertex_buffer(&vertex_buffers[1]);
+        Buffer<float> *vb = Renderer::API->GenFloatBuffer(&vertex_data);
+        vb->set_format({{LinalgDataType::VEC3, "position"},
+                        {LinalgDataType::VEC3, "normal"}});
+
+        render_state->set_vertex_buffer(vb);
     }
 };
 } // namespace mare

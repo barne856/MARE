@@ -38,7 +38,7 @@ GLenum GLDrawMethod(DrawMethod draw_method)
 
 void GLRenderer::init()
 {
-        running = true;
+    running = true;
 
     if (!glfwInit())
     {
@@ -237,45 +237,45 @@ void GLRenderer::enable_blending(bool enable)
 }
 
 // Buffers
-Buffer<float> *GLRenderer::GenFloatBuffer(unsigned int count)
+Buffer<float> *GLRenderer::GenFloatBuffer(std::vector<float> *data, BufferType buffer_type, size_t size_in_bytes)
 {
-    return new GLBuffer<float>[count];
+    return new GLBuffer<float>(data, buffer_type, size_in_bytes);
 }
-Buffer<int> *GLRenderer::GenIntBuffer(unsigned int count)
+Buffer<int> *GLRenderer::GenIntBuffer(std::vector<int> *data, BufferType buffer_type, size_t size_in_bytes)
 {
-    return new GLBuffer<int>[count];
+    return new GLBuffer<int>(data, buffer_type, size_in_bytes);
 }
-Buffer<unsigned int> *GLRenderer::GenIndexBuffer(unsigned int count)
+Buffer<unsigned int> *GLRenderer::GenIndexBuffer(std::vector<unsigned int> *data, BufferType buffer_type, size_t size_in_bytes)
 {
-    return new GLBuffer<unsigned int>[count];
+    return new GLBuffer<unsigned int>(data, buffer_type, size_in_bytes);
 }
-Buffer<bool> *GLRenderer::GenBoolBuffer(unsigned int count)
+Buffer<bool> *GLRenderer::GenBoolBuffer(std::vector<bool> *data, BufferType buffer_type, size_t size_in_bytes)
 {
-    return new GLBuffer<bool>[count];
+    return new GLBuffer<bool>(data, buffer_type, size_in_bytes);
 }
-Buffer<glm::mat4> *GLRenderer::GenMat4Buffer(unsigned int count)
+Buffer<glm::vec2> *GLRenderer::GenVec2Buffer(std::vector<glm::vec2> *data, BufferType buffer_type, size_t size_in_bytes)
 {
-    return new GLBuffer<glm::mat4>[count];
+    return new GLBuffer<glm::vec2>(data, buffer_type, size_in_bytes);
 }
-Buffer<glm::mat3> *GLRenderer::GenMat3Buffer(unsigned int count)
+Buffer<glm::vec3> *GLRenderer::GenVec3Buffer(std::vector<glm::vec3> *data, BufferType buffer_type, size_t size_in_bytes)
 {
-    return new GLBuffer<glm::mat3>[count];
+    return new GLBuffer<glm::vec3>(data, buffer_type, size_in_bytes);
 }
-Buffer<glm::mat2> *GLRenderer::GenMat2Buffer(unsigned int count)
+Buffer<glm::vec4> *GLRenderer::GenVec4Buffer(std::vector<glm::vec4> *data, BufferType buffer_type, size_t size_in_bytes)
 {
-    return new GLBuffer<glm::mat2>[count];
+    return new GLBuffer<glm::vec4>(data, buffer_type, size_in_bytes);
 }
-Buffer<glm::vec2> *GLRenderer::GenVec2Buffer(unsigned int count)
+Buffer<glm::mat2> *GLRenderer::GenMat2Buffer(std::vector<glm::mat2> *data, BufferType buffer_type, size_t size_in_bytes)
 {
-    return new GLBuffer<glm::vec2>[count];
+    return new GLBuffer<glm::mat2>(data, buffer_type, size_in_bytes);
 }
-Buffer<glm::vec3> *GLRenderer::GenVec3Buffer(unsigned int count)
+Buffer<glm::mat3> *GLRenderer::GenMat3Buffer(std::vector<glm::mat3> *data, BufferType buffer_type, size_t size_in_bytes)
 {
-    return new GLBuffer<glm::vec3>[count];
+    return new GLBuffer<glm::mat3>(data, buffer_type, size_in_bytes);
 }
-Buffer<glm::vec4> *GLRenderer::GenVec4Buffer(unsigned int count)
+Buffer<glm::mat4> *GLRenderer::GenMat4Buffer(std::vector<glm::mat4> *data, BufferType buffer_type, size_t size_in_bytes)
 {
-    return new GLBuffer<glm::vec4>[count];
+    return new GLBuffer<glm::mat4>(data, buffer_type, size_in_bytes);
 }
 
 // Textures
@@ -308,14 +308,17 @@ void GLRenderer::render_simple_mesh(Layer *layer, SimpleMesh *mesh, Material *ma
     }
     material->upload_mat4("model", mesh->get_model());
     material->upload_mat3("normal_matrix", glm::mat3(mesh->get_normal()));
+    mesh->get_state()->wait_buffer();
     if (mesh->get_state()->is_indexed())
     {
-        glDrawElements(GLDrawMethod(mesh->get_draw_method()), GLsizei(mesh->get_state()->render_count()), GL_UNSIGNED_INT, nullptr);
+        glDrawElementsBaseVertex(GLDrawMethod(mesh->get_draw_method()), GLsizei(mesh->get_state()->render_count()), GL_UNSIGNED_INT, nullptr, mesh->get_state()->get_render_index());
     }
     else
     {
-        glDrawArrays(GLDrawMethod(mesh->get_draw_method()), 0, GLsizei(mesh->get_state()->render_count()));
+        glDrawArrays(GLDrawMethod(mesh->get_draw_method()), mesh->get_state()->get_render_index(), GLsizei(mesh->get_state()->render_count()));
     }
+    mesh->get_state()->lock_buffer();
+    mesh->get_state()->swap_buffer();
 }
 // composite rendering
 void GLRenderer::render_simple_mesh(Layer *layer, SimpleMesh *mesh, Material *material, glm::mat4 parent_model)
@@ -329,14 +332,17 @@ void GLRenderer::render_simple_mesh(Layer *layer, SimpleMesh *mesh, Material *ma
     }
     material->upload_mat4("model", parent_model * mesh->get_model());
     material->upload_mat3("normal_matrix", glm::transpose(glm::inverse(glm::mat3(parent_model * (mesh->get_model())))));
+    mesh->get_state()->wait_buffer();
     if (mesh->get_state()->is_indexed())
     {
-        glDrawElements(GLDrawMethod(mesh->get_draw_method()), GLsizei(mesh->get_state()->render_count()), GL_UNSIGNED_INT, nullptr);
+        glDrawElementsBaseVertex(GLDrawMethod(mesh->get_draw_method()), GLsizei(mesh->get_state()->render_count()), GL_UNSIGNED_INT, nullptr, mesh->get_state()->get_render_index());
     }
     else
     {
-        glDrawArrays(GLDrawMethod(mesh->get_draw_method()), 0, GLsizei(mesh->get_state()->render_count()));
+        glDrawArrays(GLDrawMethod(mesh->get_draw_method()), mesh->get_state()->get_render_index(), GLsizei(mesh->get_state()->render_count()));
     }
+    mesh->get_state()->lock_buffer();
+    mesh->get_state()->swap_buffer();
 }
 // instanced rendering
 void GLRenderer::render_simple_mesh(Layer *layer, SimpleMesh *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models)
@@ -351,15 +357,18 @@ void GLRenderer::render_simple_mesh(Layer *layer, SimpleMesh *mesh, Material *ma
     material->upload_mat4("model", parent_model * mesh->get_model());
     material->upload_mat3("normal_matrix", glm::transpose(glm::inverse(glm::mat3(parent_model * (mesh->get_model())))));
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, models->name());
+    mesh->get_state()->wait_buffer();
     if (mesh->get_state()->is_indexed())
     {
-        glDrawElementsInstanced(GLDrawMethod(mesh->get_draw_method()), mesh->get_state()->render_count(), GL_UNSIGNED_INT, nullptr, instance_count);
+        glDrawElementsInstancedBaseVertex(GLDrawMethod(mesh->get_draw_method()), mesh->get_state()->render_count(), GL_UNSIGNED_INT, nullptr, instance_count, mesh->get_state()->get_render_index());
     }
     else
     {
-        glDrawArraysInstanced(GLDrawMethod(mesh->get_draw_method()), 0, mesh->get_state()->render_count(), instance_count);
+        glDrawArraysInstanced(GLDrawMethod(mesh->get_draw_method()), mesh->get_state()->get_render_index(), mesh->get_state()->render_count(), instance_count);
     }
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, 0);
+    mesh->get_state()->lock_buffer();
+    mesh->get_state()->swap_buffer();
 }
 
 // Debug functions

@@ -1,226 +1,258 @@
+// MARE
 #include "mare/GL/GLBuffer.hpp"
-#include "GL/glew.h"
 
+// Standard Library
 #include <iostream>
+#include <algorithm>
 
+// External Libraries
 #include "glm.hpp"
 
 namespace mare
 {
 template <typename T>
-void GLBuffer<T>::create(std::vector<T> &data, size_t dynamic_size_in_bytes)
+GLBuffer<T>::GLBuffer(std::vector<T> *data, BufferType buffer_type, size_t size_in_bytes)
+    : Buffer(data, buffer_type, size_in_bytes), buffer_pointer(nullptr), buffer_fence(nullptr)
 {
-    glDeleteBuffers(1, &m_buffer_ID);
+    // Create the buffer
     glCreateBuffers(1, &m_buffer_ID);
-    if (dynamic_size_in_bytes)
+    GLbitfield flags = 0;
+    switch (buffer_type)
     {
-        glNamedBufferStorage(m_buffer_ID, dynamic_size_in_bytes, nullptr, GL_MAP_READ_BIT | GL_MAP_WRITE_BIT);
-        m_dynamic_size_in_bytes = dynamic_size_in_bytes;
-        is_dynamic = true;
-        if (data.size())
+    case BufferType::STATIC:
+        glNamedBufferStorage(m_buffer_ID, m_data_size, &(*data)[0], 0);
+        buffer_pointer = nullptr;
+        break;
+    case BufferType::READ_ONLY:
+        flags = GL_MAP_READ_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT;
+        glNamedBufferStorage(m_buffer_ID, m_data_size, nullptr, flags);
+        buffer_pointer = static_cast<T *>(glMapNamedBufferRange(m_buffer_ID, 0, m_data_size, flags));
+        if (data)
         {
-            m_data_size = sizeof(T) * data.size();
-            update(data, 0);
+            flush(*data, 0);
         }
-    }
-    else
-    {
-        glNamedBufferData(m_buffer_ID, sizeof(T) * data.size(), &data[0], GL_STATIC_DRAW);
-        m_data_size = sizeof(T) * data.size();
-        is_dynamic = false;
-    }
-    if (!m_format.stride())
-    {
-        m_count = unsigned int(data.size());
-    }
-    else
-    {
-        m_count = unsigned int(m_data_size / m_format.stride());
-    }
-}
-
-template <typename T>
-void GLBuffer<T>::create(T *data, size_t size_in_bytes, size_t dynamic_size_in_bytes)
-{
-    glDeleteBuffers(1, &m_buffer_ID);
-    glCreateBuffers(1, &m_buffer_ID);
-    if (dynamic_size_in_bytes)
-    {
-        glNamedBufferStorage(m_buffer_ID, dynamic_size_in_bytes, nullptr, GL_MAP_READ_BIT | GL_MAP_WRITE_BIT);
-        m_dynamic_size_in_bytes = dynamic_size_in_bytes;
-        is_dynamic = true;
-        if (size_in_bytes)
+        break;
+    case BufferType::WRITE_ONLY:
+        flags = GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT;
+        glNamedBufferStorage(m_buffer_ID, m_data_size, nullptr, flags);
+        buffer_pointer = static_cast<T *>(glMapNamedBufferRange(m_buffer_ID, 0, m_data_size, flags));
+        if (data)
         {
-            m_data_size = size_in_bytes;
-            update(data, size_in_bytes, 0);
+            flush(*data, 0);
         }
-    }
-    else
-    {
-        glNamedBufferData(m_buffer_ID, size_in_bytes, data, GL_STATIC_DRAW);
-        m_data_size = size_in_bytes;
-        is_dynamic = false;
-    }
-    if (!m_format.stride())
-    {
-        m_count = unsigned int(m_data_size / sizeof(T));
-    }
-    else
-    {
-        m_count = unsigned int(m_data_size / m_format.stride());
-    }
-}
-
-// updates dynamic buffers with pre-allocated space. render count will increase but not decrease
-template <typename T>
-void GLBuffer<T>::update(std::vector<T> &data, unsigned int offset)
-{
-    if (is_dynamic)
-    {
-        if (sizeof(T) * data.size() + offset * sizeof(T) > m_dynamic_size_in_bytes)
+        break;
+    case BufferType::READ_WRITE:
+        flags = GL_MAP_WRITE_BIT | GL_MAP_READ_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT;
+        glNamedBufferStorage(m_buffer_ID, m_data_size, nullptr, flags);
+        buffer_pointer = static_cast<T *>(glMapNamedBufferRange(m_buffer_ID, 0, m_data_size, flags));
+        if (data)
         {
-            std::cerr << "Cannot update buffer, out of range" << std::endl;
+            flush(*data, 0);
         }
-        else
+        break;
+    case BufferType::READ_ONLY_DOUBLE_BUFFERED:
+        flags = GL_MAP_READ_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT;
+        glNamedBufferStorage(m_buffer_ID, m_num_buffers * m_data_size, nullptr, flags);
+        buffer_pointer = static_cast<T *>(glMapNamedBufferRange(m_buffer_ID, 0, m_num_buffers * m_data_size, flags));
+        if (data)
         {
-            // increase render count, does not decrease render count if updated with zeros
-            if (sizeof(T) * data.size() + offset * sizeof(T) > m_data_size)
-            {
-                m_data_size = sizeof(T) * data.size() + offset * sizeof(T);
-                if (!m_format.stride())
-                {
-                    m_count = unsigned int(data.size());
-                }
-                else
-                {
-                    m_count = unsigned int(m_data_size / m_format.stride());
-                }
-            }
-            void *p = glMapNamedBufferRange(m_buffer_ID, offset * sizeof(T), sizeof(T) * data.size(), GL_MAP_WRITE_BIT);
-            memcpy(p, &data[0], sizeof(T) * data.size());
-            glUnmapNamedBuffer(m_buffer_ID);
+            flush(*data, 0);
+            flush(*data, data->size());
         }
-    }
-    else
-    {
-        std::cerr << "Cannot update a static buffer, set the dynamic size in bytes during buffer creation to create a dynamic buffer" << std::endl;
-    }
-}
-template <typename T>
-void GLBuffer<T>::update(T *data, size_t size_in_bytes, unsigned int offset)
-{
-    if (is_dynamic)
-    {
-        if (size_in_bytes + offset > m_dynamic_size_in_bytes)
+        buffer_fence = new GLsync[m_num_buffers];
+        break;
+    case BufferType::WRITE_ONLY_DOUBLE_BUFFERED:
+        flags = GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT;
+        glNamedBufferStorage(m_buffer_ID, m_num_buffers * m_data_size, nullptr, flags);
+        buffer_pointer = static_cast<T *>(glMapNamedBufferRange(m_buffer_ID, 0, m_num_buffers * m_data_size, flags));
+        if (data)
         {
-            std::cerr << "Cannot update buffer, out of range" << std::endl;
+            flush(*data, 0);
+            flush(*data, data->size());
         }
-        else
+        buffer_fence = new GLsync[m_num_buffers];
+        break;
+    case BufferType::READ_WRITE_DOUBLE_BUFFERED:
+        flags = GL_MAP_WRITE_BIT | GL_MAP_READ_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT;
+        glNamedBufferStorage(m_buffer_ID, m_num_buffers * m_data_size, nullptr, flags);
+        buffer_pointer = static_cast<T *>(glMapNamedBufferRange(m_buffer_ID, 0, m_num_buffers * m_data_size, flags));
+        if (data)
         {
-            // increase render count, does not decrease render count if updated with zeros
-            if (size_in_bytes + offset > m_data_size)
-            {
-                m_data_size = size_in_bytes + offset;
-                if (!m_format.stride())
-                {
-                    m_count = unsigned int(m_data_size / sizeof(T));
-                }
-                else
-                {
-                    m_count = unsigned int(m_data_size / m_format.stride());
-                }
-            }
-            void *p = glMapNamedBufferRange(m_buffer_ID, offset, size_in_bytes, GL_MAP_WRITE_BIT);
-            memcpy(p, data, size_in_bytes);
-            glUnmapNamedBuffer(m_buffer_ID);
+            flush(*data, 0);
+            flush(*data, data->size());
         }
-    }
-    else
-    {
-        std::cerr << "Cannot update a static buffer, set the dynamic size in bytes during buffer creation to create a dynamic buffer" << std::endl;
-    }
-}
-
-template <typename T>
-const T GLBuffer<T>::operator[](unsigned int i) const
-{
-    T result{};
-    if (is_dynamic)
-    {
-        if (i >= (unsigned int)(m_data_size / sizeof(T)))
+        buffer_fence = new GLsync[m_num_buffers];
+        break;
+    case BufferType::READ_ONLY_TRIPLE_BUFFERED:
+        flags = GL_MAP_READ_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT;
+        glNamedBufferStorage(m_buffer_ID, m_num_buffers * m_data_size, nullptr, flags);
+        buffer_pointer = static_cast<T *>(glMapNamedBufferRange(m_buffer_ID, 0, m_num_buffers * m_data_size, flags));
+        if (data)
         {
-            std::cerr << "Buffer index out of bounds" << std::endl;
-            return result;
+            flush(*data, 0);
+            flush(*data, data->size());
+            flush(*data, 2 * data->size());
         }
-        void *buffer_read_pointer = glMapNamedBufferRange(m_buffer_ID, i * sizeof(T), sizeof(T), GL_MAP_READ_BIT);
-        memcpy(&result, buffer_read_pointer, sizeof(T));
-        glUnmapNamedBuffer(m_buffer_ID);
-        return result;
+        buffer_fence = new GLsync[m_num_buffers];
+        break;
+    case BufferType::WRITE_ONLY_TRIPLE_BUFFERED:
+        flags = GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT;
+        glNamedBufferStorage(m_buffer_ID, m_num_buffers * m_data_size, nullptr, flags);
+        buffer_pointer = static_cast<T *>(glMapNamedBufferRange(m_buffer_ID, 0, m_num_buffers * m_data_size, flags));
+        if (data)
+        {
+            flush(*data, 0);
+            flush(*data, data->size());
+            flush(*data, 2 * data->size());
+        }
+        buffer_fence = new GLsync[m_num_buffers];
+        break;
+    case BufferType::READ_WRITE_TRIPLE_BUFFERED:
+        flags = GL_MAP_WRITE_BIT | GL_MAP_READ_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT;
+        glNamedBufferStorage(m_buffer_ID, m_num_buffers * m_data_size, nullptr, flags);
+        buffer_pointer = static_cast<T *>(glMapNamedBufferRange(m_buffer_ID, 0, m_num_buffers * m_data_size, flags));
+        if (data)
+        {
+            flush(*data, 0);
+            flush(*data, data->size());
+            flush(*data, 2 * data->size());
+        }
+        buffer_fence = new GLsync[m_num_buffers];
+        break;
     }
-    std::cerr << "Cannot read from a static buffer, set the dynamic size in bytes during buffer creation to create a dynamic buffer" << std::endl;
-    return result;
 }
 
 template <typename T>
 GLBuffer<T>::~GLBuffer()
 {
     glDeleteBuffers(1, &m_buffer_ID);
+    for (unsigned short i = 0; i < m_num_buffers; i++)
+    {
+        glDeleteSync(buffer_fence[i]);
+    }
+    delete[] buffer_fence;
 }
 
 template <typename T>
-unsigned int GLBuffer<T>::gl_type(ShaderDataType type)
+void GLBuffer<T>::flush(std::vector<T> &data, unsigned int offset)
 {
-    switch (type)
+    if (m_buffer_type != BufferType::STATIC)
     {
-    case ShaderDataType::FLOAT:
-        return GL_FLOAT;
-    case ShaderDataType::VEC2:
-        return GL_FLOAT;
-    case ShaderDataType::VEC3:
-        return GL_FLOAT;
-    case ShaderDataType::VEC4:
-        return GL_FLOAT;
-    case ShaderDataType::MAT2:
-        return GL_FLOAT;
-    case ShaderDataType::MAT3:
-        return GL_FLOAT;
-    case ShaderDataType::MAT4:
-        return GL_FLOAT;
-    case ShaderDataType::INT:
-        return GL_INT;
-    case ShaderDataType::INT2:
-        return GL_INT;
-    case ShaderDataType::INT3:
-        return GL_INT;
-    case ShaderDataType::INT4:
-        return GL_INT;
-    case ShaderDataType::BOOL:
-        return GL_BOOL;
-    case ShaderDataType::CHAR:
-        return GL_BYTE;
-    case ShaderDataType::BYTE:
-        return GL_UNSIGNED_BYTE;
-    case ShaderDataType::SHORT:
-        return GL_SHORT;
-    case ShaderDataType::UNSIGNED_SHORT:
-        return GL_UNSIGNED_SHORT;
-    case ShaderDataType::UNSIGNED_INT:
-        return GL_UNSIGNED_INT;
-    default:
-        return GL_NONE;
+        if (sizeof(T) * data.size() + offset * sizeof(T) > m_data_size)
+        {
+            std::cerr << "Cannot update buffer, out of range" << std::endl;
+        }
+        else
+        {
+            m_count = std::max(data.size() + offset, m_count);
+            unsigned int write_offset = offset;
+            if (m_num_buffers)
+            {
+                write_offset = offset + ((m_buffer_index + 1) % m_num_buffers) * (m_data_size / sizeof(T));
+            }
+            // write into back buffer
+            memcpy(static_cast<void *>(&buffer_pointer[write_offset]), &data[0], data.size() * sizeof(T));
+        }
     }
-    return 0;
+    else
+    {
+        std::cerr << "Cannot update a static buffer, set the dynamic size in bytes during buffer creation to create a dynamic buffer" << std::endl;
+    }
+}
+
+template <typename T>
+void GLBuffer<T>::clear(unsigned int offset)
+{
+    if (!m_format.stride)
+    {
+        m_count = sizeof(T) * offset / sizeof(T);
+    }
+    else
+    {
+        m_count = sizeof(T) * offset / m_format.stride;
+    }
+}
+
+template <typename T>
+T &GLBuffer<T>::operator[](unsigned int i)
+{
+    // if buffer can be written to by the CPU
+    //if (m_buffer_type > 3)
+    //{
+    return buffer_pointer[i];
+    //}
+    //else
+    //{
+    //    std::cerr << "Don't write to this buffer!" << std::endl;
+    //}
+    //return;
+}
+
+template <typename T>
+T GLBuffer<T>::operator[](unsigned int i) const
+{
+    // if buffer can be read by the CPU
+    //if (m_buffer_type < 7)
+    //{
+    T element;
+    element = buffer_pointer[i];
+    return element;
+    //}
+    //else
+    //{
+    //    std::cerr << "Don't read from this buffer!" << std::endl;
+    //}
+    //return;
+}
+
+template <typename T>
+void GLBuffer<T>::wait_buffer()
+{
+    if (buffer_fence && (glIsSync(buffer_fence[m_buffer_index]) == GL_TRUE))
+    {
+        while (true)
+        {
+            GLenum result = glClientWaitSync(buffer_fence[m_buffer_index], GL_SYNC_FLUSH_COMMANDS_BIT, 1);
+            if (result == GL_ALREADY_SIGNALED || result == GL_CONDITION_SATISFIED)
+            {
+                glDeleteSync(buffer_fence[m_buffer_index]);
+                return;
+            }
+            else if (result == GL_TIMEOUT_EXPIRED)
+            {
+                std::cerr << "Sync timeout expired, slow performance." << std::endl;
+                continue;
+            }
+            else if (result == GL_WAIT_FAILED)
+            {
+                std::cerr << "Non-valid sync object!" << std::endl;
+                return;
+            }
+        }
+    }
+}
+template <typename T>
+void GLBuffer<T>::lock_buffer()
+{
+    if (buffer_fence)
+    {
+        if (glIsSync(buffer_fence[m_buffer_index]) == GL_TRUE)
+        {
+            glDeleteSync(buffer_fence[m_buffer_index]);
+        }
+        buffer_fence[m_buffer_index] = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+    }
 }
 
 template class GLBuffer<float>;
 template class GLBuffer<int>;
 template class GLBuffer<unsigned int>;
 template class GLBuffer<bool>;
-template class GLBuffer<glm::mat4>;
-template class GLBuffer<glm::mat3>;
-template class GLBuffer<glm::mat2>;
 template class GLBuffer<glm::vec2>;
 template class GLBuffer<glm::vec3>;
 template class GLBuffer<glm::vec4>;
+template class GLBuffer<glm::mat2>;
+template class GLBuffer<glm::mat3>;
+template class GLBuffer<glm::mat4>;
 
 } // namespace mare

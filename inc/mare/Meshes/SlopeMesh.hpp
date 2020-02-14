@@ -76,13 +76,19 @@ public:
         data.push_back({-0.5f * scale, -0.5f * scale, -0.5f * scale});
         data.push_back({-SQRT2 / 2.0f, SQRT2 / 2.0f, 0.0f});
 
-        vertex_buffers = Renderer::API->GenFloatBuffer(1);
-        vertex_buffers->create(&data[0][0], data.size() * sizeof(glm::vec3));
-        vertex_buffers->set_format({{ShaderDataType::VEC3, "position"},
-                                    {ShaderDataType::VEC3, "normal"}});
+        std::vector<float> vertex_data{};
+        for(auto& vert : data)
+        {
+            vertex_data.push_back(vert[0]);
+            vertex_data.push_back(vert[1]);
+            vertex_data.push_back(vert[2]);
+        }
 
-        render_state->create();
-        render_state->add_vertex_buffer(vertex_buffers);
+        Buffer<float> *vertex_buffer = Renderer::API->GenFloatBuffer(&vertex_data);
+        vertex_buffer->set_format({{LinalgDataType::VEC3, "position"},
+                                    {LinalgDataType::VEC3, "normal"}});
+
+        render_state->set_vertex_buffer(vertex_buffer);
     }
 };
 } // namespace mare

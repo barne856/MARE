@@ -186,16 +186,16 @@ public:
     virtual void enable_blending(bool enable) = 0;
 
     // Buffers
-    virtual Buffer<float> *GenFloatBuffer(unsigned int count) = 0;
-    virtual Buffer<int> *GenIntBuffer(unsigned int count) = 0;
-    virtual Buffer<unsigned int> *GenIndexBuffer(unsigned int count) = 0;
-    virtual Buffer<bool> *GenBoolBuffer(unsigned int count) = 0;
-    virtual Buffer<glm::vec2> *GenVec2Buffer(unsigned int count) = 0;
-    virtual Buffer<glm::vec3> *GenVec3Buffer(unsigned int count) = 0;
-    virtual Buffer<glm::vec4> *GenVec4Buffer(unsigned int count) = 0;
-    virtual Buffer<glm::mat2> *GenMat2Buffer(unsigned int count) = 0;
-    virtual Buffer<glm::mat3> *GenMat3Buffer(unsigned int count) = 0;
-    virtual Buffer<glm::mat4> *GenMat4Buffer(unsigned int count) = 0;
+    virtual Buffer<float> *GenFloatBuffer(std::vector<float> *data, BufferType buffer_type = BufferType::STATIC, size_t size_in_bytes = 0) = 0;
+    virtual Buffer<int> *GenIntBuffer(std::vector<int> *data, BufferType buffer_type = BufferType::STATIC, size_t size_in_bytes = 0) = 0;
+    virtual Buffer<unsigned int> *GenIndexBuffer(std::vector<unsigned int> *data, BufferType buffer_type = BufferType::STATIC, size_t size_in_bytes = 0) = 0;
+    virtual Buffer<bool> *GenBoolBuffer(std::vector<bool> *data, BufferType buffer_type = BufferType::STATIC, size_t size_in_bytes = 0) = 0;
+    virtual Buffer<glm::vec2> *GenVec2Buffer(std::vector<glm::vec2> *data, BufferType buffer_type = BufferType::STATIC, size_t size_in_bytes = 0) = 0;
+    virtual Buffer<glm::vec3> *GenVec3Buffer(std::vector<glm::vec3> *data, BufferType buffer_type = BufferType::STATIC, size_t size_in_bytes = 0) = 0;
+    virtual Buffer<glm::vec4> *GenVec4Buffer(std::vector<glm::vec4> *data, BufferType buffer_type = BufferType::STATIC, size_t size_in_bytes = 0) = 0;
+    virtual Buffer<glm::mat2> *GenMat2Buffer(std::vector<glm::mat2> *data, BufferType buffer_type = BufferType::STATIC, size_t size_in_bytes = 0) = 0;
+    virtual Buffer<glm::mat3> *GenMat3Buffer(std::vector<glm::mat3> *data, BufferType buffer_type = BufferType::STATIC, size_t size_in_bytes = 0) = 0;
+    virtual Buffer<glm::mat4> *GenMat4Buffer(std::vector<glm::mat4> *data, BufferType buffer_type = BufferType::STATIC, size_t size_in_bytes = 0) = 0;
 
     // Textures
     virtual Texture2D *GenTexture2D(const char *image_filepath) = 0;

@@ -7,9 +7,7 @@ namespace mare
 InstancedMesh::InstancedMesh(unsigned int max_instances)
     : instance_count(0), instance_transforms(nullptr), m_mesh(nullptr), m_max_instances(max_instances)
 {
-    instance_transforms = Renderer::API->GenMat4Buffer(1);
-    std::vector<glm::mat4> empty{};
-    instance_transforms->create(empty, max_instances * sizeof(glm::mat4));
+    instance_transforms = Renderer::API->GenMat4Buffer(nullptr, BufferType::READ_WRITE, max_instances * sizeof(glm::mat4));
 }
 
 InstancedMesh::~InstancedMesh()
@@ -26,14 +24,13 @@ InstancedMesh::~InstancedMesh()
 
 void InstancedMesh::push_instance(glm::mat4 model)
 {
-    std::vector<glm::mat4> models{model};
-    instance_transforms->update(models, instance_count);
+    (*instance_transforms)[instance_count] = model;
     instance_count++;
 }
 
 void InstancedMesh::update_instance(unsigned int index, glm::mat4 model)
 {
-    instance_transforms->update(&model, (size_t)sizeof(glm::mat4), (unsigned int)(index*sizeof(glm::mat4)));
+    (*instance_transforms)[index] = model;
 }
 
 void InstancedMesh::render(Layer *layer, Material *material)
@@ -48,7 +45,8 @@ void InstancedMesh::render(Layer *layer, Material *material, glm::mat4 parent_mo
 
 void InstancedMesh::render(Layer *layer, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models)
 {
-    // rendering an instanced mesh of instanced meshes is infeasible and will not reduce draw calls, only render instances of simple meshes or composite meshes consisting only of simple meshes in their mesh trees.
+    // rendering an instanced mesh of instanced meshes is a bad idea. It will not reduce draw calls and it will
+    // read from the models buffer in a very ineffiecnt way, only render instances of simple meshes or composite meshes consisting only of simple meshes in their mesh trees.
     for(unsigned int i = 0; i < instance_count; i++)
     {
         m_mesh->render(layer, material, (*models)[i]);

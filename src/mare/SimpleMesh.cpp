@@ -6,21 +6,12 @@
 namespace mare
 {
 SimpleMesh::SimpleMesh()
-    : index_buffer(nullptr), vertex_buffers(nullptr)
 {
     render_state = Renderer::API->GenRenderState();
     render_state->set_draw_method(DrawMethod::TRIANGLES);
 }
 SimpleMesh::~SimpleMesh()
 {
-    if (index_buffer)
-    {
-        delete[] index_buffer;
-    }
-    if (vertex_buffers)
-    {
-        delete[] vertex_buffers;
-    }
     delete render_state;
 }
 void SimpleMesh::render(Layer* layer, Material *material)

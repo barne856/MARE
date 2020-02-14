@@ -3,6 +3,8 @@
 
 // TODO:
 
+// Test Buffer Streaming
+
 // CLEANUP
 // organize headers and cpp files
 // replace pointers with smart pointers
@@ -23,7 +25,8 @@
 // textures and framebuffers (fix simplemesh to add texture coordinates, set textures of materials, add repeating textures)
 // material - point light, directional light, spotlight, hemisphere light, shadow mapping, texturing
 
-// Particle system
+// Particle system with transform feedback
+// Cloth physics with transform feedback
 
 // ADVANCE DESIGN
 // Components for objects

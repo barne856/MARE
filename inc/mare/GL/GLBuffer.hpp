@@ -4,20 +4,27 @@
 // MARE
 #include "mare/Buffer.hpp"
 
+// OpenGL
+#include "GL/glew.h"
+
 namespace mare
 {
 template <typename T>
 class GLBuffer : public Buffer<T>
 {
 public:
+    GLBuffer(std::vector<T> *data, BufferType buffer_type = BufferType::STATIC, size_t size_in_bytes = 0);
     virtual ~GLBuffer();
-    virtual void create(std::vector<T>& data, size_t dynamic_size_in_bytes = 0) override;
-    virtual void create(T *data, size_t size_in_bytes, size_t dynamic_size_in_bytes = 0) override;
-    virtual void update(std::vector<T>& data, unsigned int offset) override;
-    virtual void update(T *data, size_t size_in_bytes, unsigned int offset) override;
-    virtual const T operator[](unsigned int i) const override;
+    virtual void flush(std::vector<T> &data, unsigned int offset) override;
+    virtual void clear(unsigned int offset) override;
+    virtual T &operator[](unsigned int i) override;
+    virtual T operator[](unsigned int i) const override;
+    void wait_buffer() override;
+    void lock_buffer() override;
 
-    static unsigned int gl_type(ShaderDataType type);
+private:
+    T *buffer_pointer;
+    GLsync* buffer_fence; // used to sync rendering when double or triple buffered
 };
 
 } // namespace mare

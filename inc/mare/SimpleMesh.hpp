@@ -14,9 +14,9 @@ public:
     SimpleMesh();
     ~SimpleMesh();
 
-    void render(Layer* layer, Material *material) override;
-    void render(Layer* layer, Material *material, glm::mat4 parent_model) override;
-    void render(Layer* layer, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models) override;
+    void render(Layer *layer, Material *material) override;
+    void render(Layer *layer, Material *material, glm::mat4 parent_model) override;
+    void render(Layer *layer, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models) override;
 
     inline void bind() const { render_state->bind(); }
     inline RenderState *get_state() const { return render_state; }
@@ -24,9 +24,6 @@ public:
 
 protected:
     RenderState *render_state = nullptr;
-    Buffer<float> *vertex_buffers = nullptr;
-    Buffer<unsigned int> *index_buffer = nullptr;
-    
 };
 } // namespace mare
 

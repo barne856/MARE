@@ -8,195 +8,91 @@
 // External Libraries
 #include "glm.hpp"
 
+// MARE
+#include "mare/MareUtility.hpp"
+
 namespace mare
 {
-enum class ShaderDataType
+// Individual Elements in the buffer format
+// Each element corresponds to an input to a shader of the type given
+class BufferFormatElement
 {
-    NONE = 0,
-    FLOAT,
-    VEC2,
-    VEC3,
-    VEC4,
-    MAT2,
-    MAT3,
-    MAT4,
-    INT,
-    INT2,
-    INT3,
-    INT4,
-    BOOL,
-    CHAR,
-    BYTE,
-    SHORT,
-    UNSIGNED_SHORT,
-    UNSIGNED_INT
+public:
+    BufferFormatElement(LinalgDataType type, std::string name, bool normalized = false);
+    size_t component_count() const;
+    std::string name;
+    size_t size;
+    size_t offset;
+    bool normalized;
+    LinalgDataType data_type;
 };
 
-template <typename T>
-ShaderDataType glm_to_shader_type();
-
-struct BufferFormatElement
-{
-
-    std::string m_name;
-    unsigned int m_size;
-    unsigned int m_offset;
-    ShaderDataType m_type;
-    bool m_normalized;
-
-    BufferFormatElement() {}
-    BufferFormatElement(ShaderDataType type, std::string name, bool normalized = false)
-        : m_name(name), m_type(type), m_size(ShaderDataTypeSize(type)), m_offset(0), m_normalized(normalized) {}
-
-    static unsigned int ShaderDataTypeSize(ShaderDataType type)
-    {
-        switch (type)
-        {
-        case ShaderDataType::FLOAT:
-            return 4;
-        case ShaderDataType::VEC2:
-            return 4 * 2;
-        case ShaderDataType::VEC3:
-            return 4 * 3;
-        case ShaderDataType::VEC4:
-            return 4 * 4;
-        case ShaderDataType::MAT2:
-            return 4 * 2 * 2;
-        case ShaderDataType::MAT3:
-            return 4 * 3 * 3;
-        case ShaderDataType::MAT4:
-            return 4 * 4 * 4;
-        case ShaderDataType::INT:
-            return 4;
-        case ShaderDataType::INT2:
-            return 4 * 2;
-        case ShaderDataType::INT3:
-            return 4 * 3;
-        case ShaderDataType::INT4:
-            return 4 * 4;
-        case ShaderDataType::BOOL:
-            return 1;
-        case ShaderDataType::CHAR:
-            return 1;
-        case ShaderDataType::BYTE:
-            return 1;
-        case ShaderDataType::UNSIGNED_SHORT:
-            return 2;
-        case ShaderDataType::SHORT:
-            return 2;
-        case ShaderDataType::UNSIGNED_INT:
-            return 4;
-        default:
-            return 0;
-        }
-        return 0;
-    }
-    ShaderDataType type() const
-    {
-        return m_type;
-    }
-    unsigned int component_count() const
-    {
-        switch (m_type)
-        {
-        case ShaderDataType::FLOAT:
-            return 1;
-        case ShaderDataType::VEC2:
-            return 2;
-        case ShaderDataType::VEC3:
-            return 3;
-        case ShaderDataType::VEC4:
-            return 4;
-        case ShaderDataType::MAT2:
-            return 2 * 2;
-        case ShaderDataType::MAT3:
-            return 3 * 3;
-        case ShaderDataType::MAT4:
-            return 4 * 4;
-        case ShaderDataType::INT:
-            return 1;
-        case ShaderDataType::INT2:
-            return 2;
-        case ShaderDataType::INT3:
-            return 3;
-        case ShaderDataType::INT4:
-            return 4;
-        case ShaderDataType::BOOL:
-            return 1;
-        case ShaderDataType::CHAR:
-            return 1;
-        case ShaderDataType::BYTE:
-            return 1;
-        case ShaderDataType::UNSIGNED_SHORT:
-            return 1;
-        case ShaderDataType::SHORT:
-            return 1;
-        case ShaderDataType::UNSIGNED_INT:
-            return 1;
-        default:
-            return 0;
-        }
-        return 0;
-    }
-};
-
+// A BufferFormat, when applied to a Buffer will tell the shader how the information is stored
+// in the buffer, i.e. interlaced or stacked, offsets, etc.
+// Each Buffer can have a Format with one or more elements or muliple Buffers
+// can be used each with their own BufferFormat
 class BufferFormat
 {
 public:
-    BufferFormat() {}
-    BufferFormat(const std::initializer_list<BufferFormatElement> &elements)
-        : m_elements(elements)
-    {
-        m_stride = 0;
-        uint32_t offset = 0;
-        for (auto &e : m_elements)
-        {
-            e.m_offset = offset;
-            offset += e.m_size;
-            m_stride += e.m_size;
-        }
-    }
-    ~BufferFormat() {}
-    inline const std::vector<BufferFormatElement> &elements() const { return m_elements; }
-    inline const unsigned int stride() const { return m_stride; }
-    std::vector<BufferFormatElement>::iterator begin() { return m_elements.begin(); }
-    std::vector<BufferFormatElement>::iterator end() { return m_elements.end(); }
-    std::vector<BufferFormatElement>::const_iterator begin() const { return m_elements.begin(); }
-    std::vector<BufferFormatElement>::const_iterator end() const { return m_elements.end(); }
+    BufferFormat();
+    BufferFormat(const std::initializer_list<BufferFormatElement> &elements);
+    const std::vector<BufferFormatElement> &elements() const;
+    std::vector<BufferFormatElement>::iterator begin();
+    std::vector<BufferFormatElement>::iterator end();
+    std::vector<BufferFormatElement>::const_iterator begin() const;
+    std::vector<BufferFormatElement>::const_iterator end() const;
+    unsigned int stride;
 
 private:
     std::vector<BufferFormatElement> m_elements;
-    unsigned int m_stride = 0;
 };
 
+enum class BufferType
+{
+    STATIC = 0,
+    READ_ONLY,
+    READ_ONLY_DOUBLE_BUFFERED,
+    READ_ONLY_TRIPLE_BUFFERED,
+    READ_WRITE,
+    READ_WRITE_DOUBLE_BUFFERED,
+    READ_WRITE_TRIPLE_BUFFERED,
+    WRITE_ONLY,
+    WRITE_ONLY_DOUBLE_BUFFERED,
+    WRITE_ONLY_TRIPLE_BUFFERED
+};
+
+// Create a buffer managed by the Graphics API
+// These can be used to push data to a shader as attributes using a RenderState or as storage blocks
 template <typename T>
 class Buffer
 {
 public:
-    Buffer() : m_buffer_ID(0), m_format(BufferFormat()), m_count(0), m_data_size(0), m_dynamic_size_in_bytes(0), is_dynamic(false) {}
+    // Create a buffer
+    // size_in_bytes is the size of a single buffer if the buffer is multibuffered
+    Buffer(std::vector<T> *data, BufferType buffer_type = BufferType::STATIC, size_t size_in_bytes = 0);
     virtual ~Buffer() {}
-    void inline set_format(const BufferFormat &format)
-    {
-        m_format = format;
-        m_count = unsigned int(m_data_size / format.stride());
-    }
-    virtual void create(std::vector<T>& data, size_t dynamic_size_in_bytes = 0) = 0;
-    virtual void create(T *data, size_t size_in_bytes, size_t dynamic_size_in_bytes = 0) = 0;
-    virtual void update(std::vector<T>& data, unsigned int offset) = 0;
-    virtual void update(T *data, size_t size_in_bytes, unsigned int offset) = 0;
-    inline const unsigned int count() const { return m_count; }
-    inline unsigned int name() { return m_buffer_ID; }
-    inline const BufferFormat &format() const { return m_format; }
-    virtual const T operator[](unsigned int i) const = 0; // read from buffer using subscript operator if buffer is dynamic
-
+    void set_format(const BufferFormat &format);
+    const BufferFormat &format() const;
+    const unsigned int count() const;
+    unsigned int name() const;
+    void swap_buffer();
+    bool is_multibuffered();
+    unsigned int get_buffer_index();
+    virtual void flush(std::vector<T> &data, unsigned int offset) = 0; // flush the back buffer with data begining at offset index into the current back buffer, only works if buffer is WRITE_ONLY or READ_WRITE
+    virtual void clear(unsigned int offset) = 0;                       // clear everything in the back buffer at position equal to or greater than offset into the current back buffer, only works if buffer is WRITE_ONLY or READ_WRITE
+    virtual T &operator[](unsigned int i) = 0;                         // write to back buffer using subscript operator if buffer WRITE_ONLY or READ_WRITE. This makes a copy of the data on the CPU side
+    virtual T operator[](unsigned int i) const = 0;                    // read from to back buffer using subscript operator if buffer READ_ONLY or READ_WRITE
+    virtual void wait_buffer() = 0;                                    // used to sync rendering when using double or triple buffers
+    virtual void lock_buffer() = 0;                                    // used to sync rendering when using double or triple buffers
 
 protected:
-    unsigned int m_buffer_ID;
-    BufferFormat m_format;
-    unsigned int m_count;
-    size_t m_data_size;
-    size_t m_dynamic_size_in_bytes;
-    bool is_dynamic;
+    unsigned int m_buffer_ID;      // Buffer ID from the rendering API
+    BufferFormat m_format;         // the applied format is any
+    size_t m_count;                // the number of elements in the buffer
+    size_t m_data_size;            // the size in bytes of all the elements in the buffer
+    BufferType m_buffer_type;      // buffer type, this determines which operations the CPU can do on the buffer
+    unsigned short m_buffer_index; // the currently rendered buffer if multibuffered
+    unsigned short m_num_buffers;  // the number of buffers if multibuffered
 };
 } // namespace mare
 
