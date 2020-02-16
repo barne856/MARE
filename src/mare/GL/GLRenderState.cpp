@@ -30,9 +30,9 @@ void GLRenderState::set_vertex_buffer(Buffer<float> *vbo)
     for (const auto &element : vbo->format())
     {
         glEnableVertexArrayAttrib(m_render_state_ID, m_attribute_index);
-        glVertexArrayAttribFormat(m_render_state_ID, m_attribute_index, element.component_count(), gl_type(element.data_type), element.normalized ? GL_TRUE : GL_FALSE, element.offset);
-        glVertexArrayAttribBinding(m_render_state_ID, m_attribute_index, m_vertex_buffer_count);
-        glVertexArrayVertexBuffer(m_render_state_ID, m_vertex_buffer_count, vbo->name(), 0, vbo->format().stride);
+        glVertexArrayAttribFormat(m_render_state_ID, m_attribute_index, static_cast<GLuint>(element.component_count()), gl_type(element.data_type), element.normalized ? GL_TRUE : GL_FALSE, static_cast<GLint>(element.offset));
+        glVertexArrayAttribBinding(m_render_state_ID, m_attribute_index, static_cast<GLuint>(m_vertex_buffer_count));
+        glVertexArrayVertexBuffer(m_render_state_ID, static_cast<GLuint>(m_vertex_buffer_count), static_cast<GLuint>(vbo->name()), 0, static_cast<GLsizei>(vbo->format().stride));
         m_attribute_index++;
     }
     m_vertex_buffer_count++;
@@ -45,41 +45,41 @@ void GLRenderState::set_index_buffer(Buffer<unsigned int> *ibo)
     m_index_render_count = ibo->count();
 }
 
-GLenum GLRenderState::gl_type(LinalgDataType type)
+GLenum GLRenderState::gl_type(ShaderDataType type)
 {
     switch (type)
     {
-    case LinalgDataType::FLOAT:
+    case ShaderDataType::FLOAT:
         return GL_FLOAT;
-    case LinalgDataType::VEC2:
+    case ShaderDataType::VEC2:
         return GL_FLOAT;
-    case LinalgDataType::VEC3:
+    case ShaderDataType::VEC3:
         return GL_FLOAT;
-    case LinalgDataType::VEC4:
+    case ShaderDataType::VEC4:
         return GL_FLOAT;
-    case LinalgDataType::MAT2:
+    case ShaderDataType::MAT2:
         return GL_FLOAT;
-    case LinalgDataType::MAT3:
+    case ShaderDataType::MAT3:
         return GL_FLOAT;
-    case LinalgDataType::MAT4:
+    case ShaderDataType::MAT4:
         return GL_FLOAT;
-    case LinalgDataType::INT:
+    case ShaderDataType::INT:
         return GL_INT;
-    case LinalgDataType::INT2:
+    case ShaderDataType::INT2:
         return GL_INT;
-    case LinalgDataType::INT3:
+    case ShaderDataType::INT3:
         return GL_INT;
-    case LinalgDataType::INT4:
+    case ShaderDataType::INT4:
         return GL_INT;
-    case LinalgDataType::BOOL:
+    case ShaderDataType::BOOL:
         return GL_BOOL;
-    case LinalgDataType::BYTE:
+    case ShaderDataType::BYTE:
         return GL_UNSIGNED_BYTE;
-    case LinalgDataType::SHORT:
+    case ShaderDataType::SHORT:
         return GL_SHORT;
-    case LinalgDataType::UNSIGNED_SHORT:
+    case ShaderDataType::UNSIGNED_SHORT:
         return GL_UNSIGNED_SHORT;
-    case LinalgDataType::UNSIGNED_INT:
+    case ShaderDataType::UNSIGNED_INT:
         return GL_UNSIGNED_INT;
     default:
         return GL_NONE;

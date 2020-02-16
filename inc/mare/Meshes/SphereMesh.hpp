@@ -101,8 +101,8 @@ public:
         }
 
         Buffer<float> *vertex_buffer = Renderer::API->GenFloatBuffer(&data);
-        vertex_buffer->set_format({{LinalgDataType::VEC3, "position"},
-                                   {LinalgDataType::VEC3, "normal"}});
+        vertex_buffer->set_format({{ShaderDataType::VEC3, "position"},
+                                   {ShaderDataType::VEC3, "normal"}});
 
         render_state->set_vertex_buffer(vertex_buffer);
     }

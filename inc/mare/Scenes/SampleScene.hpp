@@ -23,8 +23,9 @@ public:
     {
         // Create the camera and controls
         set_camera(new Camera(CameraType::PERSPECTIVE));
-        get_camera()->set_controls(ControlsConfig::ORBITCONTROLS);
+        get_camera()->set_controls(ControlsConfig::FLYCONTROLS);
         get_camera()->set_position(glm::vec3(0.0f, 0.0f, 1.0f));
+        Renderer::API->set_cursor(CURSOR::DISABLED);
 
         // create objects
         mare_text = new MareTextObject();
@@ -148,10 +149,22 @@ public:
 
     bool on_key(const RendererInput &input) override
     {
-        if (input.W_PRESSED)
+        if (input.T_JUST_PRESSED)
         {
             wireframe = !wireframe;
         }
+        if(input.LEFT_CONTROL_PRESSED)
+        {
+            Renderer::API->set_cursor(CURSOR::ENABLED);
+            get_camera()->set_controls(ControlsConfig::NONE);
+        }
+        else
+        {
+            Renderer::API->set_cursor(CURSOR::DISABLED);
+            get_camera()->set_controls(ControlsConfig::FLYCONTROLS);
+        }
+
+        
         Renderer::API->wireframe_mode(wireframe);
         // event is handled
         return true;

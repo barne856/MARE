@@ -24,11 +24,17 @@ set(SRC
 ./src/mare/CompositeMesh.cpp
 ./src/mare/Controls.cpp
 ./src/mare/InstancedMesh.cpp
+./src/mare/Layer.cpp
 ./src/mare/MareUtility.cpp
 ./src/mare/Material.cpp
 ./src/mare/Mesh.cpp
+./src/mare/Object.cpp
+./src/mare/Overlay.cpp
 ./src/mare/Renderer.cpp
+./src/mare/RenderState.cpp
+./src/mare/Scene.cpp
 ./src/mare/SimpleMesh.cpp
+./src/mare/Widget.cpp
 ./src/mare/GL/GLBuffer.cpp
 ./src/mare/GL/GLRenderer.cpp
 ./src/mare/GL/GLRenderState.cpp

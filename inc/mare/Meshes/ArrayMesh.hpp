@@ -41,9 +41,9 @@ public:
             vertex_data.push_back(texture_coords[i][1]);
         }
         Buffer<float>* vb = Renderer::API->GenFloatBuffer(&vertex_data);
-        vb->set_format({{LinalgDataType::VEC3, "position"},
-                                    {LinalgDataType::VEC3, "normals"},
-                                    {LinalgDataType::VEC2, "texture_coords"}});
+        vb->set_format({{ShaderDataType::VEC3, "position"},
+                                    {ShaderDataType::VEC3, "normals"},
+                                    {ShaderDataType::VEC2, "texture_coords"}});
         render_state->set_vertex_buffer(vb);
         if (indices)
         {

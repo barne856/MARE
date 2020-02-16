@@ -79,7 +79,7 @@ public:
 
         // if dynamic, create extra space to hold resized strings
         Buffer<float>* vb = Renderer::API->GenFloatBuffer(&verts);
-        vb->set_format({{LinalgDataType::VEC2, "position"}});
+        vb->set_format({{ShaderDataType::VEC2, "position"}});
 
         render_state->set_vertex_buffer(vb);
     }

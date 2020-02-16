@@ -16,7 +16,7 @@ InstancedMesh::~InstancedMesh()
     {
         delete[] instance_transforms;
     }
-    if(m_mesh)
+    if (m_mesh)
     {
         delete m_mesh;
     }
@@ -28,9 +28,29 @@ void InstancedMesh::push_instance(glm::mat4 model)
     instance_count++;
 }
 
-void InstancedMesh::update_instance(unsigned int index, glm::mat4 model)
+void InstancedMesh::pop_instance()
 {
-    (*instance_transforms)[index] = model;
+    instance_count--;
+}
+
+void InstancedMesh::clear_instances()
+{
+    instance_count = 0;
+}
+
+void InstancedMesh::flush_instances(std::vector<glm::mat4> &models, size_t offset)
+{
+    instance_transforms->flush(models, offset);
+}
+
+glm::mat4 &InstancedMesh::operator[](unsigned int i)
+{
+    return (*instance_transforms)[i];
+}
+
+glm::mat4 InstancedMesh::operator[](unsigned int i) const
+{
+    return (*instance_transforms)[i];
 }
 
 void InstancedMesh::render(Layer *layer, Material *material)
@@ -47,7 +67,7 @@ void InstancedMesh::render(Layer *layer, Material *material, glm::mat4 parent_mo
 {
     // rendering an instanced mesh of instanced meshes is a bad idea. It will not reduce draw calls and it will
     // read from the models buffer in a very ineffiecnt way, only render instances of simple meshes or composite meshes consisting only of simple meshes in their mesh trees.
-    for(unsigned int i = 0; i < instance_count; i++)
+    for (unsigned int i = 0; i < instance_count; i++)
     {
         m_mesh->render(layer, material, (*models)[i]);
     }

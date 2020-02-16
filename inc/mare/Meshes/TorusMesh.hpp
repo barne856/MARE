@@ -67,9 +67,9 @@ public:
         }
 
         Buffer<float> * vertex_buffer = Renderer::API->GenFloatBuffer(&vertex_data);
-        vertex_buffer->set_format({{LinalgDataType::VEC3, "position"},
-                                    {LinalgDataType::VEC3, "normal"},
-                                    {LinalgDataType::VEC2, "texcoords"}});
+        vertex_buffer->set_format({{ShaderDataType::VEC3, "position"},
+                                    {ShaderDataType::VEC3, "normal"},
+                                    {ShaderDataType::VEC2, "texcoords"}});
 
         Buffer<unsigned int> *index_buffer = Renderer::API->GenIndexBuffer(&indices);
 

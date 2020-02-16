@@ -5,12 +5,12 @@ namespace mare
 {
 
 // BufferFormat Element
-BufferFormatElement::BufferFormatElement(LinalgDataType type, std::string name, bool normalized)
-    : data_type(type), name(name), size(linalg_data_type_size(type)), offset(0), normalized(normalized) {}
+BufferFormatElement::BufferFormatElement(ShaderDataType type, std::string name, bool normalized)
+    : data_type(type), name(name), size(shader_data_type_size(type)), offset(0), normalized(normalized) {}
 
 size_t BufferFormatElement::component_count() const
 {
-    return linalg_component_count(data_type);
+    return shader_component_count(data_type);
 }
 
 // BufferFormat
@@ -18,7 +18,7 @@ BufferFormat::BufferFormat() : m_elements({}), stride(0) {}
 BufferFormat::BufferFormat(const std::initializer_list<BufferFormatElement> &elements)
     : m_elements(elements), stride(0)
 {
-    uint32_t offset = 0;
+    size_t offset = 0;
     for (auto &e : m_elements)
     {
         e.offset = offset;
@@ -103,13 +103,14 @@ void Buffer<T>::set_format(const BufferFormat &format)
 template <typename T>
 const BufferFormat &Buffer<T>::format() const { return m_format; }
 template <typename T>
-const unsigned int Buffer<T>::count() const { return m_count; }
+const size_t Buffer<T>::count() const { return m_count; }
 template <typename T>
 unsigned int Buffer<T>::name() const { return m_buffer_ID; }
 
 template <typename T>
 void Buffer<T>::swap_buffer()
 {
+    // m_num_buffers is zero if single buffered
     if (m_num_buffers)
     {
         m_buffer_index = (m_buffer_index + 1) % m_num_buffers;

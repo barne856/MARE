@@ -22,7 +22,7 @@ public:
     void set_vertex_buffer(Buffer<float> *vbo) override;
     void set_index_buffer(Buffer<unsigned int> *ibo) override;
 private:
-GLenum gl_type(LinalgDataType type);
+GLenum gl_type(ShaderDataType type);
 };
 } // namespace mare
 

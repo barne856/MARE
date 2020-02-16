@@ -61,8 +61,8 @@ public:
         }
 
         Buffer<float> *vb = Renderer::API->GenFloatBuffer(&vertex_data);
-        vb->set_format({{LinalgDataType::VEC3, "position"},
-                        {LinalgDataType::VEC3, "normal"}});
+        vb->set_format({{ShaderDataType::VEC3, "position"},
+                        {ShaderDataType::VEC3, "normal"}});
 
         render_state->set_vertex_buffer(vb);
     }

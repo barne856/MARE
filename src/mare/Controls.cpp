@@ -86,4 +86,56 @@ void OrbitControls::interpret_input(Camera *camera, RendererInput &input)
         camera->set_view(pos, center, up);
     }
 }
+
+void FlyControls::interpret_input(Camera *camera, RendererInput &input)
+{
+    float sensitivity = 300.0f;
+    float speed = 1.0f;
+    float dtheta = float(input.mouse_vel.y) / sensitivity;
+    float dphi = -float(input.mouse_vel.x) / sensitivity;
+    glm::vec3 dir = camera->get_direction();
+    glm::vec3 up = camera->get_up();
+
+    float theta = acosf(dir.z);
+    float phi = atan2f(dir.y, dir.x);
+
+    theta = glm::clamp(theta + dtheta, 0.01f, PI - 0.01f);
+    phi += dphi;
+
+    dir = glm::vec3(sinf(theta) * cosf(phi), sinf(theta) * sinf(phi), cosf(theta));
+    glm::vec3 right = glm::normalize(glm::cross(dir, {0.0f, 0.0f, 1.0f}));
+    up = glm::cross(right, dir);
+
+    camera->set_direction(dir);
+    camera->set_up(up);
+    camera->recalculate_view();
+
+    float x = 0.0f;
+    float y = 0.0f;
+    if (input.W_PRESSED)
+    {
+        y += 1.0f;
+    }
+    if (input.S_PRESSED)
+    {
+        y -= 1.0f;
+    }
+    if (input.D_PRESSED)
+    {
+        x += 1.0f;
+    }
+    if (input.A_PRESSED)
+    {
+        x -= 1.0f;
+    }
+    if (x || y)
+    {
+        x /= sqrtf(x * x + y * y);
+        y /= sqrtf(x * x + y * y);
+    }
+    glm::vec3 velocity = (dir*y + right*x)*speed;
+    camera->set_linear_velocity(velocity);
+
+}
+
 } // namespace mare

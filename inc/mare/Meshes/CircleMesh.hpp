@@ -29,7 +29,7 @@ public:
         verts.push_back(0.0f);
 
         Buffer<float> *vertex_buffer = Renderer::API->GenFloatBuffer(&verts);
-        vertex_buffer->set_format({{LinalgDataType::VEC2, "position"}});
+        vertex_buffer->set_format({{ShaderDataType::VEC2, "position"}});
 
         render_state->set_vertex_buffer(vertex_buffer);
     }

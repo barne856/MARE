@@ -3,20 +3,14 @@
 
 // TODO:
 
-// Test Buffer Streaming
-
 // CLEANUP
-// organize headers and cpp files
-// replace pointers with smart pointers
-// implement pop instance and others in the instanced mesh
-// fix compiling with gcc on linux
-// add exception handling
-// finish input implementation in GLRenderer
 // screen to world coordinates with 3D
-// Free flying camera controls
+// replace pointers with smart pointers
+// add exception handling
+// fix compiling with gcc on linux
 // DOCUMENTATION
 
-// Create a scene network which is a directed network of renderable scene, each scene can exit itself and load another level for which it has a pointer to
+// Create a scene network which is a directed network of renderable scenes, each scene can exit itself and load another level for which it has a pointer to
 // Scenes should separate render and logic operations
 // Initially, create the root scene set it as the renderer's Scene. This will add it to the cache of created scenes
 // When a Scene wants to change to another scene of a certain type, check if a cached scene is availbale or else create that scene and add set the renderer's scene to it.

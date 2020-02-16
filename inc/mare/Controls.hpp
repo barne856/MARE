@@ -10,7 +10,8 @@ struct RendererInput; // forward declaration
 enum class ControlsConfig
 {
     NONE,
-    ORBITCONTROLS
+    ORBITCONTROLS,
+    FLYCONTROLS
 };
 
 class Controls
@@ -21,6 +22,12 @@ public:
 };
 
 class OrbitControls : public Controls
+{
+public:
+    void interpret_input(Camera *camera, RendererInput &input) override;
+};
+
+class FlyControls : public Controls
 {
 public:
     void interpret_input(Camera *camera, RendererInput &input) override;

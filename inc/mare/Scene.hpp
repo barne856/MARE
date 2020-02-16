@@ -14,40 +14,20 @@ namespace mare
 class Scene : public Layer
 {
 public:
-    Scene() : m_layer_stack(nullptr)
-    {
-        m_layer_stack = new std::vector<Layer *>();
-        m_layer_stack->push_back(this);
-    }
-    virtual ~Scene()
-    {
-        for (size_t i = m_layer_stack->size(); i--;)
-        {
-            if (i != 0)
-            {
-                delete m_layer_stack->at(i);
-                m_layer_stack->at(i) = nullptr;
-            }
-        }
-        delete m_layer_stack;
-        m_layer_stack = nullptr;
-    }
-    widget_value get_widget_value(size_t overlay_index, size_t widget_index)
-    {
-        return static_cast<Overlay *>(get_layer(overlay_index))->get_widget(widget_index)->get_value();
-    }
-    Layer *get_layer(size_t index)
-    {
-        return (*m_layer_stack)[index + 1];
-    }
-    std::vector<Layer *> *get_layer_stack()
-    {
-        return m_layer_stack;
-    }
-    void push_layer(Layer *layer)
-    {
-        m_layer_stack->push_back(layer);
-    }
+    Scene();
+    virtual ~Scene();
+
+    virtual bool render(double current_time, double delta_time) override { return true; }
+    virtual bool on_key(const RendererInput &input) { return false; }
+    virtual bool on_mouse_button(const RendererInput &input) { return false; }
+    virtual bool on_mouse_move(const RendererInput &input) { return false; }
+    virtual bool on_mouse_wheel(const RendererInput &input) { return false; }
+    virtual bool on_resize(const RendererInput &input) { return false; }
+
+    shader_data_type get_widget_value(size_t overlay_index, size_t widget_index);
+    Layer *get_layer(size_t index);
+    std::vector<Layer *> *get_layer_stack();
+    void push_layer(Layer *layer);
 
 private:
     std::vector<Layer *> *m_layer_stack;

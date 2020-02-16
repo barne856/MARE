@@ -38,6 +38,9 @@ void Camera::set_controls(ControlsConfig config)
     case ControlsConfig::ORBITCONTROLS:
         m_controls = new OrbitControls();
         break;
+    case ControlsConfig::FLYCONTROLS:
+        m_controls = new FlyControls();
+        break;
     default:
         m_controls = nullptr;
         break;
@@ -53,8 +56,7 @@ void Camera::interpret_input()
 void Camera::set_view(const glm::vec3 &eye, const glm::vec3 &center, const glm::vec3 &up)
 {
     m_position = eye;
-    m_direction = center - eye;
-    m_direction = glm::normalize(m_direction);
+    m_direction = glm::normalize(center - eye);
     m_up = glm::normalize(up);
     recalculate_view();
 }
@@ -65,14 +67,12 @@ void Camera::set_position(const glm::vec3 &position)
 }
 void Camera::set_direction(const glm::vec3 &direction)
 {
-    m_direction = direction;
-    m_direction = glm::normalize(m_direction);
+    m_direction = glm::normalize(direction);
     recalculate_view();
 }
 void Camera::set_up(const glm::vec3 &up)
 {
-    m_up = up;
-    m_up = glm::normalize(m_up);
+    m_up = glm::normalize(up);
     recalculate_view();
 }
 void Camera::set_fov(float fovy)

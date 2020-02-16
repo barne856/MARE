@@ -134,7 +134,7 @@ GLBuffer<T>::~GLBuffer()
 }
 
 template <typename T>
-void GLBuffer<T>::flush(std::vector<T> &data, unsigned int offset)
+void GLBuffer<T>::flush(std::vector<T> &data, size_t offset)
 {
     if (m_buffer_type != BufferType::STATIC)
     {
@@ -145,11 +145,13 @@ void GLBuffer<T>::flush(std::vector<T> &data, unsigned int offset)
         else
         {
             m_count = std::max(data.size() + offset, m_count);
-            unsigned int write_offset = offset;
+            size_t write_offset = offset;
             if (m_num_buffers)
             {
                 write_offset = offset + ((m_buffer_index + 1) % m_num_buffers) * (m_data_size / sizeof(T));
             }
+            // wait for OpenGL to finish reading from the buffer
+            wait_buffer();
             // write into back buffer
             memcpy(static_cast<void *>(&buffer_pointer[write_offset]), &data[0], data.size() * sizeof(T));
         }

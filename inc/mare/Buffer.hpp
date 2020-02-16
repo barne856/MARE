@@ -18,13 +18,13 @@ namespace mare
 class BufferFormatElement
 {
 public:
-    BufferFormatElement(LinalgDataType type, std::string name, bool normalized = false);
+    BufferFormatElement(ShaderDataType type, std::string name, bool normalized = false);
     size_t component_count() const;
     std::string name;
     size_t size;
     size_t offset;
     bool normalized;
-    LinalgDataType data_type;
+    ShaderDataType data_type;
 };
 
 // A BufferFormat, when applied to a Buffer will tell the shader how the information is stored
@@ -41,7 +41,7 @@ public:
     std::vector<BufferFormatElement>::iterator end();
     std::vector<BufferFormatElement>::const_iterator begin() const;
     std::vector<BufferFormatElement>::const_iterator end() const;
-    unsigned int stride;
+    size_t stride;
 
 private:
     std::vector<BufferFormatElement> m_elements;
@@ -73,12 +73,12 @@ public:
     virtual ~Buffer() {}
     void set_format(const BufferFormat &format);
     const BufferFormat &format() const;
-    const unsigned int count() const;
+    const size_t count() const;
     unsigned int name() const;
     void swap_buffer();
     bool is_multibuffered();
     unsigned int get_buffer_index();
-    virtual void flush(std::vector<T> &data, unsigned int offset) = 0; // flush the back buffer with data begining at offset index into the current back buffer, only works if buffer is WRITE_ONLY or READ_WRITE
+    virtual void flush(std::vector<T> &data, size_t offset) = 0; // flush the back buffer with data begining at offset index into the current back buffer, only works if buffer is WRITE_ONLY or READ_WRITE
     virtual void clear(unsigned int offset) = 0;                       // clear everything in the back buffer at position equal to or greater than offset into the current back buffer, only works if buffer is WRITE_ONLY or READ_WRITE
     virtual T &operator[](unsigned int i) = 0;                         // write to back buffer using subscript operator if buffer WRITE_ONLY or READ_WRITE. This makes a copy of the data on the CPU side
     virtual T operator[](unsigned int i) const = 0;                    // read from to back buffer using subscript operator if buffer READ_ONLY or READ_WRITE

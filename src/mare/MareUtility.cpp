@@ -4,82 +4,82 @@
 namespace mare
 {
 
-size_t linalg_data_type_size(LinalgDataType type)
+size_t shader_data_type_size(ShaderDataType type)
 {
     switch (type)
     {
-    case LinalgDataType::FLOAT:
+    case ShaderDataType::FLOAT:
         return 4;
-    case LinalgDataType::VEC2:
+    case ShaderDataType::VEC2:
         return 4 * 2;
-    case LinalgDataType::VEC3:
+    case ShaderDataType::VEC3:
         return 4 * 3;
-    case LinalgDataType::VEC4:
+    case ShaderDataType::VEC4:
         return 4 * 4;
-    case LinalgDataType::MAT2:
+    case ShaderDataType::MAT2:
         return 4 * 2 * 2;
-    case LinalgDataType::MAT3:
+    case ShaderDataType::MAT3:
         return 4 * 3 * 3;
-    case LinalgDataType::MAT4:
+    case ShaderDataType::MAT4:
         return 4 * 4 * 4;
-    case LinalgDataType::INT:
+    case ShaderDataType::INT:
         return 4;
-    case LinalgDataType::INT2:
+    case ShaderDataType::INT2:
         return 4 * 2;
-    case LinalgDataType::INT3:
+    case ShaderDataType::INT3:
         return 4 * 3;
-    case LinalgDataType::INT4:
+    case ShaderDataType::INT4:
         return 4 * 4;
-    case LinalgDataType::BOOL:
+    case ShaderDataType::BOOL:
         return 1;
-    case LinalgDataType::BYTE:
+    case ShaderDataType::BYTE:
         return 1;
-    case LinalgDataType::UNSIGNED_SHORT:
+    case ShaderDataType::UNSIGNED_SHORT:
         return 2;
-    case LinalgDataType::SHORT:
+    case ShaderDataType::SHORT:
         return 2;
-    case LinalgDataType::UNSIGNED_INT:
+    case ShaderDataType::UNSIGNED_INT:
         return 4;
     default:
         return 0;
     }
     return 0;
 }
-size_t linalg_component_count(LinalgDataType type)
+size_t shader_component_count(ShaderDataType type)
 {
     switch (type)
     {
-    case LinalgDataType::FLOAT:
+    case ShaderDataType::FLOAT:
         return 1;
-    case LinalgDataType::VEC2:
+    case ShaderDataType::VEC2:
         return 2;
-    case LinalgDataType::VEC3:
+    case ShaderDataType::VEC3:
         return 3;
-    case LinalgDataType::VEC4:
+    case ShaderDataType::VEC4:
         return 4;
-    case LinalgDataType::MAT2:
+    case ShaderDataType::MAT2:
         return 2 * 2;
-    case LinalgDataType::MAT3:
+    case ShaderDataType::MAT3:
         return 3 * 3;
-    case LinalgDataType::MAT4:
+    case ShaderDataType::MAT4:
         return 4 * 4;
-    case LinalgDataType::INT:
+    case ShaderDataType::INT:
         return 1;
-    case LinalgDataType::INT2:
+    case ShaderDataType::INT2:
         return 2;
-    case LinalgDataType::INT3:
+    case ShaderDataType::INT3:
         return 3;
-    case LinalgDataType::INT4:
+    case ShaderDataType::INT4:
         return 4;
-    case LinalgDataType::BOOL:
+    case ShaderDataType::BOOL:
         return 1;
-    case LinalgDataType::BYTE:
+    case ShaderDataType::BYTE:
         return 1;
-    case LinalgDataType::UNSIGNED_SHORT:
+    case ShaderDataType::UNSIGNED_SHORT:
         return 1;
-    case LinalgDataType::SHORT:
+    case ShaderDataType::SHORT:
         return 1;
-    case LinalgDataType::UNSIGNED_INT:
+    case ShaderDataType::UNSIGNED_INT:
         return 1;
     default:
         return 0;
