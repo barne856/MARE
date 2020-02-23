@@ -3,38 +3,38 @@
 
 namespace mare
 {
-Scene::Scene() : m_layer_stack(nullptr)
-{
-    m_layer_stack = new std::vector<Layer *>();
-    m_layer_stack->push_back(this);
-}
-Scene::~Scene()
-{
-    for (size_t i = m_layer_stack->size(); i--;)
-    {
-        if (i != 0)
-        {
-            delete m_layer_stack->at(i);
-            m_layer_stack->at(i) = nullptr;
-        }
-    }
-    delete m_layer_stack;
-    m_layer_stack = nullptr;
-}
+Scene::Scene() {}
+Scene::~Scene() {}
 shader_data_type Scene::get_widget_value(size_t overlay_index, size_t widget_index)
 {
-    return static_cast<Overlay *>(get_layer(overlay_index))->get_widget(widget_index)->get_value();
+    return get_overlay(overlay_index)->get_widget(widget_index)->get_value();
 }
-Layer *Scene::get_layer(size_t index)
+Overlay *Scene::get_overlay(size_t index)
 {
-    return (*m_layer_stack)[index + 1];
+    // the 0 index is always the base layer "this"
+    return overlay_stack_[index].get();
 }
-std::vector<Layer *> *Scene::get_layer_stack()
+void Scene::push_overlay(Scoped<Overlay> overlay)
 {
-    return m_layer_stack;
+    overlay_stack_.push_back(std::move(overlay));
 }
-void Scene::push_layer(Layer *layer)
+
+std::vector<Scoped<Overlay>>::const_iterator Scene::begin()
 {
-    m_layer_stack->push_back(layer);
+    return overlay_stack_.begin();
 }
+std::vector<Scoped<Overlay>>::const_iterator Scene::end()
+{
+    return overlay_stack_.end();
+}
+
+std::vector<Scoped<Overlay>>::const_reverse_iterator Scene::rbegin()
+{
+    return overlay_stack_.rbegin();
+}
+std::vector<Scoped<Overlay>>::const_reverse_iterator Scene::rend()
+{
+    return overlay_stack_.rend();
+}
+
 } // namespace mare

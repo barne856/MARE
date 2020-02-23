@@ -4,6 +4,7 @@
 #include "mare/GL/GLShader.hpp"
 #include "mare/GL/GLTexture.hpp"
 #include "mare/GL/GLRenderState.hpp"
+#include "mare/Camera.hpp"
 #include "mare/SimpleMesh.hpp"
 #include "mare/Scene.hpp"
 
@@ -113,21 +114,34 @@ void GLRenderer::start_process()
         if (info.scene)
         {
             bool render_result = true;
-            for (auto &layer : *(info.scene->get_layer_stack()))
+            // render scene
+            if (info.scene->get_camera())
             {
-                if (layer->get_camera())
+                info.scene->get_camera()->render(delta_time);
+            }
+            render_result = info.scene->render(time, delta_time);
+            if (!render_result)
+            {
+                info.scene = nullptr;
+            }
+            else
+            {
+                // render overlays
+                for (auto overlay = info.scene->begin(); overlay != info.scene->end(); overlay++)
                 {
-                    layer->get_camera()->render(delta_time);
-                }
-                render_result = layer->render(time, delta_time);
-                if (!render_result)
-                {
-                    info.scene = nullptr;
-                    break;
+                    if ((*overlay)->get_camera())
+                    {
+                        (*overlay)->get_camera()->render(delta_time);
+                    }
+                    render_result = (*overlay)->render(time, delta_time);
+                    if (!render_result)
+                    {
+                        info.scene = nullptr;
+                        break;
+                    }
                 }
             }
         }
-
         info.current_time = time;
         glfwPollEvents();
         glfwSwapBuffers(window);
@@ -210,10 +224,12 @@ void GLRenderer::enable_depth_testing(bool enable)
     {
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LESS);
+        glDepthMask(GL_TRUE);
     }
     else
     {
         glDisable(GL_DEPTH_TEST);
+        glDepthMask(GL_FALSE);
     }
 }
 
@@ -243,68 +259,96 @@ void GLRenderer::enable_blending(bool enable)
     }
 }
 
+glm::vec3 GLRenderer::raycast(Camera *camera)
+{
+    glm::mat4 inversed_camera = glm::inverse(camera->projection() * camera->view());
+    float x = 2.0f * (float)input.mouse_pos.x / (float)(info.window_width) - 1.0f;
+    float y = -2.0f * (float)input.mouse_pos.y / (float)(info.window_height) + 1.0f;
+    float z = 0.0f;
+    glReadPixels(input.mouse_pos.x, info.window_height - input.mouse_pos.y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &z);
+    z = 2.0f * z - 1.0f;
+    glm::vec4 screen_vector = glm::vec4(x, y, z, 1.0f);
+    glm::vec4 world_vector = inversed_camera * screen_vector;
+    world_vector /= world_vector.w;
+    return glm::vec3(world_vector);
+}
+
+glm::vec3 GLRenderer::raycast(Camera *camera, glm::ivec2 screen_coords)
+{
+    glm::mat4 inversed_camera = glm::inverse(camera->projection() * camera->view());
+    float x = 2.0f * (float)screen_coords.x / (float)(info.window_width) - 1.0f;
+    float y = -2.0f * (float)screen_coords.y / (float)(info.window_height) + 1.0f;
+    float z = 0.0f;
+    glReadPixels(screen_coords.x, info.window_height - screen_coords.y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &z);
+    z = 2.0f * z - 1.0f;
+    glm::vec4 screen_vector = glm::vec4(x, y, z, 1.0f);
+    glm::vec4 world_vector = inversed_camera * screen_vector;
+    world_vector /= world_vector.w;
+    return glm::vec3(world_vector);
+}
+
 // Buffers
-Buffer<float> *GLRenderer::GenFloatBuffer(std::vector<float> *data, BufferType buffer_type, size_t size_in_bytes)
+Scoped<Buffer<float>> GLRenderer::GenFloatBuffer(std::vector<float> *data, BufferType buffer_type, size_t size_in_bytes)
 {
-    return new GLBuffer<float>(data, buffer_type, size_in_bytes);
+    return std::make_unique<GLBuffer<float>>(data, buffer_type, size_in_bytes);
 }
-Buffer<int> *GLRenderer::GenIntBuffer(std::vector<int> *data, BufferType buffer_type, size_t size_in_bytes)
+Scoped<Buffer<int>> GLRenderer::GenIntBuffer(std::vector<int> *data, BufferType buffer_type, size_t size_in_bytes)
 {
-    return new GLBuffer<int>(data, buffer_type, size_in_bytes);
+    return std::make_unique<GLBuffer<int>>(data, buffer_type, size_in_bytes);
 }
-Buffer<unsigned int> *GLRenderer::GenIndexBuffer(std::vector<unsigned int> *data, BufferType buffer_type, size_t size_in_bytes)
+Scoped<Buffer<unsigned int>> GLRenderer::GenIndexBuffer(std::vector<unsigned int> *data, BufferType buffer_type, size_t size_in_bytes)
 {
-    return new GLBuffer<unsigned int>(data, buffer_type, size_in_bytes);
+    return std::make_unique<GLBuffer<unsigned int>>(data, buffer_type, size_in_bytes);
 }
-Buffer<bool> *GLRenderer::GenBoolBuffer(std::vector<bool> *data, BufferType buffer_type, size_t size_in_bytes)
+Scoped<Buffer<bool>> GLRenderer::GenBoolBuffer(std::vector<bool> *data, BufferType buffer_type, size_t size_in_bytes)
 {
-    return new GLBuffer<bool>(data, buffer_type, size_in_bytes);
+    return std::make_unique<GLBuffer<bool>>(data, buffer_type, size_in_bytes);
 }
-Buffer<glm::vec2> *GLRenderer::GenVec2Buffer(std::vector<glm::vec2> *data, BufferType buffer_type, size_t size_in_bytes)
+Scoped<Buffer<glm::vec2>> GLRenderer::GenVec2Buffer(std::vector<glm::vec2> *data, BufferType buffer_type, size_t size_in_bytes)
 {
-    return new GLBuffer<glm::vec2>(data, buffer_type, size_in_bytes);
+    return std::make_unique<GLBuffer<glm::vec2>>(data, buffer_type, size_in_bytes);
 }
-Buffer<glm::vec3> *GLRenderer::GenVec3Buffer(std::vector<glm::vec3> *data, BufferType buffer_type, size_t size_in_bytes)
+Scoped<Buffer<glm::vec3>> GLRenderer::GenVec3Buffer(std::vector<glm::vec3> *data, BufferType buffer_type, size_t size_in_bytes)
 {
-    return new GLBuffer<glm::vec3>(data, buffer_type, size_in_bytes);
+    return std::make_unique<GLBuffer<glm::vec3>>(data, buffer_type, size_in_bytes);
 }
-Buffer<glm::vec4> *GLRenderer::GenVec4Buffer(std::vector<glm::vec4> *data, BufferType buffer_type, size_t size_in_bytes)
+Scoped<Buffer<glm::vec4>> GLRenderer::GenVec4Buffer(std::vector<glm::vec4> *data, BufferType buffer_type, size_t size_in_bytes)
 {
-    return new GLBuffer<glm::vec4>(data, buffer_type, size_in_bytes);
+    return std::make_unique<GLBuffer<glm::vec4>>(data, buffer_type, size_in_bytes);
 }
-Buffer<glm::mat2> *GLRenderer::GenMat2Buffer(std::vector<glm::mat2> *data, BufferType buffer_type, size_t size_in_bytes)
+Scoped<Buffer<glm::mat2>> GLRenderer::GenMat2Buffer(std::vector<glm::mat2> *data, BufferType buffer_type, size_t size_in_bytes)
 {
-    return new GLBuffer<glm::mat2>(data, buffer_type, size_in_bytes);
+    return std::make_unique<GLBuffer<glm::mat2>>(data, buffer_type, size_in_bytes);
 }
-Buffer<glm::mat3> *GLRenderer::GenMat3Buffer(std::vector<glm::mat3> *data, BufferType buffer_type, size_t size_in_bytes)
+Scoped<Buffer<glm::mat3>> GLRenderer::GenMat3Buffer(std::vector<glm::mat3> *data, BufferType buffer_type, size_t size_in_bytes)
 {
-    return new GLBuffer<glm::mat3>(data, buffer_type, size_in_bytes);
+    return std::make_unique<GLBuffer<glm::mat3>>(data, buffer_type, size_in_bytes);
 }
-Buffer<glm::mat4> *GLRenderer::GenMat4Buffer(std::vector<glm::mat4> *data, BufferType buffer_type, size_t size_in_bytes)
+Scoped<Buffer<glm::mat4>> GLRenderer::GenMat4Buffer(std::vector<glm::mat4> *data, BufferType buffer_type, size_t size_in_bytes)
 {
-    return new GLBuffer<glm::mat4>(data, buffer_type, size_in_bytes);
+    return std::make_unique<GLBuffer<glm::mat4>>(data, buffer_type, size_in_bytes);
 }
 
 // Textures
-Texture2D *GLRenderer::GenTexture2D(const char *image_filepath)
+Scoped<Texture2D> GLRenderer::GenTexture2D(const char *image_filepath)
 {
-    return new GLTexture2D(image_filepath);
+    return std::make_unique<GLTexture2D>(image_filepath);
 }
 
 // Render States
-RenderState *GLRenderer::GenRenderState()
+Scoped<RenderState> GLRenderer::GenRenderState()
 {
-    return new GLRenderState();
+    return std::make_unique<GLRenderState>();
 }
 
 // Shaders
-Shader *GLRenderer::GenShader(const char *directory)
+Scoped<Shader> GLRenderer::GenShader(const char *directory)
 {
-    return new GLShader(directory);
+    return std::make_unique<GLShader>(directory);
 }
 
 // normal rendering of simple meshes
-void GLRenderer::render_simple_mesh(Layer *layer, SimpleMesh *mesh, Material *material)
+void GLRenderer::render_simple_mesh(const Layer *layer, const SimpleMesh *mesh, Material *material)
 {
     mesh->bind();
     material->bind();
@@ -327,7 +371,7 @@ void GLRenderer::render_simple_mesh(Layer *layer, SimpleMesh *mesh, Material *ma
     mesh->get_state()->swap_buffer();
 }
 // composite rendering
-void GLRenderer::render_simple_mesh(Layer *layer, SimpleMesh *mesh, Material *material, glm::mat4 parent_model)
+void GLRenderer::render_simple_mesh(const Layer *layer, const SimpleMesh *mesh, Material *material, const glm::mat4 &parent_model)
 {
     mesh->bind();
     material->bind();
@@ -350,7 +394,7 @@ void GLRenderer::render_simple_mesh(Layer *layer, SimpleMesh *mesh, Material *ma
     mesh->get_state()->swap_buffer();
 }
 // instanced rendering
-void GLRenderer::render_simple_mesh(Layer *layer, SimpleMesh *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models)
+void GLRenderer::render_simple_mesh(const Layer *layer, const SimpleMesh *mesh, Material *material, const glm::mat4 &parent_model, unsigned int instance_count, const Buffer<glm::mat4> *models)
 {
     mesh->bind();
     material->bind();
@@ -474,24 +518,34 @@ void GLRenderer::glfw_onResize(GLFWwindow *window, int w, int h)
 
     if (info.scene)
     {
-        std::vector<Layer *> *layer_stack = info.scene->get_layer_stack();
-        for (auto &layer : *layer_stack)
+        if (info.scene->get_camera())
         {
-            if (layer->get_camera())
+            info.scene->get_camera()->set_aspect(info.window_aspect);
+            info.scene->get_camera()->recalculate_projection();
+        }
+
+        for (auto overlay = info.scene->begin(); overlay != info.scene->end(); overlay++)
+        {
+            if ((*overlay)->get_camera())
             {
-                layer->get_camera()->set_aspect(info.window_aspect);
-                layer->get_camera()->recalculate_projection();
+                (*overlay)->get_camera()->set_aspect(info.window_aspect);
+                (*overlay)->get_camera()->recalculate_projection();
             }
         }
 
         bool handled = false;
-        for (size_t i = layer_stack->size(); i--;)
+        for (auto overlay = info.scene->rbegin(); overlay != info.scene->rend(); overlay++)
         {
-            handled = layer_stack->at(i)->on_resize(input);
+            handled = (*overlay)->on_resize(input);
             if (handled)
             {
                 break;
             }
+        }
+
+        if (!handled)
+        {
+            info.scene->on_resize(input);
         }
     }
 }
@@ -2273,19 +2327,26 @@ void GLRenderer::glfw_onKey(GLFWwindow *window, int key, int scancode, int actio
     }
     if (info.scene)
     {
-        std::vector<Layer *> *layer_stack = info.scene->get_layer_stack();
         bool handled = false;
-        for (size_t i = layer_stack->size(); i--;)
+        for (auto overlay = info.scene->rbegin(); overlay != info.scene->rend(); overlay++)
         {
-            if (layer_stack->at(i)->get_camera())
+            if ((*overlay)->get_camera())
             {
-                layer_stack->at(i)->get_camera()->interpret_input();
+                (*overlay)->get_camera()->interpret_input();
             }
-            handled = layer_stack->at(i)->on_key(input);
+            handled = (*overlay)->on_key(input);
             if (handled)
             {
                 break;
             }
+        }
+        if (!handled)
+        {
+            if (info.scene->get_camera())
+            {
+                info.scene->get_camera()->interpret_input();
+            }
+            info.scene->on_key(input);
         }
     }
 }
@@ -2318,19 +2379,26 @@ void GLRenderer::glfw_onMouseButton(GLFWwindow *window, int button, int action, 
     }
     if (info.scene)
     {
-        std::vector<Layer *> *layer_stack = info.scene->get_layer_stack();
         bool handled = false;
-        for (size_t i = layer_stack->size(); i--;)
+        for (auto overlay = info.scene->rbegin(); overlay != info.scene->rend(); overlay++)
         {
-            if (layer_stack->at(i)->get_camera())
+            if ((*overlay)->get_camera())
             {
-                layer_stack->at(i)->get_camera()->interpret_input();
+                (*overlay)->get_camera()->interpret_input();
             }
-            handled = layer_stack->at(i)->on_mouse_button(input);
+            handled = (*overlay)->on_mouse_button(input);
             if (handled)
             {
                 break;
             }
+        }
+        if (!handled)
+        {
+            if (info.scene->get_camera())
+            {
+                info.scene->get_camera()->interpret_input();
+            }
+            info.scene->on_mouse_button(input);
         }
     }
 }
@@ -2342,21 +2410,29 @@ void GLRenderer::glfw_onMouseMove(GLFWwindow *window, double x, double y)
     get_input().mouse_vel = glm::ivec2(x, y) - old_pos;
     if (info.scene)
     {
-        std::vector<Layer *> *layer_stack = info.scene->get_layer_stack();
         bool handled = false;
-        for (size_t i = layer_stack->size(); i--;)
+        for (auto overlay = info.scene->rbegin(); overlay != info.scene->rend(); overlay++)
         {
-            if (layer_stack->at(i)->get_camera())
+            if ((*overlay)->get_camera())
             {
-                layer_stack->at(i)->get_camera()->interpret_input();
+                (*overlay)->get_camera()->interpret_input();
             }
-            handled = layer_stack->at(i)->on_mouse_move(input);
+            handled = (*overlay)->on_mouse_move(input);
             if (handled)
             {
                 break;
             }
         }
+        if (!handled)
+        {
+            if (info.scene->get_camera())
+            {
+                info.scene->get_camera()->interpret_input();
+            }
+            info.scene->on_mouse_move(input);
+        }
     }
+
     // mouse velocity is always zero outside of mouse move callbacks
     get_input().mouse_vel = glm::ivec2(0, 0);
 }
@@ -2373,19 +2449,26 @@ void GLRenderer::glfw_onMouseWheel(GLFWwindow *window, double xoffset, double yo
     }
     if (info.scene)
     {
-        std::vector<Layer *> *layer_stack = info.scene->get_layer_stack();
         bool handled = false;
-        for (size_t i = layer_stack->size(); i--;)
+        for (auto overlay = info.scene->rbegin(); overlay != info.scene->rend(); overlay++)
         {
-            if (layer_stack->at(i)->get_camera())
+            if ((*overlay)->get_camera())
             {
-                layer_stack->at(i)->get_camera()->interpret_input();
+                (*overlay)->get_camera()->interpret_input();
             }
-            handled = layer_stack->at(i)->on_mouse_wheel(input);
+            handled = (*overlay)->on_mouse_wheel(input);
             if (handled)
             {
                 break;
             }
+        }
+        if (!handled)
+        {
+            if (info.scene->get_camera())
+            {
+                info.scene->get_camera()->interpret_input();
+            }
+            info.scene->on_mouse_wheel(input);
         }
     }
     // mouse scroll is always 0 outside of mouse scroll callbacks

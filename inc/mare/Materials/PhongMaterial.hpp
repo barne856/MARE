@@ -56,7 +56,7 @@ public:
     } light;
     glm::vec3 light_position;
     private:
-    Texture2D* texture;
+    Scoped<Texture2D> texture;
 };
 } // namespace mare
 

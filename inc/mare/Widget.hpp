@@ -38,7 +38,7 @@ class Widget : public Layer, public Object
 {
 public:
     using Object::render;
-    Widget(Layer *layer);
+    Widget(Layer* layer);
     virtual ~Widget();
 
     virtual bool render(double current_time, double delta_time) final { return true; }
@@ -48,15 +48,15 @@ public:
     virtual bool on_mouse_wheel(const RendererInput &input) override { return false; }
     virtual bool on_resize(const RendererInput &input) final { return false; }
 
-    glm::vec2 get_widget_coords(glm::ivec2 screen_coords);
-    bool is_in_bounds(glm::ivec2 screen_coords);
+    glm::vec2 get_widget_coords();
+    bool is_in_bounds();
     shader_data_type get_value();
     virtual void set_value(shader_data_type value);
 
 protected:
     shader_data_type value;
     Rect bounds;
-    Layer *base_layer;
+    Layer* base_layer;
 };
 } // namespace mare
 

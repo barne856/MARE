@@ -1,23 +1,12 @@
 // MARE
+#include "mare/Renderer.hpp"
 #include "mare/Overlay.hpp"
 
 namespace mare
 {
 
-Overlay::Overlay() : m_widget_stack(nullptr)
-{
-    m_widget_stack = new std::vector<Widget *>();
-}
-Overlay::~Overlay()
-{
-    for (size_t i = m_widget_stack->size(); i--;)
-    {
-        delete m_widget_stack->at(i);
-        m_widget_stack->at(i) = nullptr;
-    }
-    delete m_widget_stack;
-    m_widget_stack = nullptr;
-}
+Overlay::Overlay() {}
+Overlay::~Overlay() {}
 bool Overlay::render(double time, double dt)
 {
     // Renderer properties
@@ -25,17 +14,17 @@ bool Overlay::render(double time, double dt)
     Renderer::API->enable_face_culling(true);
 
     // render widgets
-    for (auto &widget : *m_widget_stack)
+    for (auto &widget : widget_stack_)
     {
         widget->render(this);
     }
 
-    // Run forever
+    // Continue Rendering
     return true;
 }
 bool Overlay::on_key(const RendererInput &input)
 {
-    for (size_t i = m_widget_stack->size(); i--;)
+    for (size_t i = widget_stack_.size(); i--;)
     {
         if (get_widget(i)->on_key(input))
         {
@@ -46,7 +35,7 @@ bool Overlay::on_key(const RendererInput &input)
 }
 bool Overlay::on_mouse_button(const RendererInput &input)
 {
-    for (size_t i = m_widget_stack->size(); i--;)
+    for (size_t i = widget_stack_.size(); i--;)
     {
         if (get_widget(i)->on_mouse_button(input))
         {
@@ -58,7 +47,7 @@ bool Overlay::on_mouse_button(const RendererInput &input)
 
 bool Overlay::on_mouse_move(const RendererInput &input)
 {
-    for (size_t i = m_widget_stack->size(); i--;)
+    for (size_t i = widget_stack_.size(); i--;)
     {
         if (get_widget(i)->on_mouse_move(input))
         {
@@ -70,7 +59,7 @@ bool Overlay::on_mouse_move(const RendererInput &input)
 
 bool Overlay::on_mouse_wheel(const RendererInput &input)
 {
-    for (size_t i = m_widget_stack->size(); i--;)
+    for (size_t i = widget_stack_.size(); i--;)
     {
         if (get_widget(i)->on_mouse_wheel(input))
         {
@@ -80,12 +69,12 @@ bool Overlay::on_mouse_wheel(const RendererInput &input)
     return false;
 }
 
-Widget *Overlay::get_widget(size_t index)
+Widget* Overlay::get_widget(size_t index)
 {
-    return (*m_widget_stack)[index];
+    return widget_stack_[index].get();
 }
-void Overlay::push_widget(Widget *widget)
+void Overlay::push_widget(Scoped<Widget> widget)
 {
-    m_widget_stack->push_back(widget);
+    widget_stack_.push_back(std::move(widget));
 }
 } // namespace mare

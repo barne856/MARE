@@ -2,16 +2,17 @@
 #define LAYER
 
 // MARE
-#include "mare/Renderer.hpp"
+#include "mare/MareUtility.hpp"
 #include "mare/Camera.hpp"
 
 namespace mare
 {
-class Layer
+struct RendererInput; // forward declaration
+class Layer : public Asset
 {
 public:
-    Layer();
-    virtual ~Layer();
+    Layer() : camera_(nullptr) {}
+    virtual ~Layer() {}
 
     virtual bool render(double current_time, double delta_time) = 0;
 
@@ -21,11 +22,11 @@ public:
     virtual bool on_mouse_wheel(const RendererInput &input) = 0;
     virtual bool on_resize(const RendererInput &input) = 0;
 
-    inline void set_camera(Camera *camera) { m_camera = camera; }
-    inline Camera *get_camera() { return m_camera; }
+    inline void set_camera(Scoped<Camera> camera) { camera_ = std::move(camera); }
+    inline Camera *get_camera() const { return camera_.get(); }
 
 private:
-    Camera *m_camera;
+    Scoped<Camera> camera_;
 };
 } // namespace mare
 

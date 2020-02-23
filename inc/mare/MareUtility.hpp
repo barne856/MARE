@@ -6,11 +6,25 @@
 // Standard Library
 #include <vector>
 #include <variant>
+#include <memory>
 
 namespace mare
 {
+// Create Asset class for all user created assets
+class Asset
+{
+public:
+    virtual ~Asset() = 0 {};
+};
+
+// Scopes and References
+template <typename T>
+using Scoped = std::unique_ptr<T>;
+template <typename T>
+using Referenced = std::shared_ptr<T>;
 // Variant type for scalars, vectors, and matrices
 using shader_data_type = std::variant<unsigned int, int, unsigned short, short, unsigned char, float, bool, glm::vec2, glm::vec3, glm::vec4, glm::ivec2, glm::ivec3, glm::ivec4, glm::mat2, glm::mat3, glm::mat4>;
+
 enum class ShaderDataType
 {
     UNSIGNED_INT = 0,

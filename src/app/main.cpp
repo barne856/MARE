@@ -4,16 +4,13 @@
 // TODO:
 
 // CLEANUP
-// screen to world coordinates with 3D
-// replace pointers with smart pointers
+// Generalize controls to work on any gameobject not just cameras
+// Specification of Renderer class which is run by main
+// Scene stack with GenRef and load_scene
+// separation of logic from rendering. create components for objects with components for rendering, physics, and callbacks
 // add exception handling
 // fix compiling with gcc on linux
 // DOCUMENTATION
-
-// Create a scene network which is a directed network of renderable scenes, each scene can exit itself and load another level for which it has a pointer to
-// Scenes should separate render and logic operations
-// Initially, create the root scene set it as the renderer's Scene. This will add it to the cache of created scenes
-// When a Scene wants to change to another scene of a certain type, check if a cached scene is availbale or else create that scene and add set the renderer's scene to it.
 
 // SHADOWS & LIGHTS
 // textures and framebuffers (fix simplemesh to add texture coordinates, set textures of materials, add repeating textures)
@@ -33,11 +30,12 @@
 // add more widgets (buttons, switches, checkboxes, color picker, text entry, message box)
 // Add more materials: normal maps and other physically based rendering techniques
 
+
 using namespace mare;
 
 int main()
 {
-    // Create the chosen API
+    // Create the chosen API (make scoped)
     Renderer *OpenGL = new GLRenderer();
     // Set renderer settings
     OpenGL->get_info().samples = 16;

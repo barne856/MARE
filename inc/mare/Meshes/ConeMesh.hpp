@@ -60,11 +60,11 @@ public:
             vertex_data.push_back(normals[i][2]);
         }
 
-        Buffer<float> *vb = Renderer::API->GenFloatBuffer(&vertex_data);
+        Scoped<Buffer<float>> vb = Renderer::API->GenFloatBuffer(&vertex_data);
         vb->set_format({{ShaderDataType::VEC3, "position"},
                         {ShaderDataType::VEC3, "normal"}});
 
-        render_state->set_vertex_buffer(vb);
+        render_state->set_vertex_buffer(std::move(vb));
     }
 };
 } // namespace mare

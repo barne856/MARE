@@ -3,21 +3,25 @@
 
 // Standard Library
 #include <bitset>
+#include <string>
+#include <unordered_map>
 // MARE
+#include "mare/MareUtility.hpp"
 #include "mare/Buffer.hpp"
+#include "mare/Material.hpp"
+#include "mare/Mesh.hpp"
+#include "mare/Object.hpp"
+#include "mare/Overlay.hpp"
+#include "mare/Scene.hpp"
+#include "mare/Widget.hpp"
+#include "mare/SimpleMesh.hpp"
+#include "mare/RenderState.hpp"
+#include "mare/Shader.hpp"
+#include "mare/Texture.hpp"
+#include "mare/Camera.hpp"
 
 namespace mare
 {
-
-// Forward declarations for pointers
-class Layer;
-class Scene;
-class SimpleMesh;
-class Material;
-class RenderState;
-class Shader;
-class Texture2D;
-
 // The available cursors for the application to use
 enum class CURSOR
 {
@@ -32,19 +36,19 @@ enum class CURSOR
 // This info is set after Renderer creation but before the renderer executes
 struct RendererInfo
 {
-    Scene *scene{};                              // Active Scene
-    Layer *focus{};                                // Focused Layer
-    const char* window_title{};                    // Window title
-    int window_width{1280};                         // window width in pixels
-    int window_height{720};                       // window height in pixels
-    float window_aspect{16.0f / 9.0f};             // window aspect ratio
-    double current_time{};                         // elapsed time in seconds
-    int samples{};                                 // antialiasing samples
-    bool wireframe{false};                         // render in wireframe mode?
-    bool fullscreen{false};                        // render in fullscreen mode?
-    bool vsync{false};                             // render in double buffered vsync mode?
-    bool cursor{true};                             // render cursor?
-    std::bitset<4> debug_mode{};                   // 0000 == off, 0001 == high, 0010 == med, 0100 == low, 1000 == notification
+    Scene *scene{};                    // Active Scene
+    Layer *focus{};                    // Focused Layer
+    const char *window_title{};        // Window title
+    int window_width{1280};            // window width in pixels
+    int window_height{720};            // window height in pixels
+    float window_aspect{16.0f / 9.0f}; // window aspect ratio
+    double current_time{};             // elapsed time in seconds
+    int samples{};                     // antialiasing samples
+    bool wireframe{false};             // render in wireframe mode?
+    bool fullscreen{false};            // render in fullscreen mode?
+    bool vsync{false};                 // render in double buffered vsync mode?
+    bool cursor{true};                 // render cursor?
+    std::bitset<4> debug_mode{};       // 0000 == off, 0001 == high, 0010 == med, 0100 == low, 1000 == notification
 };
 
 // This input is passed by reference to the callbacks which decide what to do with it
@@ -290,40 +294,67 @@ public:
     virtual void enable_depth_testing(bool enable) = 0;
     virtual void enable_face_culling(bool enable) = 0;
     virtual void enable_blending(bool enable) = 0;
+    virtual glm::vec3 raycast(Camera *camera) = 0;
+    virtual glm::vec3 raycast(Camera *camera, glm::ivec2 screen_coords) = 0;
 
     // Buffers
-    virtual Buffer<float> *GenFloatBuffer(std::vector<float> *data, BufferType buffer_type = BufferType::STATIC, size_t size_in_bytes = 0) = 0;
-    virtual Buffer<int> *GenIntBuffer(std::vector<int> *data, BufferType buffer_type = BufferType::STATIC, size_t size_in_bytes = 0) = 0;
-    virtual Buffer<unsigned int> *GenIndexBuffer(std::vector<unsigned int> *data, BufferType buffer_type = BufferType::STATIC, size_t size_in_bytes = 0) = 0;
-    virtual Buffer<bool> *GenBoolBuffer(std::vector<bool> *data, BufferType buffer_type = BufferType::STATIC, size_t size_in_bytes = 0) = 0;
-    virtual Buffer<glm::vec2> *GenVec2Buffer(std::vector<glm::vec2> *data, BufferType buffer_type = BufferType::STATIC, size_t size_in_bytes = 0) = 0;
-    virtual Buffer<glm::vec3> *GenVec3Buffer(std::vector<glm::vec3> *data, BufferType buffer_type = BufferType::STATIC, size_t size_in_bytes = 0) = 0;
-    virtual Buffer<glm::vec4> *GenVec4Buffer(std::vector<glm::vec4> *data, BufferType buffer_type = BufferType::STATIC, size_t size_in_bytes = 0) = 0;
-    virtual Buffer<glm::mat2> *GenMat2Buffer(std::vector<glm::mat2> *data, BufferType buffer_type = BufferType::STATIC, size_t size_in_bytes = 0) = 0;
-    virtual Buffer<glm::mat3> *GenMat3Buffer(std::vector<glm::mat3> *data, BufferType buffer_type = BufferType::STATIC, size_t size_in_bytes = 0) = 0;
-    virtual Buffer<glm::mat4> *GenMat4Buffer(std::vector<glm::mat4> *data, BufferType buffer_type = BufferType::STATIC, size_t size_in_bytes = 0) = 0;
+    virtual Scoped<Buffer<float>> GenFloatBuffer(std::vector<float> *data, BufferType buffer_type = BufferType::STATIC, size_t size_in_bytes = 0) = 0;
+    virtual Scoped<Buffer<int>> GenIntBuffer(std::vector<int> *data, BufferType buffer_type = BufferType::STATIC, size_t size_in_bytes = 0) = 0;
+    virtual Scoped<Buffer<unsigned int>> GenIndexBuffer(std::vector<unsigned int> *data, BufferType buffer_type = BufferType::STATIC, size_t size_in_bytes = 0) = 0;
+    virtual Scoped<Buffer<bool>> GenBoolBuffer(std::vector<bool> *data, BufferType buffer_type = BufferType::STATIC, size_t size_in_bytes = 0) = 0;
+    virtual Scoped<Buffer<glm::vec2>> GenVec2Buffer(std::vector<glm::vec2> *data, BufferType buffer_type = BufferType::STATIC, size_t size_in_bytes = 0) = 0;
+    virtual Scoped<Buffer<glm::vec3>> GenVec3Buffer(std::vector<glm::vec3> *data, BufferType buffer_type = BufferType::STATIC, size_t size_in_bytes = 0) = 0;
+    virtual Scoped<Buffer<glm::vec4>> GenVec4Buffer(std::vector<glm::vec4> *data, BufferType buffer_type = BufferType::STATIC, size_t size_in_bytes = 0) = 0;
+    virtual Scoped<Buffer<glm::mat2>> GenMat2Buffer(std::vector<glm::mat2> *data, BufferType buffer_type = BufferType::STATIC, size_t size_in_bytes = 0) = 0;
+    virtual Scoped<Buffer<glm::mat3>> GenMat3Buffer(std::vector<glm::mat3> *data, BufferType buffer_type = BufferType::STATIC, size_t size_in_bytes = 0) = 0;
+    virtual Scoped<Buffer<glm::mat4>> GenMat4Buffer(std::vector<glm::mat4> *data, BufferType buffer_type = BufferType::STATIC, size_t size_in_bytes = 0) = 0;
 
     // Textures
-    virtual Texture2D *GenTexture2D(const char *image_filepath) = 0;
+    virtual Scoped<Texture2D> GenTexture2D(const char *image_filepath) = 0;
 
     // Render States
-    virtual RenderState *GenRenderState() = 0;
+    virtual Scoped<RenderState> GenRenderState() = 0;
 
     // Shaders
-    virtual Shader *GenShader(const char *directory) = 0;
+    virtual Scoped<Shader> GenShader(const char *directory) = 0;
 
     // Rendering Simple Meshes with no Composite or Instanced Meshes (Composite and Instanced Meshes are rendered by themselves)
-    virtual void render_simple_mesh(Layer *layer, SimpleMesh *mesh, Material *material) = 0;
-    virtual void render_simple_mesh(Layer *layer, SimpleMesh *mesh, Material *material, glm::mat4 parent_model) = 0;
-    virtual void render_simple_mesh(Layer *layer, SimpleMesh *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models) = 0;
+    virtual void render_simple_mesh(const Layer *layer, const SimpleMesh *mesh, Material *material) = 0;
+    virtual void render_simple_mesh(const Layer *layer, const SimpleMesh *mesh, Material *material, const glm::mat4 &parent_model) = 0;
+    virtual void render_simple_mesh(const Layer *layer, const SimpleMesh *mesh, Material *material, const glm::mat4 &parent_model, unsigned int instance_count, const Buffer<glm::mat4> *models) = 0;
 
-    static Renderer* API;
+    // Create scoped or referenced assets
+    template <typename T, typename... Args>
+    Scoped<T> GenScoped(Args... args)
+    {
+        return std::make_unique<T>(args...);
+    }
+    template <typename T, typename... Args>
+    Referenced<T> GenRef(std::string name, Args... args)
+    {
+        asset_map.insert_or_assign(name, std::make_shared<T>(args...) );
+        return std::dynamic_pointer_cast<T>(asset_map[name]);
+    }
+    template <typename T>
+    Referenced<T> GetRef(std::string name)
+    {
+        return std::dynamic_pointer_cast<T>(asset_map[name]);
+    }
+    void DeleteRef(std::string name)
+    {
+        asset_map.erase(name);
+    }
+
+    static Renderer *API;
 
 protected:
     // static variables for renderer accessable from anywhere
     static RendererInfo info;
     static RendererInput input;
     static bool running;
+
+    // Referenced Assests
+    std::unordered_map<std::string, Referenced<Asset>> asset_map;
 };
 } // namespace mare
 

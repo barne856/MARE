@@ -15,18 +15,18 @@ GLBuffer<T>::GLBuffer(std::vector<T> *data, BufferType buffer_type, size_t size_
     : Buffer(data, buffer_type, size_in_bytes), buffer_pointer(nullptr), buffer_fence(nullptr)
 {
     // Create the buffer
-    glCreateBuffers(1, &m_buffer_ID);
+    glCreateBuffers(1, &buffer_ID_);
     GLbitfield flags = 0;
     switch (buffer_type)
     {
     case BufferType::STATIC:
-        glNamedBufferStorage(m_buffer_ID, m_data_size, &(*data)[0], 0);
+        glNamedBufferStorage(buffer_ID_, data_size_, &(*data)[0], 0);
         buffer_pointer = nullptr;
         break;
     case BufferType::READ_ONLY:
         flags = GL_MAP_READ_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT;
-        glNamedBufferStorage(m_buffer_ID, m_data_size, nullptr, flags);
-        buffer_pointer = static_cast<T *>(glMapNamedBufferRange(m_buffer_ID, 0, m_data_size, flags));
+        glNamedBufferStorage(buffer_ID_, data_size_, nullptr, flags);
+        buffer_pointer = static_cast<T *>(glMapNamedBufferRange(buffer_ID_, 0, data_size_, flags));
         if (data)
         {
             flush(*data, 0);
@@ -34,8 +34,8 @@ GLBuffer<T>::GLBuffer(std::vector<T> *data, BufferType buffer_type, size_t size_
         break;
     case BufferType::WRITE_ONLY:
         flags = GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT;
-        glNamedBufferStorage(m_buffer_ID, m_data_size, nullptr, flags);
-        buffer_pointer = static_cast<T *>(glMapNamedBufferRange(m_buffer_ID, 0, m_data_size, flags));
+        glNamedBufferStorage(buffer_ID_, data_size_, nullptr, flags);
+        buffer_pointer = static_cast<T *>(glMapNamedBufferRange(buffer_ID_, 0, data_size_, flags));
         if (data)
         {
             flush(*data, 0);
@@ -43,8 +43,8 @@ GLBuffer<T>::GLBuffer(std::vector<T> *data, BufferType buffer_type, size_t size_
         break;
     case BufferType::READ_WRITE:
         flags = GL_MAP_WRITE_BIT | GL_MAP_READ_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT;
-        glNamedBufferStorage(m_buffer_ID, m_data_size, nullptr, flags);
-        buffer_pointer = static_cast<T *>(glMapNamedBufferRange(m_buffer_ID, 0, m_data_size, flags));
+        glNamedBufferStorage(buffer_ID_, data_size_, nullptr, flags);
+        buffer_pointer = static_cast<T *>(glMapNamedBufferRange(buffer_ID_, 0, data_size_, flags));
         if (data)
         {
             flush(*data, 0);
@@ -52,72 +52,72 @@ GLBuffer<T>::GLBuffer(std::vector<T> *data, BufferType buffer_type, size_t size_
         break;
     case BufferType::READ_ONLY_DOUBLE_BUFFERED:
         flags = GL_MAP_READ_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT;
-        glNamedBufferStorage(m_buffer_ID, m_num_buffers * m_data_size, nullptr, flags);
-        buffer_pointer = static_cast<T *>(glMapNamedBufferRange(m_buffer_ID, 0, m_num_buffers * m_data_size, flags));
+        glNamedBufferStorage(buffer_ID_, num_buffers_ * data_size_, nullptr, flags);
+        buffer_pointer = static_cast<T *>(glMapNamedBufferRange(buffer_ID_, 0, num_buffers_ * data_size_, flags));
         if (data)
         {
             flush(*data, 0);
             flush(*data, data->size());
         }
-        buffer_fence = new GLsync[m_num_buffers];
+        buffer_fence = new GLsync[num_buffers_];
         break;
     case BufferType::WRITE_ONLY_DOUBLE_BUFFERED:
         flags = GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT;
-        glNamedBufferStorage(m_buffer_ID, m_num_buffers * m_data_size, nullptr, flags);
-        buffer_pointer = static_cast<T *>(glMapNamedBufferRange(m_buffer_ID, 0, m_num_buffers * m_data_size, flags));
+        glNamedBufferStorage(buffer_ID_, num_buffers_ * data_size_, nullptr, flags);
+        buffer_pointer = static_cast<T *>(glMapNamedBufferRange(buffer_ID_, 0, num_buffers_ * data_size_, flags));
         if (data)
         {
             flush(*data, 0);
             flush(*data, data->size());
         }
-        buffer_fence = new GLsync[m_num_buffers];
+        buffer_fence = new GLsync[num_buffers_];
         break;
     case BufferType::READ_WRITE_DOUBLE_BUFFERED:
         flags = GL_MAP_WRITE_BIT | GL_MAP_READ_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT;
-        glNamedBufferStorage(m_buffer_ID, m_num_buffers * m_data_size, nullptr, flags);
-        buffer_pointer = static_cast<T *>(glMapNamedBufferRange(m_buffer_ID, 0, m_num_buffers * m_data_size, flags));
+        glNamedBufferStorage(buffer_ID_, num_buffers_ * data_size_, nullptr, flags);
+        buffer_pointer = static_cast<T *>(glMapNamedBufferRange(buffer_ID_, 0, num_buffers_ * data_size_, flags));
         if (data)
         {
             flush(*data, 0);
             flush(*data, data->size());
         }
-        buffer_fence = new GLsync[m_num_buffers];
+        buffer_fence = new GLsync[num_buffers_];
         break;
     case BufferType::READ_ONLY_TRIPLE_BUFFERED:
         flags = GL_MAP_READ_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT;
-        glNamedBufferStorage(m_buffer_ID, m_num_buffers * m_data_size, nullptr, flags);
-        buffer_pointer = static_cast<T *>(glMapNamedBufferRange(m_buffer_ID, 0, m_num_buffers * m_data_size, flags));
+        glNamedBufferStorage(buffer_ID_, num_buffers_ * data_size_, nullptr, flags);
+        buffer_pointer = static_cast<T *>(glMapNamedBufferRange(buffer_ID_, 0, num_buffers_ * data_size_, flags));
         if (data)
         {
             flush(*data, 0);
             flush(*data, data->size());
             flush(*data, 2 * data->size());
         }
-        buffer_fence = new GLsync[m_num_buffers];
+        buffer_fence = new GLsync[num_buffers_];
         break;
     case BufferType::WRITE_ONLY_TRIPLE_BUFFERED:
         flags = GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT;
-        glNamedBufferStorage(m_buffer_ID, m_num_buffers * m_data_size, nullptr, flags);
-        buffer_pointer = static_cast<T *>(glMapNamedBufferRange(m_buffer_ID, 0, m_num_buffers * m_data_size, flags));
+        glNamedBufferStorage(buffer_ID_, num_buffers_ * data_size_, nullptr, flags);
+        buffer_pointer = static_cast<T *>(glMapNamedBufferRange(buffer_ID_, 0, num_buffers_ * data_size_, flags));
         if (data)
         {
             flush(*data, 0);
             flush(*data, data->size());
             flush(*data, 2 * data->size());
         }
-        buffer_fence = new GLsync[m_num_buffers];
+        buffer_fence = new GLsync[num_buffers_];
         break;
     case BufferType::READ_WRITE_TRIPLE_BUFFERED:
         flags = GL_MAP_WRITE_BIT | GL_MAP_READ_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT;
-        glNamedBufferStorage(m_buffer_ID, m_num_buffers * m_data_size, nullptr, flags);
-        buffer_pointer = static_cast<T *>(glMapNamedBufferRange(m_buffer_ID, 0, m_num_buffers * m_data_size, flags));
+        glNamedBufferStorage(buffer_ID_, num_buffers_ * data_size_, nullptr, flags);
+        buffer_pointer = static_cast<T *>(glMapNamedBufferRange(buffer_ID_, 0, num_buffers_ * data_size_, flags));
         if (data)
         {
             flush(*data, 0);
             flush(*data, data->size());
             flush(*data, 2 * data->size());
         }
-        buffer_fence = new GLsync[m_num_buffers];
+        buffer_fence = new GLsync[num_buffers_];
         break;
     }
 }
@@ -125,8 +125,8 @@ GLBuffer<T>::GLBuffer(std::vector<T> *data, BufferType buffer_type, size_t size_
 template <typename T>
 GLBuffer<T>::~GLBuffer()
 {
-    glDeleteBuffers(1, &m_buffer_ID);
-    for (unsigned short i = 0; i < m_num_buffers; i++)
+    glDeleteBuffers(1, &buffer_ID_);
+    for (unsigned short i = 0; i < num_buffers_; i++)
     {
         glDeleteSync(buffer_fence[i]);
     }
@@ -136,19 +136,19 @@ GLBuffer<T>::~GLBuffer()
 template <typename T>
 void GLBuffer<T>::flush(std::vector<T> &data, size_t offset)
 {
-    if (m_buffer_type != BufferType::STATIC)
+    if (buffer_type_ != BufferType::STATIC)
     {
-        if (sizeof(T) * data.size() + offset * sizeof(T) > m_data_size)
+        if (sizeof(T) * data.size() + offset * sizeof(T) > data_size_)
         {
             std::cerr << "Cannot update buffer, out of range" << std::endl;
         }
         else
         {
-            m_count = std::max(data.size() + offset, m_count);
+            count_ = std::max(data.size() + offset, count_);
             size_t write_offset = offset;
-            if (m_num_buffers)
+            if (num_buffers_)
             {
-                write_offset = offset + ((m_buffer_index + 1) % m_num_buffers) * (m_data_size / sizeof(T));
+                write_offset = offset + ((buffer_index_ + 1) % num_buffers_) * (data_size_ / sizeof(T));
             }
             // wait for OpenGL to finish reading from the buffer
             wait_buffer();
@@ -165,13 +165,13 @@ void GLBuffer<T>::flush(std::vector<T> &data, size_t offset)
 template <typename T>
 void GLBuffer<T>::clear(unsigned int offset)
 {
-    if (!m_format.stride)
+    if (!format_.stride)
     {
-        m_count = sizeof(T) * offset / sizeof(T);
+        count_ = sizeof(T) * offset / sizeof(T);
     }
     else
     {
-        m_count = sizeof(T) * offset / m_format.stride;
+        count_ = sizeof(T) * offset / format_.stride;
     }
 }
 
@@ -210,14 +210,14 @@ T GLBuffer<T>::operator[](unsigned int i) const
 template <typename T>
 void GLBuffer<T>::wait_buffer()
 {
-    if (buffer_fence && (glIsSync(buffer_fence[m_buffer_index]) == GL_TRUE))
+    if (buffer_fence && (glIsSync(buffer_fence[buffer_index_]) == GL_TRUE))
     {
         while (true)
         {
-            GLenum result = glClientWaitSync(buffer_fence[m_buffer_index], GL_SYNC_FLUSH_COMMANDS_BIT, 1);
+            GLenum result = glClientWaitSync(buffer_fence[buffer_index_], GL_SYNC_FLUSH_COMMANDS_BIT, 1);
             if (result == GL_ALREADY_SIGNALED || result == GL_CONDITION_SATISFIED)
             {
-                glDeleteSync(buffer_fence[m_buffer_index]);
+                glDeleteSync(buffer_fence[buffer_index_]);
                 return;
             }
             else if (result == GL_TIMEOUT_EXPIRED)
@@ -238,11 +238,11 @@ void GLBuffer<T>::lock_buffer()
 {
     if (buffer_fence)
     {
-        if (glIsSync(buffer_fence[m_buffer_index]) == GL_TRUE)
+        if (glIsSync(buffer_fence[buffer_index_]) == GL_TRUE)
         {
-            glDeleteSync(buffer_fence[m_buffer_index]);
+            glDeleteSync(buffer_fence[buffer_index_]);
         }
-        buffer_fence[m_buffer_index] = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+        buffer_fence[buffer_index_] = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
     }
 }
 

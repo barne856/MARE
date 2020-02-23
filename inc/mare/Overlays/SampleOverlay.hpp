@@ -18,12 +18,11 @@ public:
     SampleOverlay()
     {
         // Create the camera and controls
-        set_camera(new Camera(CameraType::ORTHOGRAPHIC));
-        get_camera()->set_controls(ControlsConfig::NONE);
+        set_camera(Renderer::API->GenScoped<Camera>(ProjectionType::ORTHOGRAPHIC));
         get_camera()->set_position(glm::vec3(0.0f, 0.0f, 1.0f));
 
         // Create Widgets
-        push_widget(new SliderUI(this));
+        push_widget(Renderer::API->GenScoped<SliderUI>(this));
         on_resize(Renderer::API->get_input());
         get_widget(0)->set_value(0.5f);
     }
@@ -33,7 +32,7 @@ public:
     {
         // position widgets on the screen
         glm::ivec2 screen_size = glm::ivec2(Renderer::API->get_info().window_width, Renderer::API->get_info().window_height);
-        glm::vec3 world_size = get_camera()->screen_to_world(screen_size);
+        glm::vec3 world_size = Renderer::API->raycast(get_camera(), screen_size);
         get_widget(0)->set_position({-world_size.x + 0.6f, -0.9f, 0.0f});
         return false;
     }

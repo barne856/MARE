@@ -8,15 +8,15 @@ namespace mare
 {
 GLRenderState::GLRenderState()
 {
-    glCreateVertexArrays(1, &m_render_state_ID);
+    glCreateVertexArrays(1, &render_state_ID_);
 }
 GLRenderState::~GLRenderState()
 {
-    glDeleteVertexArrays(1, &m_render_state_ID);
+    glDeleteVertexArrays(1, &render_state_ID_);
 }
 void GLRenderState::bind() const
 {
-    glBindVertexArray(m_render_state_ID);
+    glBindVertexArray(render_state_ID_);
 }
 
 void GLRenderState::unbind() const
@@ -24,25 +24,25 @@ void GLRenderState::unbind() const
     glBindVertexArray(0);
 }
 
-void GLRenderState::set_vertex_buffer(Buffer<float> *vbo)
+void GLRenderState::set_vertex_buffer(Scoped<Buffer<float>> vbo)
 {
-    vertex_buffer = vbo;
-    for (const auto &element : vbo->format())
+    vertex_buffer_ = std::move(vbo);
+    for (const auto &element : vertex_buffer_->format())
     {
-        glEnableVertexArrayAttrib(m_render_state_ID, m_attribute_index);
-        glVertexArrayAttribFormat(m_render_state_ID, m_attribute_index, static_cast<GLuint>(element.component_count()), gl_type(element.data_type), element.normalized ? GL_TRUE : GL_FALSE, static_cast<GLint>(element.offset));
-        glVertexArrayAttribBinding(m_render_state_ID, m_attribute_index, static_cast<GLuint>(m_vertex_buffer_count));
-        glVertexArrayVertexBuffer(m_render_state_ID, static_cast<GLuint>(m_vertex_buffer_count), static_cast<GLuint>(vbo->name()), 0, static_cast<GLsizei>(vbo->format().stride));
-        m_attribute_index++;
+        glEnableVertexArrayAttrib(render_state_ID_, attribute_index_);
+        glVertexArrayAttribFormat(render_state_ID_, attribute_index_, static_cast<GLuint>(element.component_count()), gl_type(element.data_type), element.normalized ? GL_TRUE : GL_FALSE, static_cast<GLint>(element.offset));
+        glVertexArrayAttribBinding(render_state_ID_, attribute_index_, static_cast<GLuint>(vertex_buffer_count_));
+        glVertexArrayVertexBuffer(render_state_ID_, static_cast<GLuint>(vertex_buffer_count_), static_cast<GLuint>(vertex_buffer_->name()), 0, static_cast<GLsizei>(vertex_buffer_->format().stride));
+        attribute_index_++;
     }
-    m_vertex_buffer_count++;
-    m_vertex_render_count = vbo->count();
+    vertex_buffer_count_++;
+    vertex_render_count_ = vertex_buffer_->count();
 }
-void GLRenderState::set_index_buffer(Buffer<unsigned int> *ibo)
+void GLRenderState::set_index_buffer(Scoped<Buffer<unsigned int>> ibo)
 {
-    index_buffer = ibo;
-    glVertexArrayElementBuffer(m_render_state_ID, ibo->name());
-    m_index_render_count = ibo->count();
+    index_buffer_ = std::move(ibo);
+    glVertexArrayElementBuffer(render_state_ID_, index_buffer_->name());
+    index_render_count_ = index_buffer_->count();
 }
 
 GLenum GLRenderState::gl_type(ShaderDataType type)

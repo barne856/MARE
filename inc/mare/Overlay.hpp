@@ -2,9 +2,9 @@
 #define OVERLAY
 
 // MARE
+#include "mare/MareUtility.hpp"
 #include "mare/Layer.hpp"
 #include "mare/Widget.hpp"
-#include "mare/Renderer.hpp"
 
 // Standard Library
 #include <vector>
@@ -16,7 +16,7 @@ class Overlay : public Layer
 public:
     Overlay();
     virtual ~Overlay();
-    
+
     bool render(double time, double dt) final;
 
     bool on_key(const RendererInput &input) final;
@@ -26,10 +26,10 @@ public:
     virtual bool on_resize(const RendererInput &input) = 0;
 
     Widget *get_widget(size_t index);
-    void push_widget(Widget *widget);
+    void push_widget(Scoped<Widget> widget);
 
 private:
-    std::vector<Widget *> *m_widget_stack;
+    std::vector<Scoped<Widget>> widget_stack_{};
 };
 } // namespace mare
 

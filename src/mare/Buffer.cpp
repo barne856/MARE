@@ -14,31 +14,31 @@ size_t BufferFormatElement::component_count() const
 }
 
 // BufferFormat
-BufferFormat::BufferFormat() : m_elements({}), stride(0) {}
+BufferFormat::BufferFormat() : elements_({}), stride(0) {}
 BufferFormat::BufferFormat(const std::initializer_list<BufferFormatElement> &elements)
-    : m_elements(elements), stride(0)
+    : elements_(elements), stride(0)
 {
     size_t offset = 0;
-    for (auto &e : m_elements)
+    for (auto &e : elements_)
     {
         e.offset = offset;
         offset += e.size;
         stride += e.size;
     }
 }
-const std::vector<BufferFormatElement> &BufferFormat::elements() const { return m_elements; }
-std::vector<BufferFormatElement>::iterator BufferFormat::begin() { return m_elements.begin(); }
-std::vector<BufferFormatElement>::iterator BufferFormat::end() { return m_elements.end(); }
-std::vector<BufferFormatElement>::const_iterator BufferFormat::begin() const { return m_elements.begin(); }
-std::vector<BufferFormatElement>::const_iterator BufferFormat::end() const { return m_elements.end(); }
+const std::vector<BufferFormatElement> &BufferFormat::elements() const { return elements_; }
+std::vector<BufferFormatElement>::iterator BufferFormat::begin() { return elements_.begin(); }
+std::vector<BufferFormatElement>::iterator BufferFormat::end() { return elements_.end(); }
+std::vector<BufferFormatElement>::const_iterator BufferFormat::begin() const { return elements_.begin(); }
+std::vector<BufferFormatElement>::const_iterator BufferFormat::end() const { return elements_.end(); }
 
 // Buffer
 template <typename T>
 Buffer<T>::Buffer(std::vector<T> *data, BufferType buffer_type, size_t size_in_bytes)
-    : m_buffer_ID(0), m_format(BufferFormat()), m_buffer_type(buffer_type), m_buffer_index(0), m_num_buffers(0)
+    : buffer_ID_(0), format_(BufferFormat()), buffer_type_(buffer_type), buffer_index_(0), num_buffers_(0)
 {
-    m_count = data ? data->size() : 0;
-    m_data_size = size_in_bytes ? size_in_bytes : sizeof(T) * m_count;
+    count_ = data ? data->size() : 0;
+    data_size_ = size_in_bytes ? size_in_bytes : sizeof(T) * count_;
 
     // if there is no data supplied
     if (!data)
@@ -63,7 +63,7 @@ Buffer<T>::Buffer(std::vector<T> *data, BufferType buffer_type, size_t size_in_b
             std::cerr << "WARNING: Static buffer cannot have a size_in_bytes parameter supplied, size will be taken from the size of the given data." << std::endl;
         }
         // or buffer is dynamic and size in bytes is smaller than the given data size
-        else if (size_in_bytes < m_data_size)
+        else if (size_in_bytes < data_size_)
         {
             std::cerr << "WARNING: size_in_bytes parameter is smaller than the given data size, allocated size will truncated." << std::endl;
         }
@@ -72,22 +72,22 @@ Buffer<T>::Buffer(std::vector<T> *data, BufferType buffer_type, size_t size_in_b
     switch (buffer_type)
     {
     case BufferType::READ_ONLY_DOUBLE_BUFFERED:
-        m_num_buffers = 2;
+        num_buffers_ = 2;
         break;
     case BufferType::WRITE_ONLY_DOUBLE_BUFFERED:
-        m_num_buffers = 2;
+        num_buffers_ = 2;
         break;
     case BufferType::READ_WRITE_DOUBLE_BUFFERED:
-        m_num_buffers = 2;
+        num_buffers_ = 2;
         break;
     case BufferType::READ_ONLY_TRIPLE_BUFFERED:
-        m_num_buffers = 3;
+        num_buffers_ = 3;
         break;
     case BufferType::WRITE_ONLY_TRIPLE_BUFFERED:
-        m_num_buffers = 3;
+        num_buffers_ = 3;
         break;
     case BufferType::READ_WRITE_TRIPLE_BUFFERED:
-        m_num_buffers = 3;
+        num_buffers_ = 3;
         break;
 
     default:
@@ -97,35 +97,35 @@ Buffer<T>::Buffer(std::vector<T> *data, BufferType buffer_type, size_t size_in_b
 template <typename T>
 void Buffer<T>::set_format(const BufferFormat &format)
 {
-    m_format = format;
-    m_count = m_data_size / format.stride;
+    format_ = format;
+    count_ = data_size_ / format.stride;
 }
 template <typename T>
-const BufferFormat &Buffer<T>::format() const { return m_format; }
+const BufferFormat &Buffer<T>::format() const { return format_; }
 template <typename T>
-const size_t Buffer<T>::count() const { return m_count; }
+const size_t Buffer<T>::count() const { return count_; }
 template <typename T>
-unsigned int Buffer<T>::name() const { return m_buffer_ID; }
+unsigned int Buffer<T>::name() const { return buffer_ID_; }
 
 template <typename T>
 void Buffer<T>::swap_buffer()
 {
     // m_num_buffers is zero if single buffered
-    if (m_num_buffers)
+    if (num_buffers_)
     {
-        m_buffer_index = (m_buffer_index + 1) % m_num_buffers;
+        buffer_index_ = (buffer_index_ + 1) % num_buffers_;
     }
 }
 template <typename T>
 bool Buffer<T>::is_multibuffered()
 {
     // if single buffered m_num_buffers == 0
-    return static_cast<bool>(m_num_buffers);
+    return static_cast<bool>(num_buffers_);
 }
 template <typename T>
 unsigned int Buffer<T>::get_buffer_index()
 {
-    return m_buffer_index;
+    return buffer_index_;
 }
 
 template class Buffer<float>;

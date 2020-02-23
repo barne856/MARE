@@ -4,31 +4,18 @@
 namespace mare
 {
 Object::Object(){}
-Object::~Object()
-{
-    for (auto &primative : primatives)
-    {
-        if (primative.mesh)
-        {
-            delete primative.mesh;
-        }
-        if (primative.material)
-        {
-            delete primative.material;
-        }
-    }
-};
-void Object::push_primative(Mesh *mesh, Material *material)
+Object::~Object() {}
+void Object::push_primative(Referenced<Mesh> mesh, Referenced<Material> material)
 {
     primatives.push_back({mesh, material});
 }
-void Object::render(Layer *layer)
+void Object::render(const Layer* layer)
 {
     for (auto &primative : primatives)
     {
         primative.material->bind();
         primative.material->render();
-        primative.mesh->render(layer, primative.material, transform);
+        primative.mesh->render(layer, primative.material.get(), transform_);
     }
 }
 } // namespace mare

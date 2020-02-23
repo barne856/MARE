@@ -3,154 +3,118 @@
 
 namespace mare
 {
-Camera::Camera(CameraType type)
-    : m_controls(nullptr), m_linear_velocity(glm::vec3(0.0f)), m_angular_velocity(0.0f), m_position(glm::vec3(0.0f)), m_direction(glm::vec3(0.0f, 0.0f, -1.0f)), m_up(glm::vec3(0.0f, 1.0f, 0.0f))
+Camera::Camera(ProjectionType type)
+    : type_(type), controls_(nullptr), linear_velocity_(glm::vec3(0.0f)), angular_velocity_(0.0f), position_(glm::vec3(0.0f)), direction_(glm::vec3(0.0f, 0.0f, -1.0f)), up_(glm::vec3(0.0f, 1.0f, 0.0f))
 {
-    m_type = type;
-    if (type == CameraType::PERSPECTIVE)
+    if (type == ProjectionType::PERSPECTIVE)
     {
-        m_near = 0.01f;
-        m_far = 1000.0f;
+        near_ = 0.1f;
+        far_ = 10.0f;
     }
     recalculate_projection();
     recalculate_view();
 }
-Camera::~Camera()
+Camera::~Camera() {}
+glm::mat4 Camera::projection() const { return projection_; }
+glm::mat4 Camera::view() const { return view_; }
+void Camera::set_controls(Scoped<Controls> controls)
 {
-    if (m_controls)
-    {
-        delete m_controls;
-        m_controls = nullptr;
-    }
-}
-glm::mat4 Camera::projection() const { return m_projection; }
-glm::mat4 Camera::view() const { return m_view; }
-void Camera::set_controls(ControlsConfig config)
-{
-    if (m_controls)
-    {
-        delete m_controls;
-        m_controls = nullptr;
-    }
-
-    switch (config)
-    {
-    case ControlsConfig::ORBITCONTROLS:
-        m_controls = new OrbitControls();
-        break;
-    case ControlsConfig::FLYCONTROLS:
-        m_controls = new FlyControls();
-        break;
-    default:
-        m_controls = nullptr;
-        break;
-    }
+    controls_ = std::move(controls);
 }
 void Camera::interpret_input()
 {
-    if (m_controls)
+    if (controls_)
     {
-        m_controls->interpret_input(this, Renderer::API->get_input());
+        controls_->interpret_input(this, Renderer::API->get_input());
     }
 }
 void Camera::set_view(const glm::vec3 &eye, const glm::vec3 &center, const glm::vec3 &up)
 {
-    m_position = eye;
-    m_direction = glm::normalize(center - eye);
-    m_up = glm::normalize(up);
+    position_ = eye;
+    direction_ = glm::normalize(center - eye);
+    up_ = glm::normalize(up);
     recalculate_view();
 }
 void Camera::set_position(const glm::vec3 &position)
 {
-    m_position = position;
+    position_ = position;
     recalculate_view();
 }
 void Camera::set_direction(const glm::vec3 &direction)
 {
-    m_direction = glm::normalize(direction);
+    direction_ = glm::normalize(direction);
     recalculate_view();
 }
 void Camera::set_up(const glm::vec3 &up)
 {
-    m_up = glm::normalize(up);
+    up_ = glm::normalize(up);
     recalculate_view();
 }
 void Camera::set_fov(float fovy)
 {
-    m_fovy = fovy;
+    fovy_ = fovy;
     recalculate_projection();
 }
 void Camera::set_scale(float scale)
 {
-    m_scale = scale;
+    scale_ = scale;
     recalculate_projection();
 }
 void Camera::set_aspect(float aspect)
 {
-    m_aspect = aspect;
+    aspect_ = aspect;
     recalculate_projection();
 }
 void Camera::set_near_clip_plan(float near)
 {
-    m_near = near;
+    near_ = near;
     recalculate_projection();
 }
 void Camera::set_far_clip_plan(float far)
 {
-    m_far = far;
+    far_ = far;
     recalculate_projection();
 }
 void Camera::set_forward_velocity(float velocity)
 {
-    m_linear_velocity = m_direction * velocity;
+    linear_velocity_ = direction_ * velocity;
 }
 void Camera::set_linear_velocity(const glm::vec3 &linear_velocity)
 {
-    m_linear_velocity = linear_velocity;
+    linear_velocity_ = linear_velocity;
 }
 void Camera::set_angular_velocity(float angular_velocity)
 {
-    m_angular_velocity = angular_velocity;
+    angular_velocity_ = angular_velocity;
 }
 void Camera::set_distance_to_center(float distance)
 {
-    m_distance_to_center = distance;
+    distance_to_center_ = distance;
 }
-glm::vec3 Camera::get_position() const { return m_position; }
-glm::vec3 Camera::get_direction() const { return m_direction; }
-glm::vec3 Camera::get_up() const { return m_up; }
-float Camera::get_distance_to_center() const { return m_distance_to_center; }
+glm::vec3 Camera::get_position() const { return position_; }
+glm::vec3 Camera::get_direction() const { return direction_; }
+glm::vec3 Camera::get_up() const { return up_; }
+float Camera::get_distance_to_center() const { return distance_to_center_; }
 void Camera::render(double dt)
 {
-    set_position(m_position + m_linear_velocity * float(dt));
-    set_direction(glm::vec3(glm::rotate(glm::mat4(1.0f), m_angular_velocity * float(dt), m_up) * glm::vec4(m_direction, 1.0f)));
+    set_position(position_ + linear_velocity_ * float(dt));
+    set_direction(glm::vec3(glm::rotate(glm::mat4(1.0f), angular_velocity_ * float(dt), up_) * glm::vec4(direction_, 1.0f)));
 }
 void Camera::recalculate_projection()
 {
-    m_aspect = Renderer::API->get_info().window_aspect;
-    switch (m_type)
+    aspect_ = Renderer::API->get_info().window_aspect;
+    switch (type_)
     {
-    case CameraType::PERSPECTIVE:
-        m_projection = glm::perspective(glm::radians(m_fovy), m_aspect, m_near, m_far);
+    case ProjectionType::PERSPECTIVE:
+        projection_ = glm::perspective(glm::radians(fovy_), aspect_, near_, far_);
         break;
-    case CameraType::ORTHOGRAPHIC:
-        m_projection = glm::ortho(-m_scale * m_aspect, m_scale * m_aspect, -m_scale, m_scale);
+    case ProjectionType::ORTHOGRAPHIC:
+        projection_ = glm::ortho(-scale_ * aspect_, scale_ * aspect_, -scale_, scale_);
         break;
     }
 }
 void Camera::recalculate_view()
 {
-    m_view = glm::lookAt(m_position, m_position + m_direction, m_up);
-}
-glm::vec3 Camera::screen_to_world(glm::ivec2 screen_coords)
-{
-    // does not calculate z value yet
-    glm::mat4 inversed_camera = glm::inverse(m_projection * m_view);
-    float x = 2.0f * (float)screen_coords.x / (float)(Renderer::API->get_info().window_width) - 1.0f;
-    float y = -2.0f * (float)screen_coords.y / (float)(Renderer::API->get_info().window_height) + 1.0f;
-    glm::vec4 screen_vector = glm::vec4(x, y, 0.0f, 1.0f);
-    glm::vec4 world_vector = inversed_camera * screen_vector;
-    world_vector /= world_vector.w;
-    return glm::vec3(world_vector);
+    view_ = glm::lookAt(position_, position_ + direction_, up_);
 }
 } // namespace mare

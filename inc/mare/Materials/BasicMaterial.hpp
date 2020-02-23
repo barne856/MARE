@@ -16,7 +16,7 @@ public:
     virtual ~BasicMaterial() {}
     void render() override
     {
-        m_shader->upload_vec4("u_color", m_color);
+        upload_vec4("u_color", m_color);
     }
     inline void set_color(glm::vec4 color) { m_color = color; }
 

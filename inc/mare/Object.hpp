@@ -13,19 +13,19 @@ namespace mare
 {
 struct Primative
 {
-    Mesh *mesh;
-    Material *material;
+    Referenced<Mesh> mesh;
+    Referenced<Material> material;
 };
 class Object : public Mesh
 {
 public:
     Object();
     virtual ~Object();
-    virtual void render(Layer *layer, Material *material) {} // not used
-    virtual void render(Layer *layer, Material *material, glm::mat4 parent_model) {} // not used
-    virtual void render(Layer *layer, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models) {} // not used
-    void push_primative(Mesh *mesh, Material *material);
-    void render(Layer *layer);
+    virtual void render(const Layer *layer, Material *material) override {}                                                                                              // not used
+    virtual void render(const Layer *layer, Material *material, const glm::mat4 &parent_model) override {}                                                               // not used
+    virtual void render(const Layer *layer, Material *material, const glm::mat4 &parent_model, unsigned int instance_count, const Buffer<glm::mat4> *models) override {} // not used
+    void push_primative(Referenced<Mesh> mesh, Referenced<Material> material);
+    void render(const Layer *layer);
     std::vector<Primative> primatives;
 };
 } // namespace mare

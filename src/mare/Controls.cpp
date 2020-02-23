@@ -8,7 +8,7 @@ namespace mare
 
 const float PI = 3.141592653f;
 
-void OrbitControls::interpret_input(Camera *camera, RendererInput &input)
+void OrbitControls::interpret_input(Camera* camera, const RendererInput &input)
 {
     if (input.mouse_button == 1)
     {
@@ -87,10 +87,14 @@ void OrbitControls::interpret_input(Camera *camera, RendererInput &input)
     }
 }
 
-void FlyControls::interpret_input(Camera *camera, RendererInput &input)
+void FlyControls::interpret_input(Camera* camera, const RendererInput &input)
 {
     float sensitivity = 300.0f;
     float speed = 1.0f;
+    if(input.LEFT_SHIFT_PRESSED)
+    {
+        speed = 2.5f;
+    }
     float dtheta = float(input.mouse_vel.y) / sensitivity;
     float dphi = -float(input.mouse_vel.x) / sensitivity;
     glm::vec3 dir = camera->get_direction();
@@ -133,9 +137,8 @@ void FlyControls::interpret_input(Camera *camera, RendererInput &input)
         x /= sqrtf(x * x + y * y);
         y /= sqrtf(x * x + y * y);
     }
-    glm::vec3 velocity = (dir*y + right*x)*speed;
+    glm::vec3 velocity = (dir * y + right * x) * speed;
     camera->set_linear_velocity(velocity);
-
 }
 
 } // namespace mare

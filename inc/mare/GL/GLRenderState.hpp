@@ -19,8 +19,8 @@ public:
     ~GLRenderState();
     void bind() const override;
     void unbind() const override;
-    void set_vertex_buffer(Buffer<float> *vbo) override;
-    void set_index_buffer(Buffer<unsigned int> *ibo) override;
+    void set_vertex_buffer(Scoped<Buffer<float>> vbo) override;
+    void set_index_buffer(Scoped<Buffer<unsigned int>> ibo) override;
 private:
 GLenum gl_type(ShaderDataType type);
 };

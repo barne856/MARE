@@ -2,6 +2,7 @@
 #define CAMERA
 
 // MARE
+#include "mare/MareUtility.hpp"
 #include "mare/Controls.hpp"
 
 #include "ext/matrix_transform.hpp"  // glm::translate, glm::rotate, glm::scale
@@ -10,7 +11,7 @@
 namespace mare
 {
 
-enum class CameraType
+enum class ProjectionType
 {
     PERSPECTIVE,
     ORTHOGRAPHIC
@@ -19,7 +20,7 @@ enum class CameraType
 class Camera
 {
 public:
-    Camera(CameraType type);
+    Camera(ProjectionType type);
     ~Camera();
 
     // Get projection and view matrices from the camera
@@ -27,7 +28,7 @@ public:
     glm::mat4 view() const;
 
     // Set the controls for the camera
-    void set_controls(ControlsConfig config);
+    void set_controls(Scoped<Controls> controls);
 
     // Interpret input from renderer using camera controls
     void interpret_input();
@@ -58,30 +59,27 @@ public:
     void recalculate_projection(); // projection
     void recalculate_view();       // view
 
-    // Raycast screen coordinates to a 3D point in world space
-    glm::vec3 screen_to_world(glm::ivec2 screen_coords);
-
 private:
     // Camera Controls
-    Controls *m_controls;
+    Scoped<Controls> controls_;
 
     // Camera Properties
-    glm::mat4 m_projection;
-    glm::mat4 m_view;
-    glm::vec3 m_linear_velocity;
-    float m_angular_velocity;
-    glm::vec3 m_position;
-    glm::vec3 m_direction;
-    glm::vec3 m_up;
-    float m_scale = 1.0f;
-    float m_aspect = 1.0f;
-    float m_near = -1.0f;
-    float m_far = 1.0f;
-    float m_fovy = 45.0f;
-    float m_distance_to_center = 1.0f;
+    glm::mat4 projection_;
+    glm::mat4 view_;
+    glm::vec3 linear_velocity_;
+    float angular_velocity_;
+    glm::vec3 position_;
+    glm::vec3 direction_;
+    glm::vec3 up_;
+    float scale_ = 1.0f;
+    float aspect_ = 1.0f;
+    float near_ = -1.0f;
+    float far_ = 1.0f;
+    float fovy_ = 45.0f;
+    float distance_to_center_ = 1.0f;
 
-    // Camera type
-    CameraType m_type;
+    // Projection type
+    ProjectionType type_;
 };
 } // namespace mare
 

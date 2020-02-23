@@ -44,7 +44,7 @@ public:
     size_t stride;
 
 private:
-    std::vector<BufferFormatElement> m_elements;
+    std::vector<BufferFormatElement> elements_;
 };
 
 enum class BufferType
@@ -86,13 +86,13 @@ public:
     virtual void lock_buffer() = 0;                                    // used to sync rendering when using double or triple buffers
 
 protected:
-    unsigned int m_buffer_ID;      // Buffer ID from the rendering API
-    BufferFormat m_format;         // the applied format is any
-    size_t m_count;                // the number of elements in the buffer
-    size_t m_data_size;            // the size in bytes of all the elements in the buffer
-    BufferType m_buffer_type;      // buffer type, this determines which operations the CPU can do on the buffer
-    unsigned short m_buffer_index; // the currently rendered buffer if multibuffered
-    unsigned short m_num_buffers;  // the number of buffers if multibuffered
+    unsigned int buffer_ID_;      // Buffer ID from the rendering API
+    BufferFormat format_;         // the applied format is any
+    size_t count_;                // the number of elements in the buffer
+    size_t data_size_;            // the size in bytes of all the elements in the buffer
+    BufferType buffer_type_;      // buffer type, this determines which operations the CPU can do on the buffer
+    unsigned short buffer_index_; // the currently rendered buffer if multibuffered
+    unsigned short num_buffers_;  // the number of buffers if multibuffered
 };
 } // namespace mare
 

@@ -18,5 +18,5 @@ RendererInput &Renderer::get_input() { return input; }
 RendererInfo Renderer::info{};    // Renderer and window information
 RendererInput Renderer::input{};  // Inputs from keyboard and mouse and focued layer
 bool Renderer::running{false};    // Program is running?
-Renderer *Renderer::API{nullptr}; // The implemented API
+Renderer* Renderer::API{nullptr}; // The implemented API
 } // namespace mare

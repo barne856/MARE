@@ -22,22 +22,21 @@ public:
     SampleScene()
     {
         // Create the camera and controls
-        set_camera(new Camera(CameraType::PERSPECTIVE));
-        get_camera()->set_controls(ControlsConfig::FLYCONTROLS);
+        set_camera(Renderer::API->GenScoped<Camera>(ProjectionType::PERSPECTIVE));
+        get_camera()->set_controls(Renderer::API->GenScoped<FlyControls>());
         get_camera()->set_position(glm::vec3(0.0f, 0.0f, 1.0f));
         Renderer::API->set_cursor(CURSOR::DISABLED);
 
         // create objects
-        mare_text = new MareTextObject();
-        torus = new TorusMesh(100, 200, 0.1f, 0.2f);
-        cube = new CubeMesh(1.0f);
+        torus = Renderer::API->GenScoped<TorusMesh>(100, 200, 0.1f, 0.2f);
+        cube = Renderer::API->GenScoped<CubeMesh>(1.0f);
         cube->set_scale({5.0f, 5.0f, 0.05f});
         cube->set_position({0.0f, 0.0f, -0.5f});
-        material = new PhongMaterial();
-        shadow_material = new BasicMaterial();
+        material = Renderer::API->GenScoped<PhongMaterial>();
+        shadow_material = Renderer::API->GenScoped<BasicMaterial>();
 
         // Push overlays to the layer stack
-        push_layer(new SampleOverlay());
+        push_overlay(Renderer::API->GenScoped<SampleOverlay>());
 
         // OpenGL Depth Texture
         glGenTextures(1, &depth_texture);
@@ -81,20 +80,12 @@ public:
         }
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-        shadow_camera = new Camera(CameraType::PERSPECTIVE);
+        shadow_camera = Renderer::API->GenScoped<Camera>(ProjectionType::PERSPECTIVE);
 
         scale_bias_matrix = glm::mat4(glm::vec4(0.5f, 0.0f, 0.0f, 0.0f),
                                       glm::vec4(0.0f, 0.5f, 0.0f, 0.0f),
                                       glm::vec4(0.0f, 0.0f, 0.5f, 0.0f),
                                       glm::vec4(0.5f, 0.5f, 0.5f, 1.0f));
-    }
-    ~SampleScene()
-    {
-        delete mare_text;
-        delete material;
-        delete torus;
-        delete cube;
-        mare_text = nullptr;
     }
 
     bool render(double time, double dt) override
@@ -115,24 +106,24 @@ public:
         //material->light.specular = glm::vec4(glm::vec3(v), 1.0f);
 
         // Render into depth buffer
-        shadow_camera->set_view(material->get_light_position(), glm::vec3(0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-        shadow_material->bind();
-        shadow_material->render();
-        shadow_material->upload_mat4("projection", shadow_camera->projection());
-        shadow_material->upload_mat4("view", shadow_camera->view());
-        glBindFramebuffer(GL_FRAMEBUFFER, depth_fbo);
-        glViewport(0, 0, Renderer::API->get_info().window_width, Renderer::API->get_info().window_height);
-        glClearDepth(1.0f);
-        glClear(GL_DEPTH_BUFFER_BIT);
-        glEnable(GL_POLYGON_OFFSET_FILL);
-        glPolygonOffset(2.0f, 4.0f);
-        Camera *temp_cam = get_camera();
-        set_camera(nullptr);
-        torus->render(this, shadow_material);
-        cube->render(this, shadow_material);
-        glDisable(GL_POLYGON_OFFSET_FILL);
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        set_camera(temp_cam);
+        // shadow_camera->set_view(material->get_light_position(), glm::vec3(0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+        // shadow_material->bind();
+        // shadow_material->render();
+        // shadow_material->upload_mat4("projection", shadow_camera->projection());
+        // shadow_material->upload_mat4("view", shadow_camera->view());
+        // glBindFramebuffer(GL_FRAMEBUFFER, depth_fbo);
+        // glViewport(0, 0, Renderer::API->get_info().window_width, Renderer::API->get_info().window_height);
+        // glClearDepth(1.0f);
+        // glClear(GL_DEPTH_BUFFER_BIT);
+        // glEnable(GL_POLYGON_OFFSET_FILL);
+        // glPolygonOffset(2.0f, 4.0f);
+        // Camera *temp_cam = get_camera();
+        // set_camera(nullptr);
+        // torus->render(this, shadow_material.get());
+        // cube->render(this, shadow_material.get());
+        // glDisable(GL_POLYGON_OFFSET_FILL);
+        // glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        // set_camera(temp_cam);
 
         // Render objects
         //mare_text->render(this);
@@ -140,8 +131,8 @@ public:
         material->render();
         material->upload_mat4("shadow_matrix", scale_bias_matrix * shadow_camera->projection() * shadow_camera->view());
         glBindTextureUnit(1, depth_texture);
-        torus->render(this, material);
-        cube->render(this, material);
+        torus->render(this, material.get());
+        cube->render(this, material.get());
 
         // Run forever
         return true;
@@ -153,19 +144,18 @@ public:
         {
             wireframe = !wireframe;
         }
-        if(input.LEFT_CONTROL_PRESSED)
+        Renderer::API->wireframe_mode(wireframe);
+        // show mouse and disable controls
+        if (input.LEFT_CONTROL_PRESSED)
         {
             Renderer::API->set_cursor(CURSOR::ENABLED);
-            get_camera()->set_controls(ControlsConfig::NONE);
+            get_camera()->set_controls(nullptr);
         }
         else
         {
             Renderer::API->set_cursor(CURSOR::DISABLED);
-            get_camera()->set_controls(ControlsConfig::FLYCONTROLS);
+            get_camera()->set_controls(Renderer::API->GenScoped<FlyControls>());
         }
-
-        
-        Renderer::API->wireframe_mode(wireframe);
         // event is handled
         return true;
     }
@@ -175,6 +165,10 @@ public:
         if (input.mouse_button == 1)
         {
             Renderer::API->get_info().focus = this;
+            if (input.LEFT_CONTROL_PRESSED)
+            {
+                torus->set_position(Renderer::API->raycast(get_camera()));
+            }
             return true;
         }
         Renderer::API->get_info().focus = nullptr;
@@ -183,12 +177,11 @@ public:
 
 private:
     // Objects
-    MareTextObject *mare_text = nullptr;
-    TorusMesh *torus = nullptr;
-    CubeMesh *cube = nullptr;
-    PhongMaterial *material = nullptr;
-    BasicMaterial *shadow_material = nullptr;
-    Camera *shadow_camera = nullptr;
+    Scoped<TorusMesh> torus = nullptr;
+    Scoped<CubeMesh> cube = nullptr;
+    Scoped<PhongMaterial> material = nullptr;
+    Scoped<BasicMaterial> shadow_material = nullptr;
+    Scoped<Camera> shadow_camera = nullptr;
     glm::mat4 scale_bias_matrix;
     bool wireframe = false;
     GLuint depth_texture;

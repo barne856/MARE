@@ -3,6 +3,7 @@
 
 // MARE
 #include "mare/Buffer.hpp"
+#include "mare/MareUtility.hpp"
 
 // OpenGL
 #include "GL/glew.h"

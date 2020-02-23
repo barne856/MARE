@@ -100,11 +100,11 @@ public:
             data.push_back(vertices[3 * i][2]);
         }
 
-        Buffer<float> *vertex_buffer = Renderer::API->GenFloatBuffer(&data);
+        Scoped<Buffer<float>> vertex_buffer = Renderer::API->GenFloatBuffer(&data);
         vertex_buffer->set_format({{ShaderDataType::VEC3, "position"},
                                    {ShaderDataType::VEC3, "normal"}});
 
-        render_state->set_vertex_buffer(vertex_buffer);
+        render_state->set_vertex_buffer(std::move(vertex_buffer));
     }
 
 private:

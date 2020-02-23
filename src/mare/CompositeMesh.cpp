@@ -2,60 +2,43 @@
 
 namespace mare
 {
-
-CompositeMesh::~CompositeMesh()
+void CompositeMesh::render(const Layer *layer, Material *material)
 {
-    for (auto &mesh : m_meshes)
+    for (auto &mesh : meshes_)
     {
-        if (mesh)
-        {
-            delete mesh;
-        }
+        mesh->render(layer, material, transform_);
     }
 }
 
-void CompositeMesh::render(Layer *layer, Material *material)
+void CompositeMesh::render(const Layer *layer, Material *material, const glm::mat4 &parent_model)
 {
-    for (Mesh *mesh : m_meshes)
+    for (auto &mesh : meshes_)
     {
-        mesh->render(layer, material, transform);
+        mesh->render(layer, material, parent_model * transform_);
     }
 }
 
-void CompositeMesh::render(Layer *layer, Material *material, glm::mat4 parent_model)
+void CompositeMesh::render(const Layer *layer, Material *material, const glm::mat4 &parent_model, unsigned int instance_count, const Buffer<glm::mat4> *models)
 {
-    for (Mesh *mesh : m_meshes)
+    for (auto &mesh : meshes_)
     {
-        mesh->render(layer, material, parent_model * transform);
+        mesh->render(layer, material, parent_model * transform_, instance_count, models);
     }
 }
 
-void CompositeMesh::render(Layer *layer, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models)
+void CompositeMesh::push_mesh(Scoped<Mesh> mesh)
 {
-    for (Mesh *mesh : m_meshes)
-    {
-        mesh->render(layer, material, parent_model * transform, instance_count, models);
-    }
-}
-
-void CompositeMesh::push_mesh(Mesh *mesh)
-{
-    m_meshes.push_back(mesh);
+    meshes_.push_back(std::move(mesh));
 }
 
 void CompositeMesh::pop_mesh()
 {
-    m_meshes.pop_back();
+    meshes_.pop_back();
 }
 
 void CompositeMesh::clear()
 {
-    m_meshes.clear();
-}
-
-void CompositeMesh::flush(std::vector<Mesh*> meshes)
-{
-    m_meshes = meshes;
+    meshes_.clear();
 }
 
 } // namespace mare

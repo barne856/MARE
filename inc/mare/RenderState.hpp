@@ -32,8 +32,8 @@ public:
 
     virtual void bind() const = 0;
     virtual void unbind() const = 0;
-    virtual void set_vertex_buffer(Buffer<float> *vbo) = 0;
-    virtual void set_index_buffer(Buffer<unsigned int> *ibo) = 0;
+    virtual void set_vertex_buffer(Scoped<Buffer<float>> vbo) = 0;
+    virtual void set_index_buffer(Scoped<Buffer<unsigned int>> ibo) = 0;
     
     size_t render_count() const;
     bool is_indexed() const;
@@ -46,14 +46,14 @@ public:
     void lock_buffer();
 
 protected:
-    unsigned int m_render_state_ID;
-    size_t m_vertex_buffer_count;
-    unsigned int m_attribute_index;
-    size_t m_vertex_render_count;
-    size_t m_index_render_count;
-    DrawMethod draw_method;
-    Buffer<float> *vertex_buffer;       // positions, normals, and texture coords
-    Buffer<unsigned int> *index_buffer; // used as rendering order if not set to nullptr
+    unsigned int render_state_ID_;
+    size_t vertex_buffer_count_;
+    unsigned int attribute_index_;
+    size_t vertex_render_count_;
+    size_t index_render_count_;
+    DrawMethod draw_method_;
+    Scoped<Buffer<float>> vertex_buffer_;       // positions, normals, and texture coords
+    Scoped<Buffer<unsigned int>> index_buffer_; // used as rendering order if not set to nullptr
 };
 } // namespace mare
 

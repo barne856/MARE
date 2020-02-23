@@ -135,14 +135,14 @@ public:
             vertex_data.push_back(vert[2]);
         }
 
-        Buffer<float> *vertex_buffer = Renderer::API->GenFloatBuffer(&vertex_data);
+        Scoped<Buffer<float>> vertex_buffer = Renderer::API->GenFloatBuffer(&vertex_data);
         vertex_buffer->set_format({{ShaderDataType::VEC3, "position"},
                                    {ShaderDataType::VEC3, "normal"}});
 
-        Buffer<unsigned int> *index_buffer = Renderer::API->GenIndexBuffer(&indices);
+        Scoped<Buffer<unsigned int>> index_buffer = Renderer::API->GenIndexBuffer(&indices);
 
-        render_state->set_vertex_buffer(vertex_buffer);
-        render_state->set_index_buffer(index_buffer);
+        render_state->set_vertex_buffer(std::move(vertex_buffer));
+        render_state->set_index_buffer(std::move(index_buffer));
     }
 };
 } // namespace mare
