@@ -13,8 +13,9 @@ namespace mare
 class GLRenderer : public Renderer
 {
 public:
-    void init() override;
-    void start_process() override;
+    void run() final;
+    void init_renderer() final;
+    void start_renderer() final;
 
     // Renderer Commands
     void set_window_title(const char *title) override;
@@ -26,8 +27,8 @@ public:
     void enable_depth_testing(bool enable) override;
     void enable_face_culling(bool enable) override;
     void enable_blending(bool enable) override;
-    glm::vec3 raycast(Layer* layer) override;
-    glm::vec3 raycast(Layer* layer, glm::ivec2 screen_coords) override;
+    glm::vec3 raycast(Layer *layer) override;
+    glm::vec3 raycast(Layer *layer, glm::ivec2 screen_coords) override;
 
     // Buffers
     virtual Scoped<Buffer<float>> GenFloatBuffer(std::vector<float> *data, BufferType buffer_type = BufferType::STATIC, size_t size_in_bytes = 0) override;

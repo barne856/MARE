@@ -60,8 +60,6 @@ public:
 
     }
 
-    bool wireframe = false;
-
 private:
     // Objects
     glm::vec4 bg_color{0.0f, 0.0f, 0.0f, 1.0f};
@@ -74,9 +72,9 @@ public:
     {
         if (input.T_JUST_PRESSED)
         {
-            scene->wireframe = !scene->wireframe;
+            Renderer::API->get_info().wireframe = !(Renderer::API->get_info().wireframe);
         }
-        Renderer::API->wireframe_mode(scene->wireframe);
+        Renderer::API->wireframe_mode(Renderer::API->get_info().wireframe);
         // show mouse and disable controls
         if (input.LEFT_CONTROL_PRESSED)
         {

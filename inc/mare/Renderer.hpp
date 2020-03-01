@@ -5,6 +5,8 @@
 #include <bitset>
 #include <string>
 #include <unordered_map>
+#include <type_traits>
+#include <iostream>
 
 // MARE
 #include "mare/MareUtility.hpp"
@@ -274,10 +276,13 @@ public:
     virtual ~Renderer() {}
 
     // Start and end the program
-    static void run();
-    virtual void init() = 0;
-    virtual void start_process() = 0;
-    static void end_process();
+    virtual void run() = 0;
+    virtual void init_renderer() = 0;
+    virtual void start_renderer() = 0;
+    virtual void init_info() = 0;
+    virtual void startup() {}
+    virtual void shutdown() {}
+    static void end_renderer();
 
     // Renderer information and input
     static RendererInfo &get_info();
@@ -360,6 +365,25 @@ protected:
     // Referenced Assests
     std::unordered_map<std::string, Referenced<Asset>> asset_map;
 };
+
+template <typename T>
+int launch()
+{
+    static_assert(std::is_base_of<Renderer, T>::value, "Type must be a renderer.");
+    try
+    {
+        std::unique_ptr<T> renderer = std::make_unique<T>();
+        Renderer::API = renderer.get();
+        Renderer::API->run();
+    }
+    catch (const std::exception &e)
+    {
+        std::cerr << e.what() << '\n';
+        return 1;
+    }
+    return 0;
+}
+
 } // namespace mare
 
 #endif

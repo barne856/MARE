@@ -3,14 +3,8 @@
 namespace mare
 {
 
-// Run the application using the specified Graphics API
-void Renderer::run()
-{
-    API->start_process();
-}
-
 // Static methods
-void Renderer::end_process() { running = false; }
+void Renderer::end_renderer() { running = false; }
 RendererInfo &Renderer::get_info() { return info; }
 RendererInput &Renderer::get_input() { return input; }
 

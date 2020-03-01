@@ -41,7 +41,15 @@ GLenum GLDrawMethod(DrawMethod draw_method)
     }
 }
 
-void GLRenderer::init()
+void GLRenderer::run()
+{
+    init_info();
+    init_renderer();
+    startup();
+    start_renderer();
+}
+
+void GLRenderer::init_renderer()
 {
     running = true;
 
@@ -105,14 +113,14 @@ void GLRenderer::init()
         std::cout << "GL VERSION: " << glGetString(GL_VERSION) << "\n";
         std::cout << "GL RENDERER: " << glGetString(GL_RENDERER) << std::endl;
     }
-}
-
-void GLRenderer::start_process()
-{
     set_window_title(info.window_title);
     double xpos, ypos;
     glfwGetCursorPos(window, &xpos, &ypos);
     input.mouse_pos = glm::ivec2(xpos, ypos);
+}
+
+void GLRenderer::start_renderer()
+{
     info.current_time = glfwGetTime();
     do
     {
@@ -183,6 +191,7 @@ void GLRenderer::start_process()
         glfwPollEvents();
         glfwSwapBuffers(window);
     } while (running && !glfwWindowShouldClose(window));
+    shutdown();
     glfwDestroyCursor(hz_resize_cursor);
     glfwDestroyCursor(arrow_cursor);
     glfwDestroyCursor(hand_cursor);

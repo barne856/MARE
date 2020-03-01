@@ -3,28 +3,25 @@
 
 // TODO:
 
-// GENERAL
-// Specification of Renderer class which is run by main, Init and startup functions
-// Scene stack with GenRef and load_scene
-
-// MetaComponents for Scenes that control vectors of Entities? (Collision and shadows, multi entity systems)
-
-// call mare::Initialize<GLRendererSpec>() to create static renderer object, access with Renderer::
-// this will also run the GLrenderSpec
-
 // SHADOWS & LIGHTS
 // textures and framebuffers (fix simplemesh to add texture coordinates, set textures of materials, add repeating textures)
 // material - point light, directional light, spotlight, hemisphere light, shadow mapping, texturing
+// MetaComponents for Scenes that control vectors of Entities? (Collision and shadows, multi entity systems)
 
 // PHYSICS
 // Physics component for transform feedback buffers GPU n body physics
 // Particle system with transform feedback
 // Cloth physics with transform feedback
 
+// SCENES
+// load different scenes
+
 // CLEANUP
 // add exception handling
 // fix compiling with gcc on linux
+
 // DOCUMENTATION
+// Document the API
 
 // EXTRAS
 // Cylinder, Cone, and Tube meshes should have an option for flat shading normals or smooth shading normals
@@ -43,25 +40,32 @@
 
 using namespace mare;
 
+class Sandbox : public GLRenderer
+{
+public:
+    void init_info() override
+    {
+        info.window_title = "Sandbox";     // Window title
+        info.window_width = 1280;          // window width in pixels
+        info.window_height = 720;          // window height in pixels
+        info.window_aspect = 16.0f / 9.0f; // window aspect ratio
+        info.samples = 16;                 // antialiasing samples
+        info.fullscreen = false;           // render in fullscreen mode?
+        info.vsync = false;                // render in double buffered vsync mode?
+        info.debug_mode = 1;               // 0000 == off, 0001 == high, 0010 == med, 0100 == low, 1000 == notification
+    }
+    void startup() override
+    {
+        auto scene_1 = GenNamedRef<SampleScene>("Scene 1");
+        info.scene = scene_1.get();
+    }
+    void shutdown() override
+    {
+        DeleteRef("Scene 1");
+    }
+};
+
 int main()
 {
-    // Create the chosen API (make scoped)
-    Renderer *OpenGL = new GLRenderer();
-    // Set renderer settings
-    OpenGL->get_info().samples = 16;
-    OpenGL->get_info().window_title = "Sandbox";
-    // Initialize the chosen API
-    OpenGL->init();
-    // Set the active API
-    Renderer::API = OpenGL;
-    // Create the root scene and set it to active
-    SampleScene *scene_1 = new SampleScene();
-    OpenGL->get_info().scene = scene_1;
-    // Run the application
-    Renderer::run();
-    // Cleanup
-    delete OpenGL;
-    delete scene_1;
-    // Return to the operating system
-    return 0;
+    return launch<Sandbox>();
 }
