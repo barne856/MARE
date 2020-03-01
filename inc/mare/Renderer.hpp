@@ -5,23 +5,22 @@
 #include <bitset>
 #include <string>
 #include <unordered_map>
+
 // MARE
 #include "mare/MareUtility.hpp"
 #include "mare/Buffer.hpp"
 #include "mare/Material.hpp"
-#include "mare/Mesh.hpp"
-#include "mare/Object.hpp"
-#include "mare/Overlay.hpp"
-#include "mare/Scene.hpp"
-#include "mare/Widget.hpp"
-#include "mare/SimpleMesh.hpp"
 #include "mare/RenderState.hpp"
 #include "mare/Shader.hpp"
 #include "mare/Texture.hpp"
-#include "mare/Camera.hpp"
 
 namespace mare
 {
+// Forward Declarations
+class SimpleMesh;
+class Layer;
+class Scene;
+
 // The available cursors for the application to use
 enum class CURSOR
 {
@@ -294,8 +293,8 @@ public:
     virtual void enable_depth_testing(bool enable) = 0;
     virtual void enable_face_culling(bool enable) = 0;
     virtual void enable_blending(bool enable) = 0;
-    virtual glm::vec3 raycast(Camera *camera) = 0;
-    virtual glm::vec3 raycast(Camera *camera, glm::ivec2 screen_coords) = 0;
+    virtual glm::vec3 raycast(Layer *layer) = 0;
+    virtual glm::vec3 raycast(Layer *layer, glm::ivec2 screen_coords) = 0;
 
     // Buffers
     virtual Scoped<Buffer<float>> GenFloatBuffer(std::vector<float> *data, BufferType buffer_type = BufferType::STATIC, size_t size_in_bytes = 0) = 0;
@@ -330,13 +329,18 @@ public:
         return std::make_unique<T>(args...);
     }
     template <typename T, typename... Args>
-    Referenced<T> GenRef(std::string name, Args... args)
+    Referenced<T> GenNamedRef(std::string name, Args... args)
     {
-        asset_map.insert_or_assign(name, std::make_shared<T>(args...) );
+        asset_map.insert_or_assign(name, std::make_shared<T>(args...));
         return std::dynamic_pointer_cast<T>(asset_map[name]);
     }
+    template <typename T, typename... Args>
+    Referenced<T> GenRef(Args... args)
+    {
+        return std::make_shared<T>(args...);
+    }
     template <typename T>
-    Referenced<T> GetRef(std::string name)
+    Referenced<T> GetRefByName(std::string name)
     {
         return std::dynamic_pointer_cast<T>(asset_map[name]);
     }

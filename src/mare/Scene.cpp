@@ -3,38 +3,66 @@
 
 namespace mare
 {
-Scene::Scene() {}
+Scene::Scene(ProjectionType type) : Layer(type) {}
 Scene::~Scene() {}
-shader_data_type Scene::get_widget_value(size_t overlay_index, size_t widget_index)
+void Scene::push_entity(Referenced<Entity> entity)
 {
-    return get_overlay(overlay_index)->get_widget(widget_index)->get_value();
-}
-Overlay *Scene::get_overlay(size_t index)
-{
-    // the 0 index is always the base layer "this"
-    return overlay_stack_[index].get();
-}
-void Scene::push_overlay(Scoped<Overlay> overlay)
-{
-    overlay_stack_.push_back(std::move(overlay));
-}
-
-std::vector<Scoped<Overlay>>::const_iterator Scene::begin()
-{
-    return overlay_stack_.begin();
-}
-std::vector<Scoped<Overlay>>::const_iterator Scene::end()
-{
-    return overlay_stack_.end();
+    for (auto entity_it = entity_begin(); entity_it != entity_end(); entity_it++)
+    {
+        if (*entity_it == entity)
+        {
+            return;
+        }
+    }
+    entity_stack_.push_back(entity);
+    return;
 }
 
-std::vector<Scoped<Overlay>>::const_reverse_iterator Scene::rbegin()
+void Scene::pull_entity(Referenced<Entity> &entity)
 {
-    return overlay_stack_.rbegin();
+    for (auto entity_it = entity_begin(); entity_it != entity_end(); entity_it++)
+    {
+        if (*entity_it == entity)
+        {
+            entity = *entity_it;
+            return;
+        }
+    }
+    return;
 }
-std::vector<Scoped<Overlay>>::const_reverse_iterator Scene::rend()
+
+Referenced<Entity> Scene::pull_entity(size_t index)
 {
-    return overlay_stack_.rend();
+    Referenced<Entity> pulled_entity = entity_stack_.at(index);
+    entity_stack_.erase(entity_stack_.begin() + index);
+    return pulled_entity;
+}
+
+Entity* Scene::get_entity(size_t index)
+{
+    return entity_stack_.at(index).get();
+}
+
+void Scene::push_overlay(Referenced<Overlay> overlay)
+{
+    for (auto overlay_it = overlay_begin(); overlay_it != overlay_end(); overlay_it++)
+    {
+        if (*overlay_it == overlay)
+        {
+            return;
+        }
+    }
+    overlay_stack_.push_back(overlay);
+}
+
+void Scene::pop_overlay()
+{
+    overlay_stack_.pop_back();
+}
+
+Overlay* Scene::get_overlay(size_t index)
+{
+    return overlay_stack_.at(index).get();
 }
 
 } // namespace mare

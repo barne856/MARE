@@ -14,22 +14,23 @@ namespace mare
 class Overlay : public Layer
 {
 public:
-    Overlay();
+    Overlay(ProjectionType type);
     virtual ~Overlay();
+    void push_widget(Referenced<Widget> widget);
+    void pop_widget();
+    Widget* get_widget(size_t index);
 
-    bool render(double time, double dt) final;
-
-    bool on_key(const RendererInput &input) final;
-    bool on_mouse_button(const RendererInput &input) final;
-    bool on_mouse_move(const RendererInput &input) final;
-    bool on_mouse_wheel(const RendererInput &input) final;
-    virtual bool on_resize(const RendererInput &input) = 0;
-
-    Widget *get_widget(size_t index);
-    void push_widget(Scoped<Widget> widget);
+    std::vector<Referenced<Widget>>::const_iterator widget_begin() const { return widget_stack_.begin(); }
+    std::vector<Referenced<Widget>>::const_iterator widget_end() const { return widget_stack_.end(); }
+    std::vector<Referenced<Widget>>::const_reverse_iterator widget_rbegin() const { return widget_stack_.rbegin(); }
+    std::vector<Referenced<Widget>>::const_reverse_iterator widget_rend() const { return widget_stack_.rend(); }
+    std::vector<Referenced<Widget>>::iterator widget_begin() { return widget_stack_.begin(); }
+    std::vector<Referenced<Widget>>::iterator widget_end() { return widget_stack_.end(); }
+    std::vector<Referenced<Widget>>::reverse_iterator widget_rbegin() { return widget_stack_.rbegin(); }
+    std::vector<Referenced<Widget>>::reverse_iterator widget_rend() { return widget_stack_.rend(); }
 
 private:
-    std::vector<Scoped<Widget>> widget_stack_{};
+    std::vector<Referenced<Widget>> widget_stack_;
 };
 } // namespace mare
 

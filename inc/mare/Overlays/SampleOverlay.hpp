@@ -2,11 +2,6 @@
 #define SAMPLEOVERLAY
 
 #include "mare/Renderer.hpp"
-#include "mare/Materials/PhongMaterial.hpp"
-#include "mare/Meshes/SlopeMesh.hpp"
-#include "mare/Meshes/CubeMesh.hpp"
-#include "mare/CompositeMesh.hpp"
-#include "mare/InstancedMesh.hpp"
 #include "mare/Widgets/SliderUI.hpp"
 #include "mare/Overlay.hpp"
 
@@ -15,28 +10,26 @@ namespace mare
 class SampleOverlay : public Overlay
 {
 public:
-    SampleOverlay()
+    SampleOverlay() : Overlay(ProjectionType::ORTHOGRAPHIC)
     {
-        // Create the camera and controls
-        set_camera(Renderer::API->GenScoped<Camera>(ProjectionType::ORTHOGRAPHIC));
-        get_camera()->set_position(glm::vec3(0.0f, 0.0f, 1.0f));
-
         // Create Widgets
         push_widget(Renderer::API->GenScoped<SliderUI>(this));
-        on_resize(Renderer::API->get_input());
-        get_widget(0)->set_value(0.5f);
     }
 
-
-    bool on_resize(const RendererInput &input) override
+    void on_enter() override
     {
-        // position widgets on the screen
-        glm::ivec2 screen_size = glm::ivec2(Renderer::API->get_info().window_width, Renderer::API->get_info().window_height);
-        glm::vec3 world_size = Renderer::API->raycast(get_camera(), screen_size);
-        get_widget(0)->set_position({-world_size.x + 0.6f, -0.9f, 0.0f});
-        return false;
     }
 
+    void render(float delta_time) override
+    {
+        // Renderer properties
+        Renderer::API->enable_depth_testing(false);
+        Renderer::API->enable_face_culling(true);
+    }
+
+    void on_exit() override
+    {
+    }
 };
 } // namespace mare
 

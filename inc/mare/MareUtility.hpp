@@ -10,12 +10,31 @@
 
 namespace mare
 {
+// wrap in until namespace
 // Create Asset class for all user created assets
 class Asset
 {
 public:
     virtual ~Asset() = 0 {};
 };
+// for all user created components
+class Component : public Asset
+{
+public:
+    virtual ~Component() = 0 {};
+};
+
+////////////////////////////////
+
+// template<class T>
+// struct is_a_System // Default case, no pattern match
+//     : std::false_type {};
+//
+// template<class T>
+// struct is_a_System< System< T > > // For types matching the pattern System<T>
+//     : std::true_type {};
+
+////////////////////////////////
 
 // Scopes and References
 template <typename T>
@@ -66,6 +85,9 @@ float shoelace(std::vector<glm::vec2> points);
 // Coordinate conversions
 void normalized_device_coordinates(int x, int y, float &nx, float &ny);
 void window_coordinates(float nx, float ny, int &x, int &y);
+
+// Math constants
+const float PI = 3.141592653f;
 
 } // namespace mare
 

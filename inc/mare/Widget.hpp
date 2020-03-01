@@ -2,7 +2,7 @@
 #define WIDGET
 
 // MARE
-#include "mare/Object.hpp"
+#include "mare/Entity.hpp"
 #include "mare/Layer.hpp"
 #include "mare/MareUtility.hpp"
 
@@ -34,24 +34,18 @@ private:
     glm::vec4 m_values{};
 };
 
-class Widget : public Layer, public Object
+class Widget : public Entity
 {
 public:
-    using Object::render;
     Widget(Layer* layer);
     virtual ~Widget();
-
-    virtual bool render(double current_time, double delta_time) final { return true; }
-    virtual bool on_key(const RendererInput &input) override { return false; }
-    virtual bool on_mouse_button(const RendererInput &input) override { return false; }
-    virtual bool on_mouse_move(const RendererInput &input) override { return false; }
-    virtual bool on_mouse_wheel(const RendererInput &input) override { return false; }
-    virtual bool on_resize(const RendererInput &input) final { return false; }
 
     glm::vec2 get_widget_coords();
     bool is_in_bounds();
     shader_data_type get_value();
     virtual void set_value(shader_data_type value);
+    void set_layer(Layer* layer);
+    Layer* get_layer();
 
 protected:
     shader_data_type value;

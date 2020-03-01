@@ -1,94 +1,46 @@
 #ifndef SAMPLESCENE
 #define SAMPLESCENE
 
+// MARE
 #include "mare/Renderer.hpp"
-
 #include "mare/Scene.hpp"
-#include "mare/Objects/MareTextObject.hpp"
-#include "mare/Meshes/TorusMesh.hpp"
-#include "mare/Meshes/CubeMesh.hpp"
 #include "mare/Overlays/SampleOverlay.hpp"
-#include "mare/Materials/PhongMaterial.hpp"
-#include "mare/Materials/BasicMaterial.hpp"
-
-#include "GL/glew.h"
-#include <iostream>
+#include "mare/Systems.hpp"
+#include "mare/Components/Controls/FlyControls.hpp"
+#include "mare/Entities/SampleTorus.hpp"
 
 namespace mare
 {
+
+// forward declare componetent
+class SampleSceneControls;
+
 class SampleScene : public Scene
 {
 public:
-    SampleScene()
+    SampleScene() : Scene(ProjectionType::PERSPECTIVE)
     {
-        // Create the camera and controls
-        set_camera(Renderer::API->GenScoped<Camera>(ProjectionType::PERSPECTIVE));
-        get_camera()->set_controls(Renderer::API->GenScoped<FlyControls>());
-        get_camera()->set_position(glm::vec3(0.0f, 0.0f, 1.0f));
-        Renderer::API->set_cursor(CURSOR::DISABLED);
+        // Set the components
+        push_component<FlyControls>();
+        push_component<SampleSceneControls>();
+        set_position(glm::vec3(0.0f, 0.0f, 1.0f));
 
-        // create objects
-        torus = Renderer::API->GenScoped<TorusMesh>(100, 200, 0.1f, 0.2f);
-        cube = Renderer::API->GenScoped<CubeMesh>(1.0f);
-        cube->set_scale({5.0f, 5.0f, 0.05f});
-        cube->set_position({0.0f, 0.0f, -0.5f});
-        material = Renderer::API->GenScoped<PhongMaterial>();
-        shadow_material = Renderer::API->GenScoped<BasicMaterial>();
+        // Push entities
+        push_entity(Renderer::API->GenScoped<SampleTorus>(100, 200, 0.1f, 0.2f));
 
         // Push overlays to the layer stack
-        push_overlay(Renderer::API->GenScoped<SampleOverlay>());
+        // push_overlay(Renderer::API->GenScoped<SampleOverlay>());
 
-        // OpenGL Depth Texture
-        glGenTextures(1, &depth_texture);
-        glBindTexture(GL_TEXTURE_2D, depth_texture);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, Renderer::API->get_info().window_width, Renderer::API->get_info().window_height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glBindTexture(GL_TEXTURE_2D, 0);
-        // OpenGL Framebuffer
-        glGenFramebuffers(1, &depth_fbo);
-        glBindFramebuffer(GL_FRAMEBUFFER, depth_fbo);
-        glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depth_texture, 0);
-        glDrawBuffer(GL_NONE);
-        if (GL_FRAMEBUFFER_COMPLETE != glCheckFramebufferStatus(GL_FRAMEBUFFER))
-        {
-            std::cerr << "Framebuffer is incomplete" << std::endl;
-            if (GL_FRAMEBUFFER_UNDEFINED == glCheckFramebufferStatus(GL_FRAMEBUFFER))
-            {
-                std::cerr << "Framebuffer is undefined" << std::endl;
-            }
-            if (GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT == glCheckFramebufferStatus(GL_FRAMEBUFFER))
-            {
-                std::cerr << "Framebuffer has incomplete attchment" << std::endl;
-            }
-            if (GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT == glCheckFramebufferStatus(GL_FRAMEBUFFER))
-            {
-                std::cerr << "Framebuffer has missing attachment" << std::endl;
-            }
-            if (GL_FRAMEBUFFER_UNSUPPORTED == glCheckFramebufferStatus(GL_FRAMEBUFFER))
-            {
-                std::cerr << "Framebuffer is unsupported" << std::endl;
-            }
-            if (GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE == glCheckFramebufferStatus(GL_FRAMEBUFFER))
-            {
-                std::cerr << "Framebuffer is incomplete (multisample)" << std::endl;
-            }
-        }
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-        shadow_camera = Renderer::API->GenScoped<Camera>(ProjectionType::PERSPECTIVE);
-
-        scale_bias_matrix = glm::mat4(glm::vec4(0.5f, 0.0f, 0.0f, 0.0f),
-                                      glm::vec4(0.0f, 0.5f, 0.0f, 0.0f),
-                                      glm::vec4(0.0f, 0.0f, 0.5f, 0.0f),
-                                      glm::vec4(0.5f, 0.5f, 0.5f, 1.0f));
+        // Start with the cursor disabled for Fly Contorls
+        Renderer::API->set_cursor(CURSOR::DISABLED);
     }
 
-    bool render(double time, double dt) override
+    void on_enter() override
+    {
+
+    }
+
+    void render(float delta_time) override
     {
         // Renderer properties
         Renderer::API->enable_blending(true);
@@ -98,96 +50,67 @@ public:
         Renderer::API->clear_color_buffer(bg_color);
         Renderer::API->clear_depth_buffer();
 
-        // get UI values
-        float v = std::get<float>(get_widget_value(0, 0));
-        torus->set_scale(glm::vec3(2.0f * v + 0.05f));
-        //material->light.ambient = glm::vec4(glm::vec3(v), 1.0f);
-        //material->light.diffuse = glm::vec4(glm::vec3(v), 1.0f);
-        //material->light.specular = glm::vec4(glm::vec3(v), 1.0f);
-
-        // Render into depth buffer
-        // shadow_camera->set_view(material->get_light_position(), glm::vec3(0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-        // shadow_material->bind();
-        // shadow_material->render();
-        // shadow_material->upload_mat4("projection", shadow_camera->projection());
-        // shadow_material->upload_mat4("view", shadow_camera->view());
-        // glBindFramebuffer(GL_FRAMEBUFFER, depth_fbo);
-        // glViewport(0, 0, Renderer::API->get_info().window_width, Renderer::API->get_info().window_height);
-        // glClearDepth(1.0f);
-        // glClear(GL_DEPTH_BUFFER_BIT);
-        // glEnable(GL_POLYGON_OFFSET_FILL);
-        // glPolygonOffset(2.0f, 4.0f);
-        // Camera *temp_cam = get_camera();
-        // set_camera(nullptr);
-        // torus->render(this, shadow_material.get());
-        // cube->render(this, shadow_material.get());
-        // glDisable(GL_POLYGON_OFFSET_FILL);
-        // glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        // set_camera(temp_cam);
-
-        // Render objects
-        //mare_text->render(this);
-        material->bind();
-        material->render();
-        material->upload_mat4("shadow_matrix", scale_bias_matrix * shadow_camera->projection() * shadow_camera->view());
-        glBindTextureUnit(1, depth_texture);
-        torus->render(this, material.get());
-        cube->render(this, material.get());
-
-        // Run forever
-        return true;
+        // get SliderUI value and scale torus
+        // float v = std::get<float>(get_overlay(0)->get_widget(0)->get_value());
+        // get_entity(0)->set_scale(glm::vec3(2.0f * v + 0.05f));
     }
 
-    bool on_key(const RendererInput &input) override
+    void on_exit() override
+    {
+
+    }
+
+    bool wireframe = false;
+
+private:
+    // Objects
+    glm::vec4 bg_color{0.0f, 0.0f, 0.0f, 1.0f};
+};
+
+class SampleSceneControls : public ControlsSystem<SampleScene>
+{
+public:
+    bool on_key(SampleScene *scene, const RendererInput &input) override
     {
         if (input.T_JUST_PRESSED)
         {
-            wireframe = !wireframe;
+            scene->wireframe = !scene->wireframe;
         }
-        Renderer::API->wireframe_mode(wireframe);
+        Renderer::API->wireframe_mode(scene->wireframe);
         // show mouse and disable controls
         if (input.LEFT_CONTROL_PRESSED)
         {
             Renderer::API->set_cursor(CURSOR::ENABLED);
-            get_camera()->set_controls(nullptr);
+            scene->pull_component<FlyControls>();
+            return true;
         }
         else
         {
             Renderer::API->set_cursor(CURSOR::DISABLED);
-            get_camera()->set_controls(Renderer::API->GenScoped<FlyControls>());
+            scene->push_component<FlyControls>();
         }
         // event is handled
-        return true;
+        return false;
     }
-
-    bool on_mouse_button(const RendererInput &input) override
+    bool on_mouse_button(SampleScene *scene, const RendererInput &input) override
     {
         if (input.mouse_button == 1)
         {
-            Renderer::API->get_info().focus = this;
+            Renderer::API->get_info().focus = scene;
             if (input.LEFT_CONTROL_PRESSED)
             {
-                torus->set_position(Renderer::API->raycast(get_camera()));
+                scene->get_entity(0)->set_position(Renderer::API->raycast(scene));
             }
             return true;
         }
         Renderer::API->get_info().focus = nullptr;
         return false;
     }
-
-private:
-    // Objects
-    Scoped<TorusMesh> torus = nullptr;
-    Scoped<CubeMesh> cube = nullptr;
-    Scoped<PhongMaterial> material = nullptr;
-    Scoped<BasicMaterial> shadow_material = nullptr;
-    Scoped<Camera> shadow_camera = nullptr;
-    glm::mat4 scale_bias_matrix;
-    bool wireframe = false;
-    GLuint depth_texture;
-    GLuint depth_fbo;
-    glm::vec4 bg_color{0.0f, 0.0f, 0.0f, 1.0f};
+    bool on_mouse_move(SampleScene *scene, const RendererInput &input) { return false; }
+    bool on_mouse_wheel(SampleScene *scene, const RendererInput &input) { return false; }
+    bool on_resize(SampleScene *scene, const RendererInput &input) { return false; }
 };
+
 } // namespace mare
 
 #endif

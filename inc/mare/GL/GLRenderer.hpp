@@ -26,8 +26,8 @@ public:
     void enable_depth_testing(bool enable) override;
     void enable_face_culling(bool enable) override;
     void enable_blending(bool enable) override;
-    glm::vec3 raycast(Camera* camera) override;
-    glm::vec3 raycast(Camera* camera, glm::ivec2 screen_coords) override;
+    glm::vec3 raycast(Layer* layer) override;
+    glm::vec3 raycast(Layer* layer, glm::ivec2 screen_coords) override;
 
     // Buffers
     virtual Scoped<Buffer<float>> GenFloatBuffer(std::vector<float> *data, BufferType buffer_type = BufferType::STATIC, size_t size_in_bytes = 0) override;

@@ -1,12 +1,16 @@
-// MARE
+// MARE GL
 #include "mare/GL/GLRenderer.hpp"
 #include "mare/GL/GLBuffer.hpp"
 #include "mare/GL/GLShader.hpp"
 #include "mare/GL/GLTexture.hpp"
 #include "mare/GL/GLRenderState.hpp"
-#include "mare/Camera.hpp"
+
+// MARE
 #include "mare/SimpleMesh.hpp"
 #include "mare/Scene.hpp"
+#include "mare/Layer.hpp"
+#include "mare/Widget.hpp"
+#include "mare/Entity.hpp"
 
 // Standard Library
 #include <iostream>
@@ -106,38 +110,71 @@ void GLRenderer::init()
 void GLRenderer::start_process()
 {
     set_window_title(info.window_title);
+    double xpos, ypos;
+    glfwGetCursorPos(window, &xpos, &ypos);
+    input.mouse_pos = glm::ivec2(xpos, ypos);
     info.current_time = glfwGetTime();
     do
     {
         double time = glfwGetTime();
-        double delta_time = time - info.current_time;
+        float delta_time = (float)(time - info.current_time);
+        // Update render and physics components
         if (info.scene)
         {
-            bool render_result = true;
-            // render scene
-            if (info.scene->get_camera())
+            // Scene and camera components
+            auto physics_systems = info.scene->get_components<IPhysicsSystem>();
+            auto render_systems = info.scene->get_components<IRenderSystem>();
+            for (auto system : physics_systems)
             {
-                info.scene->get_camera()->render(delta_time);
+                system->update(info.scene, delta_time);
             }
-            render_result = info.scene->render(time, delta_time);
-            if (!render_result)
+            for (auto system : render_systems)
             {
-                info.scene = nullptr;
+                system->render(info.scene, info.scene, delta_time);
             }
-            else
+            info.scene->render(delta_time);
+            // Entities in scene
+            for (auto entity_it = info.scene->entity_begin(); entity_it != info.scene->entity_end(); entity_it++)
             {
-                // render overlays
-                for (auto overlay = info.scene->begin(); overlay != info.scene->end(); overlay++)
+                Entity *entity = entity_it->get();
+                physics_systems = entity->get_components<IPhysicsSystem>();
+                render_systems = entity->get_components<IRenderSystem>();
+                for (auto system : physics_systems)
                 {
-                    if ((*overlay)->get_camera())
+                    system->update(entity, delta_time);
+                }
+                for (auto system : render_systems)
+                {
+                    system->render(entity, info.scene, delta_time);
+                }
+            }
+            // Overlays on scene and widgets in overlays
+            for (auto overlay_it = info.scene->overlay_begin(); overlay_it != info.scene->overlay_end(); overlay_it++)
+            {
+                Overlay *overlay = overlay_it->get();
+                physics_systems = overlay->get_components<IPhysicsSystem>();
+                render_systems = overlay->get_components<IRenderSystem>();
+                for (auto system : physics_systems)
+                {
+                    system->update(overlay, delta_time);
+                }
+                for (auto system : render_systems)
+                {
+                    system->render(overlay, overlay, delta_time);
+                }
+                overlay->render(delta_time);
+                for (auto widget_it = overlay->widget_begin(); widget_it != overlay->widget_end(); widget_it++)
+                {
+                    Widget *widget = widget_it->get();
+                    physics_systems = widget->get_components<IPhysicsSystem>();
+                    render_systems = widget->get_components<IRenderSystem>();
+                    for (auto system : physics_systems)
                     {
-                        (*overlay)->get_camera()->render(delta_time);
+                        system->update(widget, delta_time);
                     }
-                    render_result = (*overlay)->render(time, delta_time);
-                    if (!render_result)
+                    for (auto system : render_systems)
                     {
-                        info.scene = nullptr;
-                        break;
+                        system->render(widget, overlay, delta_time);
                     }
                 }
             }
@@ -259,9 +296,9 @@ void GLRenderer::enable_blending(bool enable)
     }
 }
 
-glm::vec3 GLRenderer::raycast(Camera *camera)
+glm::vec3 GLRenderer::raycast(Layer *layer)
 {
-    glm::mat4 inversed_camera = glm::inverse(camera->projection() * camera->view());
+    glm::mat4 inversed_camera = glm::inverse(layer->projection() * layer->view());
     float x = 2.0f * (float)input.mouse_pos.x / (float)(info.window_width) - 1.0f;
     float y = -2.0f * (float)input.mouse_pos.y / (float)(info.window_height) + 1.0f;
     float z = 0.0f;
@@ -273,9 +310,9 @@ glm::vec3 GLRenderer::raycast(Camera *camera)
     return glm::vec3(world_vector);
 }
 
-glm::vec3 GLRenderer::raycast(Camera *camera, glm::ivec2 screen_coords)
+glm::vec3 GLRenderer::raycast(Layer *layer, glm::ivec2 screen_coords)
 {
-    glm::mat4 inversed_camera = glm::inverse(camera->projection() * camera->view());
+    glm::mat4 inversed_camera = glm::inverse(layer->projection() * layer->view());
     float x = 2.0f * (float)screen_coords.x / (float)(info.window_width) - 1.0f;
     float y = -2.0f * (float)screen_coords.y / (float)(info.window_height) + 1.0f;
     float z = 0.0f;
@@ -352,10 +389,10 @@ void GLRenderer::render_simple_mesh(const Layer *layer, const SimpleMesh *mesh, 
 {
     mesh->bind();
     material->bind();
-    if (layer->get_camera())
+    if (layer)
     {
-        material->upload_mat4("projection", layer->get_camera()->projection());
-        material->upload_mat4("view", layer->get_camera()->view());
+        material->upload_mat4("projection", layer->projection());
+        material->upload_mat4("view", layer->view());
     }
     material->upload_mat4("model", mesh->get_model());
     material->upload_mat3("normal_matrix", glm::mat3(mesh->get_normal()));
@@ -375,10 +412,10 @@ void GLRenderer::render_simple_mesh(const Layer *layer, const SimpleMesh *mesh, 
 {
     mesh->bind();
     material->bind();
-    if (layer->get_camera())
+    if (layer)
     {
-        material->upload_mat4("projection", layer->get_camera()->projection());
-        material->upload_mat4("view", layer->get_camera()->view());
+        material->upload_mat4("projection", layer->projection());
+        material->upload_mat4("view", layer->view());
     }
     material->upload_mat4("model", parent_model * mesh->get_model());
     material->upload_mat3("normal_matrix", glm::transpose(glm::inverse(glm::mat3(parent_model * (mesh->get_model())))));
@@ -398,10 +435,10 @@ void GLRenderer::render_simple_mesh(const Layer *layer, const SimpleMesh *mesh, 
 {
     mesh->bind();
     material->bind();
-    if (layer->get_camera())
+    if (layer)
     {
-        material->upload_mat4("projection", layer->get_camera()->projection());
-        material->upload_mat4("view", layer->get_camera()->view());
+        material->upload_mat4("projection", layer->projection());
+        material->upload_mat4("view", layer->view());
     }
     material->upload_mat4("model", parent_model * mesh->get_model());
     material->upload_mat3("normal_matrix", glm::transpose(glm::inverse(glm::mat3(parent_model * (mesh->get_model())))));
@@ -514,38 +551,67 @@ GLRenderer::debug_message_callback(GLenum source,
 // Renderer callback functions
 void GLRenderer::glfw_onResize(GLFWwindow *window, int w, int h)
 {
+    // callback to the renderer to resize the viewport
     Renderer::API->resize_window(w, h);
 
     if (info.scene)
     {
-        if (info.scene->get_camera())
+        // reverse iterate through overlay callbacks first
+        bool handled = false;
+        for (auto overlay_it = info.scene->overlay_rbegin(); overlay_it != info.scene->overlay_rend(); overlay_it++)
         {
-            info.scene->get_camera()->set_aspect(info.window_aspect);
-            info.scene->get_camera()->recalculate_projection();
-        }
-
-        for (auto overlay = info.scene->begin(); overlay != info.scene->end(); overlay++)
-        {
-            if ((*overlay)->get_camera())
+            Overlay *overlay = overlay_it->get();
+            // reverse iterate through overlay widgets
+            for (auto widget_it = overlay->widget_rbegin(); widget_it != overlay->widget_rend(); widget_it++)
             {
-                (*overlay)->get_camera()->set_aspect(info.window_aspect);
-                (*overlay)->get_camera()->recalculate_projection();
+                Widget *widget = widget_it->get();
+                auto controls_systems = widget->get_components<IControlsSystem>();
+                // reverse iterate through widget controls callbacks
+                for (auto controls_it = controls_systems.rbegin(); controls_it != controls_systems.rend(); controls_it++)
+                {
+                    handled = (*controls_it)->on_resize(widget, input);
+                    if (handled)
+                    {
+                        return;
+                    }
+                }
+            }
+            auto controls_systems = overlay->get_components<IControlsSystem>();
+            // reverse iterate through overlay controls callbacks
+            for (auto controls_it = controls_systems.rbegin(); controls_it != controls_systems.rend(); controls_it++)
+            {
+                handled = (*controls_it)->on_resize(overlay, input);
+                if (handled)
+                {
+                    return;
+                }
             }
         }
-
-        bool handled = false;
-        for (auto overlay = info.scene->rbegin(); overlay != info.scene->rend(); overlay++)
+        // if event is not handled by overlays, callback to the scene
+        // reverse iterate through scene entities
+        for (auto entity_it = info.scene->entity_rbegin(); entity_it != info.scene->entity_rend(); entity_it++)
         {
-            handled = (*overlay)->on_resize(input);
+            Entity *entity = entity_it->get();
+            auto controls_systems = entity->get_components<IControlsSystem>();
+            // reverse iterate through entity controls callbacks
+            for (auto controls_it = controls_systems.rbegin(); controls_it != controls_systems.rend(); controls_it++)
+            {
+                handled = (*controls_it)->on_resize(entity, input);
+                if (handled)
+                {
+                    return;
+                }
+            }
+        }
+        auto controls_systems = info.scene->get_components<IControlsSystem>();
+        // reverse iterate through scene controls callbacks
+        for (auto controls_it = controls_systems.rbegin(); controls_it != controls_systems.rend(); controls_it++)
+        {
+            handled = (*controls_it)->on_resize(info.scene, input);
             if (handled)
             {
-                break;
+                return;
             }
-        }
-
-        if (!handled)
-        {
-            info.scene->on_resize(input);
         }
     }
 }
@@ -2327,26 +2393,62 @@ void GLRenderer::glfw_onKey(GLFWwindow *window, int key, int scancode, int actio
     }
     if (info.scene)
     {
+        // reverse iterate through overlay callbacks first
         bool handled = false;
-        for (auto overlay = info.scene->rbegin(); overlay != info.scene->rend(); overlay++)
+        for (auto overlay_it = info.scene->overlay_rbegin(); overlay_it != info.scene->overlay_rend(); overlay_it++)
         {
-            if ((*overlay)->get_camera())
+            Overlay *overlay = overlay_it->get();
+            // reverse iterate through overlay widgets
+            for (auto widget_it = overlay->widget_rbegin(); widget_it != overlay->widget_rend(); widget_it++)
             {
-                (*overlay)->get_camera()->interpret_input();
+                Widget *widget = widget_it->get();
+                auto controls_systems = widget->get_components<IControlsSystem>();
+                // reverse iterate through widget controls callbacks
+                for (auto controls_it = controls_systems.rbegin(); controls_it != controls_systems.rend(); controls_it++)
+                {
+                    handled = (*controls_it)->on_key(widget, input);
+                    if (handled)
+                    {
+                        return;
+                    }
+                }
             }
-            handled = (*overlay)->on_key(input);
-            if (handled)
+            auto controls_systems = overlay->get_components<IControlsSystem>();
+            // reverse iterate through overlay controls callbacks
+            for (auto controls_it = controls_systems.rbegin(); controls_it != controls_systems.rend(); controls_it++)
             {
-                break;
+                handled = (*controls_it)->on_key(overlay, input);
+                if (handled)
+                {
+                    return;
+                }
             }
         }
-        if (!handled)
+        // if event is not handled by overlays, callback to the scene
+        // reverse iterate through scene entities
+        for (auto entity_it = info.scene->entity_rbegin(); entity_it != info.scene->entity_rend(); entity_it++)
         {
-            if (info.scene->get_camera())
+            Entity *entity = entity_it->get();
+            auto controls_systems = entity->get_components<IControlsSystem>();
+            // reverse iterate through entity controls callbacks
+            for (auto controls_it = controls_systems.rbegin(); controls_it != controls_systems.rend(); controls_it++)
             {
-                info.scene->get_camera()->interpret_input();
+                handled = (*controls_it)->on_key(entity, input);
+                if (handled)
+                {
+                    return;
+                }
             }
-            info.scene->on_key(input);
+        }
+        auto controls_systems = info.scene->get_components<IControlsSystem>();
+        // reverse iterate through scene controls callbacks
+        for (auto controls_it = controls_systems.rbegin(); controls_it != controls_systems.rend(); controls_it++)
+        {
+            handled = (*controls_it)->on_key(info.scene, input);
+            if (handled)
+            {
+                return;
+            }
         }
     }
 }
@@ -2379,62 +2481,142 @@ void GLRenderer::glfw_onMouseButton(GLFWwindow *window, int button, int action, 
     }
     if (info.scene)
     {
+        // reverse iterate through overlay callbacks first
         bool handled = false;
-        for (auto overlay = info.scene->rbegin(); overlay != info.scene->rend(); overlay++)
+        for (auto overlay_it = info.scene->overlay_rbegin(); overlay_it != info.scene->overlay_rend(); overlay_it++)
         {
-            if ((*overlay)->get_camera())
+            Overlay *overlay = overlay_it->get();
+            // reverse iterate through overlay widgets
+            for (auto widget_it = overlay->widget_rbegin(); widget_it != overlay->widget_rend(); widget_it++)
             {
-                (*overlay)->get_camera()->interpret_input();
+                Widget *widget = widget_it->get();
+                auto controls_systems = widget->get_components<IControlsSystem>();
+                // reverse iterate through widget controls callbacks
+                for (auto controls_it = controls_systems.rbegin(); controls_it != controls_systems.rend(); controls_it++)
+                {
+                    handled = (*controls_it)->on_mouse_button(widget, input);
+                    if (handled)
+                    {
+                        return;
+                    }
+                }
             }
-            handled = (*overlay)->on_mouse_button(input);
-            if (handled)
+            auto controls_systems = overlay->get_components<IControlsSystem>();
+            // reverse iterate through overlay controls callbacks
+            for (auto controls_it = controls_systems.rbegin(); controls_it != controls_systems.rend(); controls_it++)
             {
-                break;
+                handled = (*controls_it)->on_mouse_button(overlay, input);
+                if (handled)
+                {
+                    return;
+                }
             }
         }
-        if (!handled)
+        // if event is not handled by overlays, callback to the scene
+        // reverse iterate through scene entities
+        for (auto entity_it = info.scene->entity_rbegin(); entity_it != info.scene->entity_rend(); entity_it++)
         {
-            if (info.scene->get_camera())
+            Entity *entity = entity_it->get();
+            auto controls_systems = entity->get_components<IControlsSystem>();
+            // reverse iterate through entity controls callbacks
+            for (auto controls_it = controls_systems.rbegin(); controls_it != controls_systems.rend(); controls_it++)
             {
-                info.scene->get_camera()->interpret_input();
+                handled = (*controls_it)->on_mouse_button(entity, input);
+                if (handled)
+                {
+                    return;
+                }
             }
-            info.scene->on_mouse_button(input);
+        }
+        auto controls_systems = info.scene->get_components<IControlsSystem>();
+        // reverse iterate through scene controls callbacks
+        for (auto controls_it = controls_systems.rbegin(); controls_it != controls_systems.rend(); controls_it++)
+        {
+            handled = (*controls_it)->on_mouse_button(info.scene, input);
+            if (handled)
+            {
+                return;
+            }
         }
     }
 }
 
 void GLRenderer::glfw_onMouseMove(GLFWwindow *window, double x, double y)
 {
-    glm::ivec2 old_pos = get_input().mouse_pos;
-    get_input().mouse_pos = glm::ivec2(x, y);
-    get_input().mouse_vel = glm::ivec2(x, y) - old_pos;
+    glm::ivec2 old_pos = input.mouse_pos;
+    input.mouse_pos = glm::ivec2(x, y);
+    input.mouse_vel = glm::ivec2(x, y) - old_pos;
+    std::cout << "Mouse Vel: " << input.mouse_vel.x << ", " << input.mouse_vel.y << std::endl;
     if (info.scene)
     {
+        // reverse iterate through overlay callbacks first
         bool handled = false;
-        for (auto overlay = info.scene->rbegin(); overlay != info.scene->rend(); overlay++)
+        for (auto overlay_it = info.scene->overlay_rbegin(); overlay_it != info.scene->overlay_rend(); overlay_it++)
         {
-            if ((*overlay)->get_camera())
+            Overlay *overlay = overlay_it->get();
+            // reverse iterate through overlay widgets
+            for (auto widget_it = overlay->widget_rbegin(); widget_it != overlay->widget_rend(); widget_it++)
             {
-                (*overlay)->get_camera()->interpret_input();
+                Widget *widget = widget_it->get();
+                auto controls_systems = widget->get_components<IControlsSystem>();
+                // reverse iterate through widget controls callbacks
+                for (auto controls_it = controls_systems.rbegin(); controls_it != controls_systems.rend(); controls_it++)
+                {
+                    handled = (*controls_it)->on_mouse_move(widget, input);
+                    if (handled)
+                    {
+                        // mouse velocity is always zero outside of mouse move callbacks
+                        input.mouse_vel = glm::ivec2(0, 0);
+                        return;
+                    }
+                }
             }
-            handled = (*overlay)->on_mouse_move(input);
+            auto controls_systems = overlay->get_components<IControlsSystem>();
+            // reverse iterate through overlay controls callbacks
+            for (auto controls_it = controls_systems.rbegin(); controls_it != controls_systems.rend(); controls_it++)
+            {
+                handled = (*controls_it)->on_mouse_move(overlay, input);
+                if (handled)
+                {
+                    // mouse velocity is always zero outside of mouse move callbacks
+                    input.mouse_vel = glm::ivec2(0, 0);
+                    return;
+                }
+            }
+        }
+        // if event is not handled by overlays, callback to the scene
+        // reverse iterate through scene entities
+        for (auto entity_it = info.scene->entity_rbegin(); entity_it != info.scene->entity_rend(); entity_it++)
+        {
+            Entity *entity = entity_it->get();
+            auto controls_systems = entity->get_components<IControlsSystem>();
+            // reverse iterate through entity controls callbacks
+            for (auto controls_it = controls_systems.rbegin(); controls_it != controls_systems.rend(); controls_it++)
+            {
+                handled = (*controls_it)->on_mouse_move(entity, input);
+                if (handled)
+                {
+                    // mouse velocity is always zero outside of mouse move callbacks
+                    input.mouse_vel = glm::ivec2(0, 0);
+                    return;
+                }
+            }
+        }
+        auto controls_systems = info.scene->get_components<IControlsSystem>();
+        // reverse iterate through scene controls callbacks
+        for (auto controls_it = controls_systems.rbegin(); controls_it != controls_systems.rend(); controls_it++)
+        {
+            handled = (*controls_it)->on_mouse_move(info.scene, input);
             if (handled)
             {
-                break;
+                // mouse velocity is always zero outside of mouse move callbacks
+                input.mouse_vel = glm::ivec2(0, 0);
+                return;
             }
-        }
-        if (!handled)
-        {
-            if (info.scene->get_camera())
-            {
-                info.scene->get_camera()->interpret_input();
-            }
-            info.scene->on_mouse_move(input);
         }
     }
-
     // mouse velocity is always zero outside of mouse move callbacks
-    get_input().mouse_vel = glm::ivec2(0, 0);
+    input.mouse_vel = glm::ivec2(0, 0);
 }
 
 void GLRenderer::glfw_onMouseWheel(GLFWwindow *window, double xoffset, double yoffset)
@@ -2449,26 +2631,70 @@ void GLRenderer::glfw_onMouseWheel(GLFWwindow *window, double xoffset, double yo
     }
     if (info.scene)
     {
+        // reverse iterate through overlay callbacks first
         bool handled = false;
-        for (auto overlay = info.scene->rbegin(); overlay != info.scene->rend(); overlay++)
+        for (auto overlay_it = info.scene->overlay_rbegin(); overlay_it != info.scene->overlay_rend(); overlay_it++)
         {
-            if ((*overlay)->get_camera())
+            Overlay *overlay = overlay_it->get();
+            // reverse iterate through overlay widgets
+            for (auto widget_it = overlay->widget_rbegin(); widget_it != overlay->widget_rend(); widget_it++)
             {
-                (*overlay)->get_camera()->interpret_input();
+                Widget *widget = widget_it->get();
+                auto controls_systems = widget->get_components<IControlsSystem>();
+                // reverse iterate through widget controls callbacks
+                for (auto controls_it = controls_systems.rbegin(); controls_it != controls_systems.rend(); controls_it++)
+                {
+                    handled = (*controls_it)->on_mouse_wheel(widget, input);
+                    if (handled)
+                    {
+                        // mouse scroll is always 0 outside of mouse scroll callbacks
+                        input.mouse_scroll = 0;
+                        return;
+                    }
+                }
             }
-            handled = (*overlay)->on_mouse_wheel(input);
-            if (handled)
+            auto controls_systems = overlay->get_components<IControlsSystem>();
+            // reverse iterate through overlay controls callbacks
+            for (auto controls_it = controls_systems.rbegin(); controls_it != controls_systems.rend(); controls_it++)
             {
-                break;
+                handled = (*controls_it)->on_mouse_wheel(overlay, input);
+                if (handled)
+                {
+                    // mouse scroll is always 0 outside of mouse scroll callbacks
+                    input.mouse_scroll = 0;
+                    return;
+                }
             }
         }
-        if (!handled)
+        // if event is not handled by overlays, callback to the scene
+        // reverse iterate through scene entities
+        for (auto entity_it = info.scene->entity_rbegin(); entity_it != info.scene->entity_rend(); entity_it++)
         {
-            if (info.scene->get_camera())
+            Entity *entity = entity_it->get();
+            auto controls_systems = entity->get_components<IControlsSystem>();
+            // reverse iterate through entity controls callbacks
+            for (auto controls_it = controls_systems.rbegin(); controls_it != controls_systems.rend(); controls_it++)
             {
-                info.scene->get_camera()->interpret_input();
+                handled = (*controls_it)->on_mouse_wheel(entity, input);
+                if (handled)
+                {
+                    // mouse scroll is always 0 outside of mouse scroll callbacks
+                    input.mouse_scroll = 0;
+                    return;
+                }
             }
-            info.scene->on_mouse_wheel(input);
+        }
+        auto controls_systems = info.scene->get_components<IControlsSystem>();
+        // reverse iterate through scene controls callbacks
+        for (auto controls_it = controls_systems.rbegin(); controls_it != controls_systems.rend(); controls_it++)
+        {
+            handled = (*controls_it)->on_mouse_wheel(info.scene, input);
+            if (handled)
+            {
+                // mouse scroll is always 0 outside of mouse scroll callbacks
+                input.mouse_scroll = 0;
+                return;
+            }
         }
     }
     // mouse scroll is always 0 outside of mouse scroll callbacks
