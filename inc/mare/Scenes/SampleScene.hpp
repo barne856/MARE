@@ -29,7 +29,7 @@ public:
         push_entity(Renderer::API->GenScoped<SampleTorus>(100, 200, 0.1f, 0.2f));
 
         // Push overlays to the layer stack
-        // push_overlay(Renderer::API->GenScoped<SampleOverlay>());
+        push_overlay(Renderer::API->GenScoped<SampleOverlay>());
 
         // Start with the cursor disabled for Fly Contorls
         Renderer::API->set_cursor(CURSOR::DISABLED);
@@ -51,8 +51,8 @@ public:
         Renderer::API->clear_depth_buffer();
 
         // get SliderUI value and scale torus
-        // float v = std::get<float>(get_overlay(0)->get_widget(0)->get_value());
-        // get_entity(0)->set_scale(glm::vec3(2.0f * v + 0.05f));
+        float v = std::get<float>(get_overlay(0)->get_widget(0)->get_value());
+        get_entity(0)->set_scale(glm::vec3(2.0f * v + 0.05f));
     }
 
     void on_exit() override
@@ -61,8 +61,7 @@ public:
     }
 
 private:
-    // Objects
-    glm::vec4 bg_color{0.0f, 0.0f, 0.0f, 1.0f};
+    glm::vec4 bg_color{0.9f, 0.9f, 0.9f, 1.0f};
 };
 
 class SampleSceneControls : public ControlsSystem<SampleScene>
@@ -80,6 +79,7 @@ public:
         {
             Renderer::API->set_cursor(CURSOR::ENABLED);
             scene->pull_component<FlyControls>();
+            scene->get_component<Rigidbody>()->linear_velocity = glm::vec3(0.0f, 0.0f, 0.0f);
             return true;
         }
         else

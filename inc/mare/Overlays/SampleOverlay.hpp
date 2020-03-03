@@ -14,6 +14,8 @@ public:
     {
         // Create Widgets
         push_widget(Renderer::API->GenScoped<SliderUI>(this));
+        get_widgets<SliderUI>()[0]->set_color(glm::vec4(0.1f, 0.1f, 0.1f, 1.0f));
+        get_widgets<SliderUI>()[0]->set_value(0.5f);
     }
 
     void on_enter() override

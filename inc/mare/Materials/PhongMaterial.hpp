@@ -16,7 +16,7 @@ class PhongMaterial : public virtual Material
 public:
     PhongMaterial() : Material("./res/Shaders/Phong")
     {
-        texture = Renderer::API->GenTexture2D("./res/Textures/checkerboard.png");
+        texture = Renderer::API->GenTexture2D("./res/Textures/weave_diffuse.jpg");
         material.ambient = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
         material.diffuse = glm::vec4(0.1f, 0.1f, 0.5f, 1.0f);
         material.specular = glm::vec4(1.0f);

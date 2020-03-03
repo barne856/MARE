@@ -2555,7 +2555,6 @@ void GLRenderer::glfw_onMouseMove(GLFWwindow *window, double x, double y)
     glm::ivec2 old_pos = input.mouse_pos;
     input.mouse_pos = glm::ivec2(x, y);
     input.mouse_vel = glm::ivec2(x, y) - old_pos;
-    std::cout << "Mouse Vel: " << input.mouse_vel.x << ", " << input.mouse_vel.y << std::endl;
     if (info.scene)
     {
         // reverse iterate through overlay callbacks first

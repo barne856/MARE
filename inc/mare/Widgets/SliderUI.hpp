@@ -30,8 +30,6 @@ public:
         solid_material = Renderer::API->GenRef<BasicMaterial>();
         solid_material->bind();
         solid_material->set_color(color);
-        // set value
-        value = 0.5f;
         // set bounds
         bounds.left() = -0.55f;
         bounds.right() = 0.55f;
@@ -46,6 +44,10 @@ public:
         // push components
         push_component<SliderUIRenderer>();
         push_component<SliderUIControls>();
+    }
+    void set_color(glm::vec4 color)
+    {
+        solid_material->set_color(color);
     }
     void set_value(shader_data_type value) override
     {
@@ -65,7 +67,7 @@ public:
     {
         slider_ui->solid_material->bind();
         slider_ui->solid_material->render();
-        slider_ui->slider_mesh->render(layer, slider_ui->solid_material.get());
+        slider_ui->slider_mesh->render(layer, slider_ui->solid_material.get(), slider_ui->get_model());
     }
 };
 

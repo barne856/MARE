@@ -1,17 +1,18 @@
-#include "mare/GL/GLRenderer.hpp"
-#include "mare/Scenes/SampleScene.hpp"
-
 // TODO:
 
 // SHADOWS & LIGHTS
-// textures and framebuffers (fix simplemesh to add texture coordinates, set textures of materials, add repeating textures)
-// material - point light, directional light, spotlight, hemisphere light, shadow mapping, texturing
-// MetaComponents for Scenes that control vectors of Entities? (Collision and shadows, multi entity systems)
+// textures and framebuffers (add repeating textures), should be a type of buffer
+// Buffers for point, directoinal, spot, and hemisphere lights
+// Buffers for shadowmap framebuffers
+// Meta RendererComponent that holds shadowmap buffers and light buffers in a Scene (MetaComponents can access every entity in the scene)
+// Meta RendererComponent operates on every entity with corresponding component (eg. MetaLightComponent holds buffer of types of lights, torusRenderer has a lightComponent that sources lights from the metaComponent) 
+//                                                                              (eg. MetaShadowComponent holds shadowbuffer, torusRenderer has a shadowComponent that will render into the depthbuffer of the metaComponent) 
 
 // PHYSICS
 // Physics component for transform feedback buffers GPU n body physics
 // Particle system with transform feedback
 // Cloth physics with transform feedback
+// MetaComponent for collisions
 
 // SCENES
 // load different scenes
@@ -24,6 +25,7 @@
 // Document the API
 
 // EXTRAS
+// Add teapot primative mesh
 // Cylinder, Cone, and Tube meshes should have an option for flat shading normals or smooth shading normals
 // Add Text Thickness to CharMesh
 // add bitmap fonts, maybe other formats too?
@@ -38,9 +40,10 @@
 // components and using matrix reordering to optimize the data when entites are added or removed.
 // 2. Shaders should only have one instance for each kind which is shared by all of the materials that use it
 
-using namespace mare;
+#include "mare/GL/GLRenderer.hpp"
+#include "mare/Scenes/SampleScene.hpp"
 
-class Sandbox : public GLRenderer
+class Sandbox : public mare::GLRenderer
 {
 public:
     void init_info() override
@@ -56,6 +59,7 @@ public:
     }
     void startup() override
     {
+        using namespace mare;
         auto scene_1 = GenNamedRef<SampleScene>("Scene 1");
         info.scene = scene_1.get();
     }
@@ -67,5 +71,5 @@ public:
 
 int main()
 {
-    return launch<Sandbox>();
+    return mare::launch<Sandbox>();
 }

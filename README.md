@@ -7,6 +7,7 @@ Minimal abstraction rendering engine using OpenGL 4.5 and C++17
     GLFW (git submodule)
     GLM (git submodule)
     GLEW  (included in project)
+    STB Image Loader (included in project)
     OpenGL 4.5 Capable Hardware
     C++17 Compiler (Visual Studio 2019 MSVC tested)
 
