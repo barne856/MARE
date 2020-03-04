@@ -12,7 +12,7 @@ Minimal abstraction rendering engine using OpenGL 4.5 and C++17
     C++17 Compiler (tested on GCC 8.3.0 and MSVC 2019)
 
 ## Clone with submodules:
-'git clone --recurse-submodules -j8 https://github.com/barne856/MARE.git'
+`git clone --recurse-submodules -j8 https://github.com/barne856/MARE.git`
 
 ## Build with CMake (from root directory):
     mkdir build
