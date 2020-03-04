@@ -51,8 +51,6 @@ enum class BufferType
 {
     STATIC = 0,
     READ_ONLY,
-    READ_ONLY_DOUBLE_BUFFERED,
-    READ_ONLY_TRIPLE_BUFFERED,
     READ_WRITE,
     READ_WRITE_DOUBLE_BUFFERED,
     READ_WRITE_TRIPLE_BUFFERED,
@@ -78,7 +76,7 @@ public:
     void swap_buffer();
     bool is_multibuffered();
     unsigned int get_buffer_index();
-    virtual void flush(std::vector<T> &data, size_t offset) = 0; // flush the back buffer with data begining at offset index into the current back buffer, only works if buffer is WRITE_ONLY or READ_WRITE
+    virtual void flush(std::vector<T> *data, size_t offset) = 0; // flush the back buffer with data begining at offset index into the current back buffer, only works if buffer is WRITE_ONLY or READ_WRITE
     virtual void clear(unsigned int offset) = 0;                       // clear everything in the back buffer at position equal to or greater than offset into the current back buffer, only works if buffer is WRITE_ONLY or READ_WRITE
     virtual T &operator[](unsigned int i) = 0;                         // write to back buffer using subscript operator if buffer WRITE_ONLY or READ_WRITE. This makes a copy of the data on the CPU side
     virtual T operator[](unsigned int i) const = 0;                    // read from to back buffer using subscript operator if buffer READ_ONLY or READ_WRITE

@@ -19,7 +19,6 @@
 
 // CLEANUP
 // add exception handling
-// fix compiling with gcc on linux
 
 // DOCUMENTATION
 // Document the API

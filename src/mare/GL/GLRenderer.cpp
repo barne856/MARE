@@ -346,10 +346,6 @@ Scoped<Buffer<unsigned int>> GLRenderer::GenIndexBuffer(std::vector<unsigned int
 {
     return std::make_unique<GLBuffer<unsigned int>>(data, buffer_type, size_in_bytes);
 }
-Scoped<Buffer<bool>> GLRenderer::GenBoolBuffer(std::vector<bool> *data, BufferType buffer_type, size_t size_in_bytes)
-{
-    return std::make_unique<GLBuffer<bool>>(data, buffer_type, size_in_bytes);
-}
 Scoped<Buffer<glm::vec2>> GLRenderer::GenVec2Buffer(std::vector<glm::vec2> *data, BufferType buffer_type, size_t size_in_bytes)
 {
     return std::make_unique<GLBuffer<glm::vec2>>(data, buffer_type, size_in_bytes);

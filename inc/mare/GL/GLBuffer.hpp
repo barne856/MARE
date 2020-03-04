@@ -16,7 +16,7 @@ class GLBuffer : public Buffer<T>
 public:
     GLBuffer(std::vector<T> *data, BufferType buffer_type = BufferType::STATIC, size_t size_in_bytes = 0);
     virtual ~GLBuffer();
-    virtual void flush(std::vector<T> &data, size_t offset) override;
+    virtual void flush(std::vector<T> *data, size_t offset) override;
     virtual void clear(unsigned int offset) override;
     virtual T &operator[](unsigned int i) override;
     virtual T operator[](unsigned int i) const override;

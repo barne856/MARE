@@ -31,7 +31,7 @@ void InstancedMesh::clear_instances()
     instance_count_ = 0;
 }
 
-void InstancedMesh::flush_instances(std::vector<glm::mat4> &models, size_t offset)
+void InstancedMesh::flush_instances(std::vector<glm::mat4> *models, size_t offset)
 {
     instance_transforms_->flush(models, offset);
 }

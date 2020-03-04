@@ -71,17 +71,11 @@ Buffer<T>::Buffer(std::vector<T> *data, BufferType buffer_type, size_t size_in_b
 
     switch (buffer_type)
     {
-    case BufferType::READ_ONLY_DOUBLE_BUFFERED:
-        num_buffers_ = 2;
-        break;
     case BufferType::WRITE_ONLY_DOUBLE_BUFFERED:
         num_buffers_ = 2;
         break;
     case BufferType::READ_WRITE_DOUBLE_BUFFERED:
         num_buffers_ = 2;
-        break;
-    case BufferType::READ_ONLY_TRIPLE_BUFFERED:
-        num_buffers_ = 3;
         break;
     case BufferType::WRITE_ONLY_TRIPLE_BUFFERED:
         num_buffers_ = 3;
@@ -131,7 +125,6 @@ unsigned int Buffer<T>::get_buffer_index()
 template class Buffer<float>;
 template class Buffer<int>;
 template class Buffer<unsigned int>;
-template class Buffer<bool>;
 template class Buffer<glm::vec2>;
 template class Buffer<glm::vec3>;
 template class Buffer<glm::vec4>;

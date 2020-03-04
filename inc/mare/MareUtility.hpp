@@ -15,15 +15,14 @@ namespace mare
 class Asset
 {
 public:
-    virtual ~Asset() = 0 {};
+    virtual ~Asset() = 0;
 };
 // for all user created components
 class Component : public Asset
 {
 public:
-    virtual ~Component() = 0 {};
+    virtual ~Component() = 0;
 };
-
 ////////////////////////////////
 
 // template<class T>

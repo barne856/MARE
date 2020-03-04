@@ -20,7 +20,7 @@ public:
     void push_instance(glm::mat4 model);
     void pop_instance();
     void clear_instances();
-    void flush_instances(std::vector<glm::mat4> &models, size_t offset);
+    void flush_instances(std::vector<glm::mat4> *models, size_t offset);
     glm::mat4 &operator[](unsigned int i);
     glm::mat4 operator[](unsigned int i) const;
 

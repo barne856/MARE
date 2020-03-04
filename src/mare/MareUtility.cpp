@@ -3,7 +3,8 @@
 
 namespace mare
 {
-
+Asset::~Asset() {}
+Component::~Component() {}
 size_t shader_data_type_size(ShaderDataType type)
 {
     switch (type)
