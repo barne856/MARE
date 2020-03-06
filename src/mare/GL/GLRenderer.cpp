@@ -90,6 +90,11 @@ void GLRenderer::init_renderer()
     arrow_cursor = glfwCreateStandardCursor(GLFW_ARROW_CURSOR);
     hand_cursor = glfwCreateStandardCursor(GLFW_HAND_CURSOR);
     crosshair_cursor = glfwCreateStandardCursor(GLFW_CROSSHAIR_CURSOR);
+    if (glfwRawMouseMotionSupported())
+    {
+        glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+    }
+
     if (info.vsync)
     {
         glfwSwapInterval(1);
@@ -227,6 +232,7 @@ void GLRenderer::set_cursor(CURSOR type)
         break;
     case CURSOR::DISABLED:
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        info.cursor = false;
         break;
     case CURSOR::ENABLED:
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
@@ -2548,6 +2554,11 @@ void GLRenderer::glfw_onMouseButton(GLFWwindow *window, int button, int action, 
 
 void GLRenderer::glfw_onMouseMove(GLFWwindow *window, double x, double y)
 {
+    if(!info.cursor)
+    {
+        info.cursor = true;
+        input.mouse_pos = glm::ivec2(x, y);
+    }
     glm::ivec2 old_pos = input.mouse_pos;
     input.mouse_pos = glm::ivec2(x, y);
     input.mouse_vel = glm::ivec2(x, y) - old_pos;

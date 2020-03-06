@@ -301,6 +301,10 @@ public:
     virtual glm::vec3 raycast(Layer *layer) = 0;
     virtual glm::vec3 raycast(Layer *layer, glm::ivec2 screen_coords) = 0;
 
+    // Scenes
+    static void load_scene(Scene* scene);
+    static void load_scene(std::string name);
+
     // Buffers
     virtual Scoped<Buffer<float>> GenFloatBuffer(std::vector<float> *data, BufferType buffer_type = BufferType::STATIC, size_t size_in_bytes = 0) = 0;
     virtual Scoped<Buffer<int>> GenIntBuffer(std::vector<int> *data, BufferType buffer_type = BufferType::STATIC, size_t size_in_bytes = 0) = 0;

@@ -7,6 +7,7 @@ add_definitions(-DGLEW_STATIC)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_BUILD_TYPE Debug)
 
 include_directories("./inc" "./ext/glfw/include" "./ext/glew-2.1.0/include" "./ext/glm/glm" "./ext/loaders/stb")
 

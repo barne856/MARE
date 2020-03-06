@@ -21,23 +21,23 @@ public:
     SampleScene() : Scene(ProjectionType::PERSPECTIVE)
     {
         // Set the components
+        push_component<Rigidbody>();
         push_component<FlyControls>();
         push_component<SampleSceneControls>();
         set_position(glm::vec3(0.0f, 0.0f, 1.0f));
+        face_towards(glm::vec3(0.0f, 0.2f, -1.0f));
 
         // Push entities
         push_entity(Renderer::API->GenScoped<SampleTorus>(100, 200, 0.1f, 0.2f));
 
         // Push overlays to the layer stack
         push_overlay(Renderer::API->GenScoped<SampleOverlay>());
-
-        // Start with the cursor disabled for Fly Contorls
-        Renderer::API->set_cursor(CURSOR::DISABLED);
     }
 
     void on_enter() override
     {
-
+        // Start with the cursor disabled for Fly Contorls
+        Renderer::API->set_cursor(CURSOR::DISABLED);
     }
 
     void render(float delta_time) override
@@ -57,7 +57,8 @@ public:
 
     void on_exit() override
     {
-
+        // Show cursor on new scenes
+        Renderer::API->set_cursor(CURSOR::ENABLED);
     }
 
 private:
@@ -104,9 +105,6 @@ public:
         Renderer::API->get_info().focus = nullptr;
         return false;
     }
-    bool on_mouse_move(SampleScene *scene, const RendererInput &input) { return false; }
-    bool on_mouse_wheel(SampleScene *scene, const RendererInput &input) { return false; }
-    bool on_resize(SampleScene *scene, const RendererInput &input) { return false; }
 };
 
 } // namespace mare

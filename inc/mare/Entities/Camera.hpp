@@ -29,8 +29,8 @@ public:
             near_ = 0.1f;
             far_ = 10.0f;
         }
+        set_forward_vector(direction_);
         recalculate_projection();
-        push_component<Rigidbody>();
         push_component<CameraControls>();
     }
     ~Camera() {}
