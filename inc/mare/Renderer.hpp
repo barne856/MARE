@@ -9,12 +9,11 @@
 #include <iostream>
 
 // MARE
-#include "mare/MareUtility.hpp"
-#include "mare/Buffer.hpp"
+#include "mare/Mare.hpp"
+#include "mare/Buffers.hpp"
+#include "mare/GL/GLBuffers.hpp"
 #include "mare/Material.hpp"
-#include "mare/RenderState.hpp"
 #include "mare/Shader.hpp"
-#include "mare/Texture.hpp"
 
 namespace mare
 {
@@ -34,6 +33,14 @@ enum class CURSOR
     CROSSHAIRS
 };
 
+enum class RendererAPI
+{
+    NONE = 0,
+    OpenGL_4_5,
+    DirectX_12, // Not yet supported
+    Vulkan      // Not yet supported
+};
+
 // This info is set after Renderer creation but before the renderer executes
 struct RendererInfo
 {
@@ -50,6 +57,7 @@ struct RendererInfo
     bool vsync{false};                 // render in double buffered vsync mode?
     bool cursor{true};                 // render cursor?
     std::bitset<4> debug_mode{};       // 0000 == off, 0001 == high, 0010 == med, 0100 == low, 1000 == notification
+    RendererAPI API{RendererAPI::NONE};
 };
 
 // This input is passed by reference to the callbacks which decide what to do with it
@@ -302,33 +310,40 @@ public:
     virtual glm::vec3 raycast(Layer *layer, glm::ivec2 screen_coords) = 0;
 
     // Scenes
-    static void load_scene(Scene* scene);
+    static void load_scene(Scene *scene);
     static void load_scene(std::string name);
 
     // Buffers
-    virtual Scoped<Buffer<float>> GenFloatBuffer(std::vector<float> *data, BufferType buffer_type = BufferType::STATIC, size_t size_in_bytes = 0) = 0;
-    virtual Scoped<Buffer<int>> GenIntBuffer(std::vector<int> *data, BufferType buffer_type = BufferType::STATIC, size_t size_in_bytes = 0) = 0;
-    virtual Scoped<Buffer<unsigned int>> GenIndexBuffer(std::vector<unsigned int> *data, BufferType buffer_type = BufferType::STATIC, size_t size_in_bytes = 0) = 0;
-    virtual Scoped<Buffer<glm::vec2>> GenVec2Buffer(std::vector<glm::vec2> *data, BufferType buffer_type = BufferType::STATIC, size_t size_in_bytes = 0) = 0;
-    virtual Scoped<Buffer<glm::vec3>> GenVec3Buffer(std::vector<glm::vec3> *data, BufferType buffer_type = BufferType::STATIC, size_t size_in_bytes = 0) = 0;
-    virtual Scoped<Buffer<glm::vec4>> GenVec4Buffer(std::vector<glm::vec4> *data, BufferType buffer_type = BufferType::STATIC, size_t size_in_bytes = 0) = 0;
-    virtual Scoped<Buffer<glm::mat2>> GenMat2Buffer(std::vector<glm::mat2> *data, BufferType buffer_type = BufferType::STATIC, size_t size_in_bytes = 0) = 0;
-    virtual Scoped<Buffer<glm::mat3>> GenMat3Buffer(std::vector<glm::mat3> *data, BufferType buffer_type = BufferType::STATIC, size_t size_in_bytes = 0) = 0;
-    virtual Scoped<Buffer<glm::mat4>> GenMat4Buffer(std::vector<glm::mat4> *data, BufferType buffer_type = BufferType::STATIC, size_t size_in_bytes = 0) = 0;
+    template <typename T>
+    Scoped<Buffer<T>> GenBuffer(T *data, size_t size_in_bytes, BufferType buffer_type = BufferType::STATIC)
+    {
+        switch (info.API)
+        {
+        case RendererAPI::OpenGL_4_5:
+            return std::make_unique<GLBuffer<T>>(data, size_in_bytes, buffer_type);
+            break;
+        default:
+            return nullptr;
+        }
+    }
 
     // Textures
-    virtual Scoped<Texture2D> GenTexture2D(const char *image_filepath) = 0;
+    virtual Scoped<Texture2DBuffer> GenTexture2DBuffer(const char *image_filepath) = 0;
 
-    // Render States
-    virtual Scoped<RenderState> GenRenderState() = 0;
+    // Framebuffers
+    virtual Scoped<Framebuffer> GenFramebuffer(int width, int height) = 0;
 
     // Shaders
     virtual Scoped<Shader> GenShader(const char *directory) = 0;
 
     // Rendering Simple Meshes with no Composite or Instanced Meshes (Composite and Instanced Meshes are rendered by themselves)
-    virtual void render_simple_mesh(const Layer *layer, const SimpleMesh *mesh, Material *material) = 0;
-    virtual void render_simple_mesh(const Layer *layer, const SimpleMesh *mesh, Material *material, const glm::mat4 &parent_model) = 0;
-    virtual void render_simple_mesh(const Layer *layer, const SimpleMesh *mesh, Material *material, const glm::mat4 &parent_model, unsigned int instance_count, const Buffer<glm::mat4> *models) = 0;
+    virtual void render_simple_mesh(Layer *layer, SimpleMesh *mesh, Material *material) = 0;
+    virtual void render_simple_mesh(Layer *layer, SimpleMesh *mesh, Material *material, glm::mat4 &parent_model) = 0;
+    virtual void render_simple_mesh(Layer *layer, SimpleMesh *mesh, Material *material, glm::mat4 &parent_model, unsigned int instance_count, Buffer<glm::mat4> *models) = 0;
+    virtual void bind_mesh_render_state(SimpleMesh* mesh, Material* material) = 0;
+    virtual void destroy_mesh_render_states(SimpleMesh* mesh) = 0;
+    virtual void push_mesh_geometry_buffer(SimpleMesh* mesh, Scoped<Buffer<float>> geometry_buffer) = 0;
+    virtual void set_mesh_index_buffer(SimpleMesh* mesh, Scoped<Buffer<uint32_t>> index_buffer) = 0;
 
     // Create scoped or referenced assets
     template <typename T, typename... Args>
@@ -350,7 +365,11 @@ public:
     template <typename T>
     Referenced<T> GetRefByName(std::string name)
     {
-        return std::dynamic_pointer_cast<T>(asset_map[name]);
+        if (asset_map.find(name) != asset_map.end())
+        {
+            return std::dynamic_pointer_cast<T>(asset_map[name]);
+        }
+        return nullptr;
     }
     void DeleteRef(std::string name)
     {

@@ -6,57 +6,64 @@
 
 // MARE
 #include "mare/Material.hpp"
-#include "mare/Texture.hpp"
+#include "mare/Buffers.hpp"
 #include "mare/Renderer.hpp"
 
 namespace mare
 {
+
+struct phong_properties
+{
+    glm::vec4 ambient;
+    glm::vec4 diffuse;
+    glm::vec4 specular;
+    float shininess;
+};
+
+struct phong_light
+{
+    glm::vec4 ambient;
+    glm::vec4 diffuse;
+    glm::vec4 specular;
+};
+
 class PhongMaterial : public virtual Material
 {
 public:
     PhongMaterial() : Material("./res/Shaders/Phong")
     {
-        texture = Renderer::API->GenTexture2D("./res/Textures/weave_diffuse.jpg");
-        material.ambient = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-        material.diffuse = glm::vec4(0.1f, 0.1f, 0.5f, 1.0f);
-        material.specular = glm::vec4(1.0f);
-        material.shininess = 32.0f;
-        light.ambient = glm::vec4(1.0f);
-        light.diffuse = glm::vec4(1.0f);
-        light.specular = glm::vec4(1.0f);
+        texture = Renderer::API->GenTexture2DBuffer("./res/Textures/weave_diffuse.jpg");
+        phong_properties props = {glm::vec4(0.0f, 0.0f, 0.0f, 1.0f),
+                                  glm::vec4(0.1f, 0.1f, 0.5f, 1.0f),
+                                  glm::vec4(1.0f),
+                                  32.0f};
+        phong_light lit = {glm::vec4(1.0f),
+                           glm::vec4(1.0f),
+                           glm::vec4(1.0f)};
         light_position = glm::vec3(0.0f, 1.0f, 1.0f);
-        bind_buffer_block("material_properties", sizeof(material));
-        bind_buffer_block("light_properties", sizeof(light));
+        properties = Renderer::API->GenBuffer<phong_properties>(&props, sizeof(phong_properties));
+        properties->set_format({{Attribute::UNIFORM, "material_properties"}});
+        light = Renderer::API->GenBuffer<phong_light>(&lit, sizeof(phong_light));
+        light->set_format({{Attribute::UNIFORM, "light_properties"}});
     }
     virtual ~PhongMaterial() {}
     void render() override
     {
-        texture->bind(0);
-        upload_buffer_block("material_properties", &material);
-        upload_buffer_block("light_properties", &light);
+        upload_texture2D("tex", texture.get());
+        upload_uniform(properties.get());
+        upload_uniform(light.get());
         upload_vec3("light_position", light_position);
     }
     inline glm::vec3 get_light_position() const
     {
         return light_position;
     }
-
-    struct
-    {
-        glm::vec4 ambient;
-        glm::vec4 diffuse;
-        glm::vec4 specular;
-        float shininess;
-    } material;
-    struct
-    {
-        glm::vec4 ambient;
-        glm::vec4 diffuse;
-        glm::vec4 specular;
-    } light;
     glm::vec3 light_position;
-    private:
-    Scoped<Texture2D> texture;
+
+private:
+    Scoped<Texture2DBuffer> texture;
+    Scoped<Buffer<phong_properties>> properties;
+    Scoped<Buffer<phong_light>> light;
 };
 } // namespace mare
 

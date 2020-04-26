@@ -4,7 +4,7 @@
 // MARE
 #include "mare/Entity.hpp"
 #include "mare/Layer.hpp"
-#include "mare/MareUtility.hpp"
+#include "mare/Mare.hpp"
 
 // External Libraries
 #include "glm.hpp"

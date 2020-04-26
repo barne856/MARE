@@ -55,7 +55,7 @@
 #ifndef CHARMESH
 #define CHARMESH
 
-#include "mare/SimpleMesh.hpp"
+#include "mare/Meshes.hpp"
 #include "mare/Renderer.hpp"
 #include <unordered_map>
 #include <vector>
@@ -75,13 +75,13 @@ public:
         this->str = str;
         this->color = glm::vec4(1.0f);
         std::vector<float> verts = string_to_verts(str);
-        render_state->set_draw_method(DrawMethod::LINES);
+        set_draw_method(DrawMethod::LINES);
 
         // if dynamic, create extra space to hold resized strings
-        Scoped<Buffer<float>> vb = Renderer::API->GenFloatBuffer(&verts);
-        vb->set_format({{ShaderDataType::VEC2, "position"}});
+        Scoped<Buffer<float>> vb = Renderer::API->GenBuffer<float>(&verts[0], verts.size()*sizeof(float));
+        vb->set_format({{Attribute::POSITION_2D, "position"}});
 
-        render_state->set_vertex_buffer(std::move(vb));
+        add_geometry_buffer(std::move(vb));
     }
     glm::vec2 get_center() const
     {

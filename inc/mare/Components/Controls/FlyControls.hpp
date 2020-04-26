@@ -2,7 +2,7 @@
 #define FLYCONTROLS
 
 // MARE
-#include "mare/MareUtility.hpp"
+#include "mare/Mare.hpp"
 #include "mare/Systems.hpp"
 #include "mare/Components/Physics/Rigidbody.hpp"
 
@@ -65,7 +65,7 @@ class FlyControls : public IControlsSystem
         float theta = acosf(dir.z);
         float phi = atan2f(dir.y, dir.x);
 
-        theta = glm::clamp(theta + dtheta, 0.01f, PI - 0.01f);
+        theta = glm::clamp(theta + dtheta, 0.01f, math::PI - 0.01f);
         phi += dphi;
 
         dir = glm::vec3(sinf(theta) * cosf(phi), sinf(theta) * sinf(phi), cosf(theta));

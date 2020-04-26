@@ -1,12 +1,9 @@
 // MARE GL
 #include "mare/GL/GLRenderer.hpp"
-#include "mare/GL/GLBuffer.hpp"
 #include "mare/GL/GLShader.hpp"
-#include "mare/GL/GLTexture.hpp"
-#include "mare/GL/GLRenderState.hpp"
 
 // MARE
-#include "mare/SimpleMesh.hpp"
+#include "mare/Meshes.hpp"
 #include "mare/Scene.hpp"
 #include "mare/Layer.hpp"
 #include "mare/Widget.hpp"
@@ -44,6 +41,7 @@ GLenum GLDrawMethod(DrawMethod draw_method)
 void GLRenderer::run()
 {
     init_info();
+    info.API = RendererAPI::OpenGL_4_5;
     init_renderer();
     startup();
     start_renderer();
@@ -339,54 +337,16 @@ glm::vec3 GLRenderer::raycast(Layer *layer, glm::ivec2 screen_coords)
     return glm::vec3(world_vector);
 }
 
-// Buffers
-Scoped<Buffer<float>> GLRenderer::GenFloatBuffer(std::vector<float> *data, BufferType buffer_type, size_t size_in_bytes)
-{
-    return std::make_unique<GLBuffer<float>>(data, buffer_type, size_in_bytes);
-}
-Scoped<Buffer<int>> GLRenderer::GenIntBuffer(std::vector<int> *data, BufferType buffer_type, size_t size_in_bytes)
-{
-    return std::make_unique<GLBuffer<int>>(data, buffer_type, size_in_bytes);
-}
-Scoped<Buffer<unsigned int>> GLRenderer::GenIndexBuffer(std::vector<unsigned int> *data, BufferType buffer_type, size_t size_in_bytes)
-{
-    return std::make_unique<GLBuffer<unsigned int>>(data, buffer_type, size_in_bytes);
-}
-Scoped<Buffer<glm::vec2>> GLRenderer::GenVec2Buffer(std::vector<glm::vec2> *data, BufferType buffer_type, size_t size_in_bytes)
-{
-    return std::make_unique<GLBuffer<glm::vec2>>(data, buffer_type, size_in_bytes);
-}
-Scoped<Buffer<glm::vec3>> GLRenderer::GenVec3Buffer(std::vector<glm::vec3> *data, BufferType buffer_type, size_t size_in_bytes)
-{
-    return std::make_unique<GLBuffer<glm::vec3>>(data, buffer_type, size_in_bytes);
-}
-Scoped<Buffer<glm::vec4>> GLRenderer::GenVec4Buffer(std::vector<glm::vec4> *data, BufferType buffer_type, size_t size_in_bytes)
-{
-    return std::make_unique<GLBuffer<glm::vec4>>(data, buffer_type, size_in_bytes);
-}
-Scoped<Buffer<glm::mat2>> GLRenderer::GenMat2Buffer(std::vector<glm::mat2> *data, BufferType buffer_type, size_t size_in_bytes)
-{
-    return std::make_unique<GLBuffer<glm::mat2>>(data, buffer_type, size_in_bytes);
-}
-Scoped<Buffer<glm::mat3>> GLRenderer::GenMat3Buffer(std::vector<glm::mat3> *data, BufferType buffer_type, size_t size_in_bytes)
-{
-    return std::make_unique<GLBuffer<glm::mat3>>(data, buffer_type, size_in_bytes);
-}
-Scoped<Buffer<glm::mat4>> GLRenderer::GenMat4Buffer(std::vector<glm::mat4> *data, BufferType buffer_type, size_t size_in_bytes)
-{
-    return std::make_unique<GLBuffer<glm::mat4>>(data, buffer_type, size_in_bytes);
-}
-
 // Textures
-Scoped<Texture2D> GLRenderer::GenTexture2D(const char *image_filepath)
+Scoped<Texture2DBuffer> GLRenderer::GenTexture2DBuffer(const char *image_filepath)
 {
-    return std::make_unique<GLTexture2D>(image_filepath);
+    return std::make_unique<GLTexture2DBuffer>(image_filepath);
 }
 
-// Render States
-Scoped<RenderState> GLRenderer::GenRenderState()
+// Framebuffers
+Scoped<Framebuffer> GLRenderer::GenFramebuffer(int width, int height)
 {
-    return std::make_unique<GLRenderState>();
+    return std::make_unique<GLFramebuffer>(width, height);
 }
 
 // Shaders
@@ -396,75 +356,119 @@ Scoped<Shader> GLRenderer::GenShader(const char *directory)
 }
 
 // normal rendering of simple meshes
-void GLRenderer::render_simple_mesh(const Layer *layer, const SimpleMesh *mesh, Material *material)
+void GLRenderer::render_simple_mesh(Layer *layer, SimpleMesh *mesh, Material *material)
 {
-    mesh->bind();
+    mesh->bind(material);
     material->bind();
-    if (layer)
-    {
-        material->upload_mat4("projection", layer->projection());
-        material->upload_mat4("view", layer->view());
-    }
+    material->upload_camera(layer);
     material->upload_mat4("model", mesh->get_model());
     material->upload_mat3("normal_matrix", glm::mat3(mesh->get_normal()));
-    if (mesh->get_state()->is_indexed())
+    material->render();
+    if (mesh->is_indexed())
     {
-        glDrawElementsBaseVertex(GLDrawMethod(mesh->get_draw_method()), GLsizei(mesh->get_state()->render_count()), GL_UNSIGNED_INT, nullptr, mesh->get_state()->get_render_index());
+        glDrawElementsBaseVertex(GLDrawMethod(mesh->get_draw_method()), GLsizei(mesh->render_count()), GL_UNSIGNED_INT, nullptr, mesh->get_render_index());
     }
     else
     {
-        glDrawArrays(GLDrawMethod(mesh->get_draw_method()), mesh->get_state()->get_render_index(), GLsizei(mesh->get_state()->render_count()));
+        glDrawArrays(GLDrawMethod(mesh->get_draw_method()), mesh->get_render_index(), GLsizei(mesh->render_count()));
     }
-    mesh->get_state()->lock_buffer();
-    mesh->get_state()->swap_buffer();
+    mesh->lock_buffers();
+    mesh->swap_buffers();
 }
 // composite rendering
-void GLRenderer::render_simple_mesh(const Layer *layer, const SimpleMesh *mesh, Material *material, const glm::mat4 &parent_model)
+void GLRenderer::render_simple_mesh(Layer *layer, SimpleMesh *mesh, Material *material, glm::mat4 &parent_model)
 {
-    mesh->bind();
+    mesh->bind(material);
     material->bind();
-    if (layer)
-    {
-        material->upload_mat4("projection", layer->projection());
-        material->upload_mat4("view", layer->view());
-    }
+    material->upload_camera(layer);
     material->upload_mat4("model", parent_model * mesh->get_model());
     material->upload_mat3("normal_matrix", glm::transpose(glm::inverse(glm::mat3(parent_model * (mesh->get_model())))));
-    if (mesh->get_state()->is_indexed())
+    material->render();
+    if (mesh->is_indexed())
     {
-        glDrawElementsBaseVertex(GLDrawMethod(mesh->get_draw_method()), GLsizei(mesh->get_state()->render_count()), GL_UNSIGNED_INT, nullptr, mesh->get_state()->get_render_index());
+        glDrawElementsBaseVertex(GLDrawMethod(mesh->get_draw_method()), GLsizei(mesh->render_count()), GL_UNSIGNED_INT, nullptr, mesh->get_render_index());
     }
     else
     {
-        glDrawArrays(GLDrawMethod(mesh->get_draw_method()), mesh->get_state()->get_render_index(), GLsizei(mesh->get_state()->render_count()));
+        glDrawArrays(GLDrawMethod(mesh->get_draw_method()), mesh->get_render_index(), GLsizei(mesh->render_count()));
     }
-    mesh->get_state()->lock_buffer();
-    mesh->get_state()->swap_buffer();
+    mesh->lock_buffers();
+    mesh->swap_buffers();
 }
 // instanced rendering
-void GLRenderer::render_simple_mesh(const Layer *layer, const SimpleMesh *mesh, Material *material, const glm::mat4 &parent_model, unsigned int instance_count, const Buffer<glm::mat4> *models)
+void GLRenderer::render_simple_mesh(Layer *layer, SimpleMesh *mesh, Material *material, glm::mat4 &parent_model, unsigned int instance_count, Buffer<glm::mat4> *models)
 {
-    mesh->bind();
+    mesh->bind(material);
     material->bind();
-    if (layer)
-    {
-        material->upload_mat4("projection", layer->projection());
-        material->upload_mat4("view", layer->view());
-    }
+    material->upload_camera(layer);
     material->upload_mat4("model", parent_model * mesh->get_model());
     material->upload_mat3("normal_matrix", glm::transpose(glm::inverse(glm::mat3(parent_model * (mesh->get_model())))));
-    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, models->name());
-    if (mesh->get_state()->is_indexed())
+    material->upload_storage(models);
+    material->render();
+    if (mesh->is_indexed())
     {
-        glDrawElementsInstancedBaseVertex(GLDrawMethod(mesh->get_draw_method()), static_cast<GLsizei>(mesh->get_state()->render_count()), GL_UNSIGNED_INT, nullptr, instance_count, mesh->get_state()->get_render_index());
+        glDrawElementsInstancedBaseVertex(GLDrawMethod(mesh->get_draw_method()), static_cast<GLsizei>(mesh->render_count()), GL_UNSIGNED_INT, nullptr, instance_count, mesh->get_render_index());
     }
     else
     {
-        glDrawArraysInstanced(GLDrawMethod(mesh->get_draw_method()), mesh->get_state()->get_render_index(), static_cast<GLsizei>(mesh->get_state()->render_count()), instance_count);
+        glDrawArraysInstanced(GLDrawMethod(mesh->get_draw_method()), mesh->get_render_index(), static_cast<GLsizei>(mesh->render_count()), instance_count);
     }
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, 0);
-    mesh->get_state()->lock_buffer();
-    mesh->get_state()->swap_buffer();
+    mesh->lock_buffers();
+    mesh->swap_buffers();
+}
+// Mesh functions
+void GLRenderer::bind_mesh_render_state(SimpleMesh *mesh, Material *material)
+{
+    if (!material)
+    {
+        glBindVertexArray(0);
+        return;
+    }
+    else if (mesh->render_states.find(material->name()) == mesh->render_states.end())
+    {
+        uint32_t vertex_array_ID;
+        glCreateVertexArrays(1, &vertex_array_ID);
+        mesh->render_states.insert({material->name(), vertex_array_ID});
+        for (auto &buffer : mesh->geometry_buffers)
+        {
+            for (const auto &attrib : buffer->format())
+            {
+                if (attrib.type == Attribute::POSITION_2D || attrib.type == Attribute::POSITON_3D || attrib.type == Attribute::NORMAL || attrib.type == Attribute::TEXTURE_MAP)
+                {
+                    uint32_t attrib_loc = glGetAttribLocation(material->name(), attrib.name.c_str());
+                    glEnableVertexArrayAttrib(vertex_array_ID, attrib_loc);
+                    glVertexArrayAttribFormat(vertex_array_ID, attrib_loc, static_cast<GLuint>(attrib.component_count()), GL_FLOAT, GL_FALSE, static_cast<GLint>(attrib.offset));
+                    glVertexArrayAttribBinding(vertex_array_ID, attrib_loc, static_cast<GLuint>(mesh->geometry_buffers.size()));
+                    glVertexArrayVertexBuffer(vertex_array_ID, static_cast<GLuint>(mesh->geometry_buffers.size()), static_cast<GLuint>(buffer->name()), 0, static_cast<GLsizei>(buffer->format().stride));
+                }
+            }
+            mesh->vertex_render_count = buffer->count();
+        }
+        if (mesh->index_buffer)
+        {
+            glVertexArrayElementBuffer(mesh->render_states[material->name()], mesh->index_buffer->name());
+        }
+    }
+    glBindVertexArray(mesh->render_states[material->name()]);
+}
+void GLRenderer::destroy_mesh_render_states(SimpleMesh *mesh)
+{
+    for (const auto &[key, value] : mesh->render_states)
+    {
+        glDeleteVertexArrays(1, &value);
+    }
+}
+void GLRenderer::push_mesh_geometry_buffer(SimpleMesh *mesh, Scoped<Buffer<float>> geometry_buffer)
+{
+    mesh->geometry_buffers.push_back(std::move(geometry_buffer));
+    mesh->invalidate_render_state_cache();
+}
+void GLRenderer::set_mesh_index_buffer(SimpleMesh *mesh, Scoped<Buffer<uint32_t>> index_buffer)
+{
+    mesh->index_render_count = index_buffer->count();
+    mesh->index_buffer = std::move(index_buffer);
+    mesh->invalidate_render_state_cache();
 }
 
 // Debug functions
@@ -2554,7 +2558,7 @@ void GLRenderer::glfw_onMouseButton(GLFWwindow *window, int button, int action, 
 
 void GLRenderer::glfw_onMouseMove(GLFWwindow *window, double x, double y)
 {
-    if(!info.cursor)
+    if (!info.cursor)
     {
         info.cursor = true;
         input.mouse_pos = glm::ivec2(x, y);

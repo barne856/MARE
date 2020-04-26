@@ -1,7 +1,7 @@
 #ifndef TORUSMESH
 #define TORUSMESH
 
-#include "mare/SimpleMesh.hpp"
+#include "mare/Meshes.hpp"
 #include "mare/Renderer.hpp"
 
 #include "glm.hpp"
@@ -16,7 +16,7 @@ public:
     {
         std::vector<float> vertex_data;
         std::vector<unsigned int> indices;
-        render_state->set_draw_method(DrawMethod::TRIANGLE_STRIP);
+        set_draw_method(DrawMethod::TRIANGLE_STRIP);
 
         // Compute torus vertices and normals
         for (unsigned int i = 0; i <= p; ++i)
@@ -66,15 +66,15 @@ public:
             indices.push_back(static_cast<unsigned int>((i + q + 1) % n_vertices));
         }
 
-        Scoped<Buffer<float>> vertex_buffer = Renderer::API->GenFloatBuffer(&vertex_data);
-        vertex_buffer->set_format({{ShaderDataType::VEC3, "position"},
-                                    {ShaderDataType::VEC3, "normal"},
-                                    {ShaderDataType::VEC2, "texcoords"}});
+        Scoped<Buffer<float>> vertex_buffer = Renderer::API->GenBuffer<float>(&vertex_data[0], vertex_data.size()*sizeof(float));
+        vertex_buffer->set_format({{Attribute::POSITON_3D, "position"},
+                                    {Attribute::NORMAL, "normal"},
+                                    {Attribute::TEXTURE_MAP, "texcoords"}});
 
-        Scoped<Buffer<unsigned int>> index_buffer = Renderer::API->GenIndexBuffer(&indices);
+        Scoped<Buffer<unsigned int>> index_buffer = Renderer::API->GenBuffer<uint32_t>(&indices[0], indices.size()*sizeof(float));
 
-        render_state->set_vertex_buffer(std::move(vertex_buffer));
-        render_state->set_index_buffer(std::move(index_buffer));
+        add_geometry_buffer(std::move(vertex_buffer));
+        set_index_buffer(std::move(index_buffer));
     }
 
 private:

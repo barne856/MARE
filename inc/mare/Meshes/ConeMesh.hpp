@@ -1,7 +1,7 @@
 #ifndef CONEMESH
 #define CONEMESH
 
-#include "mare/SimpleMesh.hpp"
+#include "mare/Meshes.hpp"
 #include "mare/Renderer.hpp"
 
 #include "glm.hpp"
@@ -17,7 +17,7 @@ public:
         std::vector<glm::vec3> verts{};
         std::vector<glm::vec3> normals{};
         std::vector<unsigned int> indices;
-        render_state->set_draw_method(DrawMethod::TRIANGLES);
+        set_draw_method(DrawMethod::TRIANGLES);
 
         const float PI = 3.141592653f;
         const float SQRT3 = 1.73205080757f;
@@ -60,11 +60,11 @@ public:
             vertex_data.push_back(normals[i][2]);
         }
 
-        Scoped<Buffer<float>> vb = Renderer::API->GenFloatBuffer(&vertex_data);
-        vb->set_format({{ShaderDataType::VEC3, "position"},
-                        {ShaderDataType::VEC3, "normal"}});
+        Scoped<Buffer<float>> vb = Renderer::API->GenBuffer<float>(&vertex_data[0], vertex_data.size()*sizeof(float));
+        vb->set_format({{Attribute::POSITON_3D, "position"},
+                        {Attribute::NORMAL, "normal"}});
 
-        render_state->set_vertex_buffer(std::move(vb));
+        add_geometry_buffer(std::move(vb));
     }
 };
 } // namespace mare

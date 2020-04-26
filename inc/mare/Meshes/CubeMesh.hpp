@@ -1,7 +1,7 @@
 #ifndef CUBEMESH
 #define CUBEMESH
 
-#include "mare/SimpleMesh.hpp"
+#include "mare/Meshes.hpp"
 #include "mare/Renderer.hpp"
 
 #include "glm.hpp"
@@ -16,7 +16,7 @@ public:
     {
         std::vector<glm::vec3> data;
         std::vector<unsigned int> indices;
-        render_state->set_draw_method(DrawMethod::TRIANGLES);
+        set_draw_method(DrawMethod::TRIANGLES);
 
         // front face vertices and normals, counterclockwise around normal from bottom left
         data.push_back({-0.5f * scale, -0.5f * scale, 0.5f * scale});
@@ -135,14 +135,14 @@ public:
             vertex_data.push_back(vert[2]);
         }
 
-        Scoped<Buffer<float>> vertex_buffer = Renderer::API->GenFloatBuffer(&vertex_data);
-        vertex_buffer->set_format({{ShaderDataType::VEC3, "position"},
-                                   {ShaderDataType::VEC3, "normal"}});
+        Scoped<Buffer<float>> vertex_buffer = Renderer::API->GenBuffer<float>(&vertex_data[0], vertex_data.size()*sizeof(float));
+        vertex_buffer->set_format({{Attribute::POSITON_3D, "position"},
+                                   {Attribute::NORMAL, "normal"}});
 
-        Scoped<Buffer<unsigned int>> index_buffer = Renderer::API->GenIndexBuffer(&indices);
+        Scoped<Buffer<unsigned int>> index_buffer = Renderer::API->GenBuffer<uint32_t>(&indices[0], indices.size()*sizeof(uint32_t));
 
-        render_state->set_vertex_buffer(std::move(vertex_buffer));
-        render_state->set_index_buffer(std::move(index_buffer));
+        add_geometry_buffer(std::move(vertex_buffer));
+        set_index_buffer(std::move(index_buffer));
     }
 };
 } // namespace mare

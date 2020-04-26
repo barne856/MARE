@@ -9,7 +9,7 @@ layout(location = 5) uniform mat4 model;
 layout(location = 6) uniform mat3 normal_matrix;
 layout(location = 7) uniform mat4 shadow_matrix;
 
-layout(std430, binding = 0) buffer ssbo
+layout(std430, binding = 0) buffer model_instances
 {
     mat4 models[];
 };

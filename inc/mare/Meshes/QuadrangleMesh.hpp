@@ -1,7 +1,7 @@
 #ifndef QUADRANGLEMESH
 #define QUADRANGLEMESH
 
-#include "mare/SimpleMesh.hpp"
+#include "mare/Meshes.hpp"
 #include "mare/Renderer.hpp"
 
 #include "glm.hpp"
@@ -14,7 +14,7 @@ public:
     QuadrangleMesh()
     {
         std::vector<float> verts;
-        render_state->set_draw_method(DrawMethod::TRIANGLES);
+        set_draw_method(DrawMethod::TRIANGLES);
 
         verts.push_back(-0.5f);
         verts.push_back(-0.5f);
@@ -29,15 +29,15 @@ public:
         verts.push_back(-0.5f);
         verts.push_back(-0.5f);
 
-        Scoped<Buffer<float>> vertex_buffer = Renderer::API->GenFloatBuffer(&verts);
-        vertex_buffer->set_format({{ShaderDataType::VEC2, "position"}});
+        Scoped<Buffer<float>> vertex_buffer = Renderer::API->GenBuffer<float>(&verts[0], verts.size()*sizeof(float));
+        vertex_buffer->set_format({{Attribute::POSITION_2D, "position"}});
 
-        render_state->set_vertex_buffer(std::move(vertex_buffer));
+        add_geometry_buffer(std::move(vertex_buffer));
     }
     QuadrangleMesh(glm::vec2 v1, glm::vec2 v2, glm::vec2 v3, glm::vec2 v4)
     {
         std::vector<float> verts;
-        render_state->set_draw_method(DrawMethod::TRIANGLES);
+        set_draw_method(DrawMethod::TRIANGLES);
 
         verts.push_back(v1[0]);
         verts.push_back(v1[1]);
@@ -52,10 +52,10 @@ public:
         verts.push_back(v1[0]);
         verts.push_back(v1[1]);
 
-        Scoped<Buffer<float>> vertex_buffer = Renderer::API->GenFloatBuffer(&verts);
-        vertex_buffer->set_format({{ShaderDataType::VEC2, "position"}});
+        Scoped<Buffer<float>> vertex_buffer = Renderer::API->GenBuffer<float>(&verts[0], verts.size()*sizeof(float));
+        vertex_buffer->set_format({{Attribute::POSITION_2D, "position"}});
 
-        render_state->set_vertex_buffer(std::move(vertex_buffer));
+        add_geometry_buffer(std::move(vertex_buffer));
     }
 };
 } // namespace mare

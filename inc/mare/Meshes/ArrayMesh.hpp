@@ -1,7 +1,7 @@
 #ifndef ARRAYMESH
 #define ARRAYMESH
 
-#include "mare/SimpleMesh.hpp"
+#include "mare/Meshes.hpp"
 #include "mare/Renderer.hpp"
 
 #include "glm.hpp"
@@ -14,7 +14,7 @@ namespace mare
 class ArrayMesh : public SimpleMesh
 {
 public:
-    ArrayMesh(DrawMethod method, const std::vector<glm::vec3> &vertices, const std::vector<glm::vec3> &normals, const std::vector<glm::vec2> &texture_coords, std::vector<unsigned int> *indices)
+    ArrayMesh(DrawMethod method, const std::vector<glm::vec3> &vertices, const std::vector<glm::vec3> &normals, const std::vector<glm::vec2> &texture_coords, std::vector<uint32_t> *indices)
     {
         if (normals.size() != vertices.size())
         {
@@ -40,16 +40,17 @@ public:
             vertex_data.push_back(texture_coords[i][0]);
             vertex_data.push_back(texture_coords[i][1]);
         }
-        Scoped<Buffer<float>> vb = Renderer::API->GenFloatBuffer(&vertex_data);
-        vb->set_format({{ShaderDataType::VEC3, "position"},
-                                    {ShaderDataType::VEC3, "normals"},
-                                    {ShaderDataType::VEC2, "texture_coords"}});
-        render_state->set_vertex_buffer(std::move(vb));
+        Scoped<Buffer<float>> vb = Renderer::API->GenBuffer<float>(&vertex_data[0], vertex_data.size()*sizeof(float));
+        vb->set_format({{Attribute::POSITON_3D, "position"},
+                                    {Attribute::NORMAL, "normals"},
+                                    {Attribute::TEXTURE_MAP, "texture_coords"}});
+        add_geometry_buffer(std::move(vb));
         if (indices)
         {
-            Scoped<Buffer<unsigned int>> ib = Renderer::API->GenIndexBuffer(indices);
-            render_state->set_index_buffer(std::move(ib));
+            Scoped<Buffer<uint32_t>> ib = Renderer::API->GenBuffer<uint32_t>(&(indices->front()), indices->size()*sizeof(uint32_t));
+            set_index_buffer(std::move(ib));
         }
+        set_draw_method(method);
     }
 };
 

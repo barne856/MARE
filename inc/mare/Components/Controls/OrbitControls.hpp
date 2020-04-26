@@ -28,7 +28,7 @@ class OrbitControls : public IControlsSystem
             float r_xy = glm::length(glm::vec2(pos.x, pos.y) - glm::vec2(center.x, center.y));
             if (r_xy == 0.0f)
             {
-                float phi = PI / 2.0f;
+                float phi = math::PI / 2.0f;
 
                 if (up.x > 0.0f)
                 {
@@ -36,25 +36,25 @@ class OrbitControls : public IControlsSystem
                 }
                 else if (up.x < 0.0f)
                 {
-                    phi = atan((up.y) / (up.x)) + PI;
+                    phi = atan((up.y) / (up.x)) + math::PI;
                 }
                 else if (up.y < 0.0f)
                 {
-                    phi = -PI / 2.0f;
+                    phi = -math::PI / 2.0f;
                 }
                 up = {cos(phi + dphi), sin(phi + dphi), 0.0f};
                 if (dtheta > 0.0f)
                 {
                     up = {0.0f, 0.0f, 1.0f};
                     float r = glm::length(pos - center);
-                    pos.x = r * sin(dtheta) * cos(phi + dphi + PI) + center.x;
-                    pos.y = r * sin(dtheta) * sin(phi + dphi + PI) + center.y;
+                    pos.x = r * sin(dtheta) * cos(phi + dphi + math::PI) + center.x;
+                    pos.y = r * sin(dtheta) * sin(phi + dphi + math::PI) + center.y;
                     pos.z = r * cos(dtheta) + center.z;
                 }
             }
             else
             {
-                float phi = PI;
+                float phi = math::PI;
 
                 if (pos.x - center.x > 0.0f)
                 {
@@ -62,19 +62,19 @@ class OrbitControls : public IControlsSystem
                 }
                 else if (pos.x - center.x < 0.0f)
                 {
-                    phi = atan((pos.y - center.y) / (pos.x - center.x)) + PI;
+                    phi = atan((pos.y - center.y) / (pos.x - center.x)) + math::PI;
                 }
                 else if (pos.y - center.y < 0.0f)
                 {
-                    phi = -PI / 2.0f;
+                    phi = -math::PI / 2.0f;
                 }
                 float r = glm::length(pos - center);
                 float h = pos.z - center.z;
-                float theta = PI / 2.0f - atan(h / r_xy);
+                float theta = math::PI / 2.0f - atan(h / r_xy);
 
-                if (theta + dtheta > PI / 2.0f)
+                if (theta + dtheta > math::PI / 2.0f)
                 {
-                    dtheta = PI / 2.0f - theta;
+                    dtheta = math::PI / 2.0f - theta;
                 }
                 if (theta + dtheta < 0.0f)
                 {

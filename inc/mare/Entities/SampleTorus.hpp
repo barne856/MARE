@@ -30,10 +30,8 @@ public:
 class SampleTorusRenderer : public RenderSystem<SampleTorus>
 {
 public:
-    void render(SampleTorus *sample_torus, const Layer *layer, float dt) override
+    void render(SampleTorus *sample_torus, Layer *layer, float dt) override
     {
-        sample_torus->material->bind();
-        sample_torus->material->render();
         sample_torus->torus->render(layer, sample_torus->material.get(), sample_torus->get_model());
     }
 };

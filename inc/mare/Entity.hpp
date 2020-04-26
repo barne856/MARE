@@ -2,7 +2,7 @@
 #define ENTITY
 
 // MARE
-#include "mare/MareUtility.hpp"
+#include "mare/Mare.hpp"
 #include "mare/Transform.hpp"
 #include "mare/Renderer.hpp"
 

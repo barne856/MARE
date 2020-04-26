@@ -1,7 +1,7 @@
 #ifndef ARROWMESH
 #define ARROWMESH
 
-#include "mare/CompositeMesh.hpp"
+#include "mare/Meshes.hpp"
 #include "mare/Meshes/ConeMesh.hpp"
 #include "mare/Meshes/CylinderMesh.hpp"
 

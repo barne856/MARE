@@ -1,7 +1,7 @@
 #ifndef SPHEREMESH
 #define SPHEREMESH
 
-#include "mare/SimpleMesh.hpp"
+#include "mare/Meshes.hpp"
 #include "mare/Renderer.hpp"
 
 #include "glm.hpp"
@@ -13,7 +13,7 @@ class SphereMesh : public SimpleMesh
 public:
     SphereMesh(unsigned int recursionLevel, float radius, bool force_flat = false)
     {
-        render_state->set_draw_method(DrawMethod::TRIANGLES);
+        set_draw_method(DrawMethod::TRIANGLES);
 
         const float X = 0.525731112119133606f;
         const float Z = 0.850650808352039932f;
@@ -100,11 +100,11 @@ public:
             data.push_back(vertices[3 * i][2]);
         }
 
-        Scoped<Buffer<float>> vertex_buffer = Renderer::API->GenFloatBuffer(&data);
-        vertex_buffer->set_format({{ShaderDataType::VEC3, "position"},
-                                   {ShaderDataType::VEC3, "normal"}});
+        Scoped<Buffer<float>> vertex_buffer = Renderer::API->GenBuffer<float>(&data[0], data.size()*sizeof(float));
+        vertex_buffer->set_format({{Attribute::POSITON_3D, "position"},
+                                   {Attribute::NORMAL, "normal"}});
 
-        render_state->set_vertex_buffer(std::move(vertex_buffer));
+        add_geometry_buffer(std::move(vertex_buffer));
     }
 
 private:

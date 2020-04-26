@@ -20,23 +20,18 @@ add_subdirectory(ext/glfw)
 set(SRC
 ./ext/glew-2.1.0/src/glew.c
 ./src/app/main.cpp
-./src/mare/Buffer.cpp
-./src/mare/CompositeMesh.cpp
-./src/mare/InstancedMesh.cpp
-./src/mare/MareUtility.cpp
+./src/mare/Buffers.cpp
+./src/mare/Mare.cpp
 ./src/mare/Material.cpp
+./src/mare/Meshes.cpp
 ./src/mare/Overlay.cpp
 ./src/mare/Renderer.cpp
-./src/mare/RenderState.cpp
 ./src/mare/Scene.cpp
-./src/mare/SimpleMesh.cpp
 ./src/mare/Transform.cpp
 ./src/mare/Widget.cpp
-./src/mare/GL/GLBuffer.cpp
+./src/mare/GL/GLBuffers.cpp
 ./src/mare/GL/GLRenderer.cpp
-./src/mare/GL/GLRenderState.cpp
-./src/mare/GL/GLShader.cpp
-./src/mare/GL/GLTexture.cpp)
+./src/mare/GL/GLShader.cpp)
 
 add_executable(APP ${SRC})
 # UNIX libraries

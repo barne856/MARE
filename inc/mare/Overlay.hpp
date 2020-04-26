@@ -2,7 +2,7 @@
 #define OVERLAY
 
 // MARE
-#include "mare/MareUtility.hpp"
+#include "mare/Mare.hpp"
 #include "mare/Layer.hpp"
 #include "mare/Widget.hpp"
 

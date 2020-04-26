@@ -1,7 +1,7 @@
 #ifndef SLOPEMESH
 #define SLOPEMESH
 
-#include "mare/SimpleMesh.hpp"
+#include "mare/Meshes.hpp"
 #include "mare/Renderer.hpp"
 
 #include "glm.hpp"
@@ -15,7 +15,7 @@ public:
     SlopeMesh(float scale)
     {
         std::vector<glm::vec3> data;
-        render_state->set_draw_method(DrawMethod::TRIANGLES);
+        set_draw_method(DrawMethod::TRIANGLES);
         const float SQRT2 = 1.41421356237f;
 
         // front face
@@ -84,11 +84,11 @@ public:
             vertex_data.push_back(vert[2]);
         }
 
-        Scoped<Buffer<float>> vertex_buffer = Renderer::API->GenFloatBuffer(&vertex_data);
-        vertex_buffer->set_format({{ShaderDataType::VEC3, "position"},
-                                    {ShaderDataType::VEC3, "normal"}});
+        Scoped<Buffer<float>> vertex_buffer = Renderer::API->GenBuffer<float>(&vertex_data[0], vertex_data.size()*sizeof(float));
+        vertex_buffer->set_format({{Attribute::POSITON_3D, "position"},
+                                    {Attribute::NORMAL, "normal"}});
 
-        render_state->set_vertex_buffer(std::move(vertex_buffer));
+        add_geometry_buffer(std::move(vertex_buffer));
     }
 };
 } // namespace mare

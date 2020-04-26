@@ -1,7 +1,7 @@
 #ifndef CIRCLEMESH
 #define CIRCLEMESH
 
-#include "mare/SimpleMesh.hpp"
+#include "mare/Meshes.hpp"
 #include "mare/Renderer.hpp"
 
 #include "glm.hpp"
@@ -14,7 +14,7 @@ public:
     CircleMesh(int sides, float radius)
     {
         std::vector<float> verts;
-        render_state->set_draw_method(DrawMethod::TRIANGLE_FAN);
+        set_draw_method(DrawMethod::TRIANGLE_FAN);
 
         verts.push_back(0.0f);
         verts.push_back(0.0f);
@@ -28,10 +28,10 @@ public:
         verts.push_back(radius);
         verts.push_back(0.0f);
 
-        Scoped<Buffer<float>> vertex_buffer = Renderer::API->GenFloatBuffer(&verts);
-        vertex_buffer->set_format({{ShaderDataType::VEC2, "position"}});
+        Scoped<Buffer<float>> vertex_buffer = Renderer::API->GenBuffer<float>(&verts[0], verts.size()*sizeof(float));
+        vertex_buffer->set_format({{Attribute::POSITION_2D, "position"}});
 
-        render_state->set_vertex_buffer(std::move(vertex_buffer));
+        add_geometry_buffer(std::move(vertex_buffer));
     }
 };
 } // namespace mare

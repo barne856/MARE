@@ -1,5 +1,5 @@
-#ifndef MAREUTILITY
-#define MAREUTILITY
+#ifndef MARE
+#define MARE
 
 // External Libraries
 #include "glm.hpp"
@@ -23,17 +23,6 @@ class Component : public Asset
 public:
     virtual ~Component() = 0;
 };
-////////////////////////////////
-
-// template<class T>
-// struct is_a_System // Default case, no pattern match
-//     : std::false_type {};
-//
-// template<class T>
-// struct is_a_System< System< T > > // For types matching the pattern System<T>
-//     : std::true_type {};
-
-////////////////////////////////
 
 // Scopes and References
 template <typename T>
@@ -43,29 +32,8 @@ using Referenced = std::shared_ptr<T>;
 // Variant type for scalars, vectors, and matrices
 using shader_data_type = std::variant<unsigned int, int, unsigned short, short, unsigned char, float, bool, glm::vec2, glm::vec3, glm::vec4, glm::ivec2, glm::ivec3, glm::ivec4, glm::mat2, glm::mat3, glm::mat4>;
 
-enum class ShaderDataType
+namespace util
 {
-    UNSIGNED_INT = 0,
-    INT,
-    UNSIGNED_SHORT,
-    SHORT,
-    BYTE,
-    FLOAT,
-    BOOL,
-    VEC2,
-    VEC3,
-    VEC4,
-    INT2,
-    INT3,
-    INT4,
-    MAT2,
-    MAT3,
-    MAT4
-};
-
-size_t shader_data_type_size(ShaderDataType type);
-size_t shader_component_count(ShaderDataType type);
-
 // get index of a type in a variant - "get_index<type, variant_type>"
 template <typename>
 struct tag
@@ -78,7 +46,10 @@ struct get_index<T, std::variant<Ts...>>
     : std::integral_constant<size_t, std::variant<tag<Ts>...>(tag<T>()).index()>
 {
 };
+} // namespace util
 
+namespace math
+{
 // Math algorithms
 float shoelace(std::vector<glm::vec2> points);
 // Coordinate conversions
@@ -87,6 +58,7 @@ void window_coordinates(float nx, float ny, int &x, int &y);
 
 // Math constants
 const float PI = 3.141592653f;
+} // namespace math
 
 } // namespace mare
 

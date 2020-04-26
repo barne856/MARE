@@ -4,7 +4,7 @@
 // MARE
 #include "mare/Widget.hpp"
 #include "mare/Meshes/QuadrangleMesh.hpp"
-#include "mare/InstancedMesh.hpp"
+#include "mare/Meshes.hpp"
 #include "mare/Materials/BasicMaterial.hpp"
 #include "mare/Renderer.hpp"
 #include "mare/Systems.hpp"
@@ -63,7 +63,7 @@ public:
 class SliderUIRenderer : public RenderSystem<SliderUI>
 {
 public:
-    void render(SliderUI *slider_ui, const Layer *layer, float dt) override
+    void render(SliderUI *slider_ui, Layer *layer, float dt) override
     {
         slider_ui->solid_material->bind();
         slider_ui->solid_material->render();

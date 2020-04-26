@@ -1,37 +1,13 @@
-// TODO:
-
-// rename components to systems and metacomponents to metasystems
-
-// Inherit from buffer -> Geometry buffer<float>(verts, norms, texcoords, also 'is a' render state(and render state should be API specific)), uniform buffers<T>, storage buffers<T>, texture buffer<unsigned char>, framebuffer buffer (inherits from texture buffer)
-// Storage buffer has transform feedback option Feedback buffer enum in buffer type
-// Transform feedback material, shadow material, applied on top of base material in entity's render component
-
-// how to render in stages? First render transform feedback, then base material, then render depth to texture from light's view, then shadow material
-
-// Texture2D
-//         ID
-//         set_buffer()
-//         Buffer<Texture2D>(filepath)
-// 
-// Framebuffer
-//         ID        
-//         depth
-//         color
-//         set_buffer()
-//         Buffer<Framebuffer>
-//
-// Textures: Min Filter and Mag filter, wrapU, wrapT, and repeat methods, gen mipmaps
+// TODO version 1:
 
 // SHADOWS & LIGHTS
-// textures and framebuffers (add repeating textures), should be a type of buffer
-// Buffers for point, directoinal, spot, and hemisphere lights
-// Buffers for shadowmap framebuffers
-// Meta RendererComponent that holds shadowmap buffers and light buffers in a Scene (MetaComponents can access every entity in the scene)
-// Meta RendererComponent operates on every entity with corresponding component (eg. MetaLightComponent holds buffer of types of lights, torusRenderer has a lightComponent that sources lights from the metaComponent, Requires material that reacts to lights) 
+// Render in Stages: Compute Shader -> Material -> Shadows and Lights
+// MetaRenderSystem that holds shadowmap textures, framebuffers, and light buffers in a Scene (MetaSystems can access every entity in the scene)
+// MetaRenderSystem operates on every entity with corresponding component (eg. MetaLightComponent holds buffer of types of lights, torusRenderer has a lightComponent that sources lights from the metaComponent, Requires material that reacts to lights) 
 //                                                                              (eg. MetaShadowComponent holds shadowbuffer, torusRenderer has a shadowComponent(Material) that will render into the depthbuffer of the metaComponent) 
 
 // PHYSICS
-// Physics component for transform feedback buffers GPU n body physics (geometry buffer to geometery buffer feedback on GPU(can it be one double buffered geometry buffer?))
+// Compute Shaders
 // Particle system with transform feedback
 // Cloth physics with transform feedback
 // MetaComponent for collisions
@@ -41,7 +17,7 @@
 // Vsync and cursor hidden should not be in input but should be their own functions
 // Document the API
 
-// EXTRAS
+// TODO version 2:
 // Beef up the Buffer, Texture, and Framebuffer classes to have all of the OpenGL features
 // Beef-up Renderer blending to have all the opengl features like custum blend functions
 // Add teapot primative mesh
@@ -55,18 +31,6 @@
 // loaders for models?
 // loaders sound? sound implimentation
 // loaders for animations? animation implimentation
-
-// OPTIMIZATION
-// 1. Optimize CPU cache misses by reworking the ECS to have tightly packed data. Look into using bitfields to match entites with
-// components and using matrix reordering to optimize the data when entites are added or removed.
-// 2. Shaders should only have one instance for each kind which is shared by all of the materials that use it
-
-// THE BAD STUFF
-// slow entity-component system (difficult and possibly breaking change) (many entites will slow the renderer down fast)
-// no animations (difficult but not breaking)
-// no sound (easy fix)
-// no external model loading (easy fix)
-// no fancy rendering techniques like precomputed radiance transfer or physically based rendering (difficult but not breaking)
 
 #include "mare/GL/GLRenderer.hpp"
 #include "mare/Scenes/SampleScene.hpp"

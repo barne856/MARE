@@ -1,7 +1,7 @@
 #ifndef CYLINDERMESH
 #define CYLINDERMESH
 
-#include "mare/SimpleMesh.hpp"
+#include "mare/Meshes.hpp"
 #include "mare/Renderer.hpp"
 
 #include "glm.hpp"
@@ -15,7 +15,7 @@ public:
     {
         std::vector<float> data;
         std::vector<unsigned int> indices;
-        render_state->set_draw_method(DrawMethod::TRIANGLES);
+        set_draw_method(DrawMethod::TRIANGLES);
 
         float theta = end_angle - start_angle;
         float dtheta = theta / sides;
@@ -107,14 +107,14 @@ public:
             indices.push_back(3 * (sides + 1) + i + 3);
         }
 
-        Scoped<Buffer<float>> vertex_buffer = Renderer::API->GenFloatBuffer(&data);
-        vertex_buffer->set_format({{ShaderDataType::VEC3, "position"},
-                                   {ShaderDataType::VEC3, "normal"}});
+        Scoped<Buffer<float>> vertex_buffer = Renderer::API->GenBuffer<float>(&data[0], data.size()*sizeof(float));
+        vertex_buffer->set_format({{Attribute::POSITON_3D, "position"},
+                                   {Attribute::NORMAL, "normal"}});
 
-        Scoped<Buffer<unsigned int>> index_buffer = Renderer::API->GenIndexBuffer(&indices);
+        Scoped<Buffer<unsigned int>> index_buffer = Renderer::API->GenBuffer<uint32_t>(&indices[0], indices.size()*sizeof(uint32_t));
 
-        render_state->set_vertex_buffer(std::move(vertex_buffer));
-        render_state->set_index_buffer(std::move(index_buffer));
+        add_geometry_buffer(std::move(vertex_buffer));
+        set_index_buffer(std::move(index_buffer));
     }
 };
 } // namespace mare

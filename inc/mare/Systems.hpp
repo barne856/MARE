@@ -2,9 +2,8 @@
 #define SYSTEMS
 
 // MARE
-#include "mare/MareUtility.hpp"
+#include "mare/Mare.hpp"
 #include "mare/Entity.hpp"
-#include "mare/Layer.hpp"
 #include "mare/Renderer.hpp"
 
 // Standard Library
@@ -12,7 +11,7 @@
 
 namespace mare
 {
-
+class Layer; // forward declaration
 class IPhysicsSystem : public Component
 {
 public:
@@ -36,7 +35,7 @@ class IRenderSystem : public Component
 {
 public:
     virtual ~IRenderSystem() {}
-    virtual void render(Entity *entity, const Layer *layer, float dt) = 0;
+    virtual void render(Entity *entity, Layer *layer, float dt) = 0;
 };
 template <class T>
 class RenderSystem : public IRenderSystem
@@ -44,11 +43,11 @@ class RenderSystem : public IRenderSystem
     static_assert(std::is_base_of<Entity, T>::value, "Type must be derived from Entity.");
 
 public:
-    virtual void render(Entity *entity, const Layer *layer, float dt) final
+    virtual void render(Entity *entity, Layer *layer, float dt) final
     {
         render(static_cast<T *>(entity), layer, dt);
     }
-    virtual void render(T *derived_entity, const Layer *layer, float dt) = 0;
+    virtual void render(T *derived_entity, Layer *layer, float dt) = 0;
 };
 
 class IControlsSystem : public Component
