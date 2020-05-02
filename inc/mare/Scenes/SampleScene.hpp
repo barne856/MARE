@@ -8,6 +8,8 @@
 #include "mare/Systems.hpp"
 #include "mare/Components/Controls/FlyControls.hpp"
 #include "mare/Entities/SampleTorus.hpp"
+#include "mare/Components/Rendering/ShadowMap.hpp"
+#include "mare/Entities/SampleCube.hpp"
 
 namespace mare
 {
@@ -24,11 +26,13 @@ public:
         push_component<Rigidbody>();
         push_component<FlyControls>();
         push_component<SampleSceneControls>();
+        push_component<ShadowMap>(4);
         set_position(glm::vec3(0.0f, 0.0f, 1.0f));
         face_towards(glm::vec3(0.0f, 0.2f, -1.0f));
 
         // Push entities
         push_entity(Renderer::API->GenScoped<SampleTorus>(100, 200, 0.1f, 0.2f));
+        push_entity(Renderer::API->GenScoped<SampleCube>());
 
         // Push overlays to the layer stack
         push_overlay(Renderer::API->GenScoped<SampleOverlay>());

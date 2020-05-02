@@ -12,17 +12,17 @@ SimpleMesh::~SimpleMesh()
 {
     Renderer::API->destroy_mesh_render_states(this);
 }
-void SimpleMesh::render(Layer *layer, Material *material)
+void SimpleMesh::render(Camera *camera, Material *material)
 {
-    Renderer::API->render_simple_mesh(layer, this, material);
+    Renderer::API->render_simple_mesh(camera, this, material);
 }
-void SimpleMesh::render(Layer *layer, Material *material, glm::mat4 &parent_model)
+void SimpleMesh::render(Camera *camera, Material *material, glm::mat4 &parent_model)
 {
-    Renderer::API->render_simple_mesh(layer, this, material, parent_model);
+    Renderer::API->render_simple_mesh(camera, this, material, parent_model);
 }
-void SimpleMesh::render(Layer *layer, Material *material, glm::mat4 &parent_model, unsigned int instance_count, Buffer<glm::mat4> *models)
+void SimpleMesh::render(Camera *camera, Material *material, glm::mat4 &parent_model, unsigned int instance_count, Buffer<glm::mat4> *models)
 {
-    Renderer::API->render_simple_mesh(layer, this, material, parent_model, instance_count, models);
+    Renderer::API->render_simple_mesh(camera, this, material, parent_model, instance_count, models);
 }
 void SimpleMesh::bind(Material *material)
 {
@@ -81,27 +81,27 @@ void SimpleMesh::lock_buffers()
     }
 }
 
-void CompositeMesh::render(Layer *layer, Material *material)
+void CompositeMesh::render(Camera *camera, Material *material)
 {
     for (auto &mesh : meshes_)
     {
-        mesh->render(layer, material, transform_);
+        mesh->render(camera, material, transform_);
     }
 }
 
-void CompositeMesh::render(Layer *layer, Material *material, glm::mat4 &parent_model)
+void CompositeMesh::render(Camera *camera, Material *material, glm::mat4 &parent_model)
 {
     for (auto &mesh : meshes_)
     {
-        mesh->render(layer, material, parent_model * transform_);
+        mesh->render(camera, material, parent_model * transform_);
     }
 }
 
-void CompositeMesh::render(Layer *layer, Material *material, glm::mat4 &parent_model, unsigned int instance_count, Buffer<glm::mat4> *models)
+void CompositeMesh::render(Camera *camera, Material *material, glm::mat4 &parent_model, unsigned int instance_count, Buffer<glm::mat4> *models)
 {
     for (auto &mesh : meshes_)
     {
-        mesh->render(layer, material, parent_model * transform_, instance_count, models);
+        mesh->render(camera, material, parent_model * transform_, instance_count, models);
     }
 }
 
@@ -148,7 +148,7 @@ void InstancedMesh::clear_instances()
     instance_count_ = 0;
 }
 
-void InstancedMesh::flush_instances(std::vector<glm::mat4> *models, size_t offset)
+void InstancedMesh::flush_instances(std::vector<glm::mat4> *models, uint32_t offset)
 {
     instance_transforms_->flush(&(models->front()), offset, models->size() * sizeof(glm::mat4));
 }
@@ -163,23 +163,23 @@ glm::mat4 InstancedMesh::operator[](unsigned int i) const
     return (*instance_transforms_)[i];
 }
 
-void InstancedMesh::render(Layer *layer, Material *material)
+void InstancedMesh::render(Camera *camera, Material *material)
 {
-    mesh_->render(layer, material, transform_, instance_count_, instance_transforms_.get());
+    mesh_->render(camera, material, transform_, instance_count_, instance_transforms_.get());
 }
 
-void InstancedMesh::render(Layer *layer, Material *material, glm::mat4 &parent_model)
+void InstancedMesh::render(Camera *camera, Material *material, glm::mat4 &parent_model)
 {
-    mesh_->render(layer, material, parent_model * transform_, instance_count_, instance_transforms_.get());
+    mesh_->render(camera, material, parent_model * transform_, instance_count_, instance_transforms_.get());
 }
 
-void InstancedMesh::render(Layer *layer, Material *material, glm::mat4 &parent_model, unsigned int instance_count, Buffer<glm::mat4> *models)
+void InstancedMesh::render(Camera *camera, Material *material, glm::mat4 &parent_model, unsigned int instance_count, Buffer<glm::mat4> *models)
 {
     // rendering an instanced mesh of instanced meshes is a bad idea. It will not reduce draw calls and it will
     // read from the models buffer in a very ineffiecnt way, only render instances of simple meshes or composite meshes consisting only of simple meshes in their mesh trees.
     for (unsigned int i = 0; i < instance_count; i++)
     {
-        mesh_->render(layer, material, (*models)[i]);
+        mesh_->render(camera, material, (*models)[i]);
     }
 }
 

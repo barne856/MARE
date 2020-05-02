@@ -1,5 +1,5 @@
-#ifndef SAMPLETORUS
-#define SAMPLETORUS
+#ifndef SAMPLECUBE
+#define SAMPLECUBE
 
 // MARE
 #include "mare/Meshes/TorusMesh.hpp"
@@ -7,32 +7,33 @@
 #include "mare/Systems.hpp"
 #include "mare/Renderer.hpp"
 #include "mare/Entity.hpp"
+#include "mare/Meshes/CubeMesh.hpp"
 #include "mare/Components/Rendering/ShadowMap.hpp"
 
 namespace mare
 {
 
     // forward declare SampleTorus components
-    class SampleTorusRenderer;
+    class SampleCubeRenderer;
 
-    class SampleTorus : public Entity
+    class SampleCube : public Entity
     {
     public:
-        SampleTorus(unsigned int n_segments, unsigned int n_rings, float inner_radius, float outer_radius)
+        SampleCube()
         {
-            push_asset<TorusMesh>(n_segments, n_rings, inner_radius, outer_radius);
+            push_asset<CubeMesh>(1.0f);
             push_asset<PhongMaterial>();
-            push_component<SampleTorusRenderer>();
+            push_component<SampleCubeRenderer>();
         }
     };
 
-    class SampleTorusRenderer : public RenderSystem<SampleTorus>
+    class SampleCubeRenderer : public RenderSystem<SampleCube>
     {
     public:
-        void render(SampleTorus *sample_torus, Camera *camera, float dt) override
+        void render(SampleCube *sample_cube, Camera *camera, float dt) override
         {
-            auto meshes = sample_torus->get_assets<Mesh>();
-            auto materials = sample_torus->get_assets<Material>();
+            auto meshes = sample_cube->get_assets<Mesh>();
+            auto materials = sample_cube->get_assets<Material>();
             ShadowMap *smc = camera->get_component<ShadowMap>();
             if (smc)
             {
@@ -41,7 +42,7 @@ namespace mare
                 materials[0]->upload_mat4("shadow_matrix", shadow_matrix);
                 materials[0]->upload_texture2D("depth_texture", smc->depth_buffer->depth_texture());
             }
-            meshes[0]->render(camera, materials[0], sample_torus->get_model());
+            meshes[0]->render(camera, materials[0], sample_cube->get_model());
         }
     };
 

@@ -17,7 +17,7 @@ class Asset
 public:
     virtual ~Asset() = 0;
 };
-// for all user created components
+// for all user created systems and components
 class Component : public Asset
 {
 public:

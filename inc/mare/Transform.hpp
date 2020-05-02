@@ -23,6 +23,7 @@ public:
     void set_up_vector(glm::vec3 up);
     void set_forward_vector(glm::vec3 forward);
     void face_towards(glm::vec3 direction);
+    void look_at(glm::vec3 center);
     glm::mat4 get_view() const;
     glm::vec3 get_direction() const;
     glm::vec3 get_up_vector() const;

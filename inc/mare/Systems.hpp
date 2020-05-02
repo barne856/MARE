@@ -11,7 +11,7 @@
 
 namespace mare
 {
-class Layer; // forward declaration
+class Camera; // forward declaration
 class IPhysicsSystem : public Component
 {
 public:
@@ -35,7 +35,7 @@ class IRenderSystem : public Component
 {
 public:
     virtual ~IRenderSystem() {}
-    virtual void render(Entity *entity, Layer *layer, float dt) = 0;
+    virtual void render(Entity *entity, Camera *camera, float dt) = 0;
 };
 template <class T>
 class RenderSystem : public IRenderSystem
@@ -43,11 +43,11 @@ class RenderSystem : public IRenderSystem
     static_assert(std::is_base_of<Entity, T>::value, "Type must be derived from Entity.");
 
 public:
-    virtual void render(Entity *entity, Layer *layer, float dt) final
+    virtual void render(Entity *entity, Camera *camera, float dt) final
     {
-        render(static_cast<T *>(entity), layer, dt);
+        render(static_cast<T *>(entity), camera, dt);
     }
-    virtual void render(T *derived_entity, Layer *layer, float dt) = 0;
+    virtual void render(T *derived_entity, Camera *camera, float dt) = 0;
 };
 
 class IControlsSystem : public Component

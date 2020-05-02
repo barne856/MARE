@@ -63,11 +63,11 @@ public:
 class SliderUIRenderer : public RenderSystem<SliderUI>
 {
 public:
-    void render(SliderUI *slider_ui, Layer *layer, float dt) override
+    void render(SliderUI *slider_ui, Camera *camera, float dt) override
     {
         slider_ui->solid_material->bind();
         slider_ui->solid_material->render();
-        slider_ui->slider_mesh->render(layer, slider_ui->solid_material.get(), slider_ui->get_model());
+        slider_ui->slider_mesh->render(camera, slider_ui->solid_material.get(), slider_ui->get_model());
     }
 };
 

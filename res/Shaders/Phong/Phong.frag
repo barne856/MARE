@@ -55,7 +55,7 @@ void main(void)
     
     //vec3 ambient = (material.ambient*light.ambient).rgb;
     float a = dot(n, l) * 0.5 + 0.5;
-    vec3 ambient = texture(tex, vs_tex_coord).rgb/2.0 + mix(vec3(0.1, 0.1, 0.1), vec3(0.75, 0.75, 0.75), a);
+    vec3 ambient = texture(tex, vs_tex_coord).rgb/4.0 + mix(vec3(0.1, 0.1, 0.1), vec3(0.75, 0.75, 0.75), a);
     //vec3 ambient = texture(tex, vs_tex_coord).rgb/4.0;
     float diffuse = max(0.0, dot(n, l));
     float specular = max(0.0, dot(n, half_vector));

@@ -20,6 +20,7 @@ namespace mare
 // Forward Declarations
 class SimpleMesh;
 class Layer;
+class Camera;
 class Scene;
 
 // The available cursors for the application to use
@@ -308,6 +309,7 @@ public:
     virtual void enable_blending(bool enable) = 0;
     virtual glm::vec3 raycast(Layer *layer) = 0;
     virtual glm::vec3 raycast(Layer *layer, glm::ivec2 screen_coords) = 0;
+    virtual void set_framebuffer(Framebuffer* framebuffer) = 0;
 
     // Scenes
     static void load_scene(Scene *scene);
@@ -337,9 +339,9 @@ public:
     virtual Scoped<Shader> GenShader(const char *directory) = 0;
 
     // Rendering Simple Meshes with no Composite or Instanced Meshes (Composite and Instanced Meshes are rendered by themselves)
-    virtual void render_simple_mesh(Layer *layer, SimpleMesh *mesh, Material *material) = 0;
-    virtual void render_simple_mesh(Layer *layer, SimpleMesh *mesh, Material *material, glm::mat4 &parent_model) = 0;
-    virtual void render_simple_mesh(Layer *layer, SimpleMesh *mesh, Material *material, glm::mat4 &parent_model, unsigned int instance_count, Buffer<glm::mat4> *models) = 0;
+    virtual void render_simple_mesh(Camera *camera, SimpleMesh *mesh, Material *material) = 0;
+    virtual void render_simple_mesh(Camera *camera, SimpleMesh *mesh, Material *material, glm::mat4 &parent_model) = 0;
+    virtual void render_simple_mesh(Camera *camera, SimpleMesh *mesh, Material *material, glm::mat4 &parent_model, unsigned int instance_count, Buffer<glm::mat4> *models) = 0;
     virtual void bind_mesh_render_state(SimpleMesh* mesh, Material* material) = 0;
     virtual void destroy_mesh_render_states(SimpleMesh* mesh) = 0;
     virtual void push_mesh_geometry_buffer(SimpleMesh* mesh, Scoped<Buffer<float>> geometry_buffer) = 0;

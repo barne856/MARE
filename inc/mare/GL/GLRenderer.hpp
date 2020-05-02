@@ -29,6 +29,7 @@ public:
     void enable_blending(bool enable) override;
     glm::vec3 raycast(Layer *layer) override;
     glm::vec3 raycast(Layer *layer, glm::ivec2 screen_coords) override;
+    virtual void set_framebuffer(Framebuffer* framebuffer) override;
 
     // Textures
     virtual Scoped<Texture2DBuffer> GenTexture2DBuffer(const char *image_filepath) override;
@@ -40,9 +41,9 @@ public:
     virtual Scoped<Shader> GenShader(const char *directory) override;
 
     // Rendering Simple Meshes with no Composite or Instanced Meshes (Composite and Instanced Meshes are rendered by themselves)
-    virtual void render_simple_mesh(Layer *layer, SimpleMesh *mesh, Material *material) override;
-    virtual void render_simple_mesh(Layer *layer, SimpleMesh *mesh, Material *material, glm::mat4 &parent_model) override;
-    virtual void render_simple_mesh(Layer *layer, SimpleMesh *mesh, Material *material, glm::mat4 &parent_model, unsigned int instance_count, Buffer<glm::mat4> *models) override;
+    virtual void render_simple_mesh(Camera *camera, SimpleMesh *mesh, Material *material) override;
+    virtual void render_simple_mesh(Camera *camera, SimpleMesh *mesh, Material *material, glm::mat4 &parent_model) override;
+    virtual void render_simple_mesh(Camera *camera, SimpleMesh *mesh, Material *material, glm::mat4 &parent_model, unsigned int instance_count, Buffer<glm::mat4> *models) override;
     virtual void bind_mesh_render_state(SimpleMesh *mesh, Material *material) override;
     virtual void destroy_mesh_render_states(SimpleMesh *mesh) override;
     virtual void push_mesh_geometry_buffer(SimpleMesh *mesh, Scoped<Buffer<float>> geometry_buffer) override;

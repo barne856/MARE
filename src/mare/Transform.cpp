@@ -46,6 +46,10 @@ void Transform::face_towards(glm::vec3 direction)
     float angle = acosf(glm::dot(forward_vector_, direction) / (glm::length(forward_vector_) * glm::length(direction)));
     set_rotation(axis, angle);
 }
+void Transform::look_at(glm::vec3 center)
+{
+    face_towards(center - translation_);
+}
 glm::vec3 Transform::get_direction() const
 {
     return glm::mat3(rotation_) * forward_vector_;

@@ -14,17 +14,18 @@
 
 // CLEANUP
 // add exception handling
-// Vsync and cursor hidden should not be in input but should be their own functions
+// compile on linux with gcc
 // Document the API
 
 // TODO version 2:
 // Beef up the Buffer, Texture, and Framebuffer classes to have all of the OpenGL features
 // Beef-up Renderer blending to have all the opengl features like custum blend functions
-// Add teapot primative mesh
+// Bezier curves and spline curves / surfaces
+// Add teapot primative mesh with bezier curves and surfaces
 // Cylinder, Cone, and Tube meshes should have an option for flat shading normals or smooth shading normals
 // Add Text Thickness to CharMesh
 // Font Loader: bitmap fonts, maybe other formats too like vector fonts with ability to extrude text?
-// Bezier curves and spline curves / surfaces
+// Text billboards
 // raypicking entities
 // add more widgets (buttons, switches, checkboxes, color picker, text entry, message box)
 // Add more materials (Basic, Depth(Material for a scene in the scene's render component), Phong, Toon, Shadow material): normal maps and other physically based rendering techniques

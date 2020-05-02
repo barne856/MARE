@@ -32,7 +32,7 @@ class PhongMaterial : public virtual Material
 public:
     PhongMaterial() : Material("./res/Shaders/Phong")
     {
-        texture = Renderer::API->GenTexture2DBuffer("./res/Textures/weave_diffuse.jpg");
+        texture = Renderer::API->GenTexture2DBuffer("./res/Textures/checkerboard.png");
         phong_properties props = {glm::vec4(0.0f, 0.0f, 0.0f, 1.0f),
                                   glm::vec4(0.1f, 0.1f, 0.5f, 1.0f),
                                   glm::vec4(1.0f),
