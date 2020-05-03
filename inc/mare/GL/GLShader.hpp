@@ -35,6 +35,7 @@ namespace mare
         virtual void upload_uniform(IBuffer *uniform, bool suppress_warnings = false) override;
         virtual void upload_storage(IBuffer *storage, bool suppress_warnings = false) override;
         virtual void upload_texture2D(const char *name, Texture2DBuffer *texture2D, bool suppress_warnings = false) override;
+        virtual void upload_image2D(const char *name, Texture2DBuffer *texture2D, bool suppress_warnings = false) override;
 
     private:
         std::vector<GLuint> shaders_;
@@ -48,6 +49,7 @@ namespace mare
         std::unordered_map<std::string, GLuint> uniform_binding_cache_;
         std::unordered_map<std::string, GLuint> storage_binding_cache_;
         std::unordered_map<std::string, GLuint> texture_binding_cache_;
+        std::unordered_map<std::string, GLuint> image_binding_cache_;
     };
 } // namespace mare
 

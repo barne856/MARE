@@ -5,6 +5,7 @@
 #include "mare/Renderer.hpp"
 #include "mare/Scene.hpp"
 #include "mare/Entities/TexturedQuad.hpp"
+#include "mare/Shader.hpp"
 
 namespace mare
 {
@@ -17,7 +18,21 @@ public:
     ComputeTextureScene() : Scene(ProjectionType::ORTHOGRAPHIC)
     {
         push_component<ComputeTextureSceneControls>();
-        push_entity(Renderer::API->GenScoped<TexturedQuad>("./res/Textures/checkerboard.png"));
+        push_entity<TexturedQuad>();
+        auto tex_quad = get_entity<TexturedQuad>();
+        
+        // create empty texture
+        texture = Renderer::API->GenTexture2DBuffer(TextureType::RGBA32F, 16*32, 16*32);
+        //texture = Renderer::API->GenTexture2DBuffer("./res/Textures/checkerboard.png");
+        // upload texture to comp shader
+        sample_compute = Renderer::API->GenRef<ComputeProgram>("./res/Shaders/SampleCompute");
+        sample_compute->bind();
+        sample_compute->upload_image2D("data", texture.get());
+        // run compute program
+        sample_compute->compute(32, 32, 1);
+        // upload texture to texturedQuad
+        tex_quad->set_texture(texture);
+        tex_quad->set_scale(glm::vec3(2.0f*aspect(), 2.0f, 1.0f));
     }
 
     void on_enter() override
@@ -45,6 +60,8 @@ public:
 
 private:
     glm::vec4 bg_color{0.9f, 0.9f, 0.9f, 1.0f};
+    Referenced<Texture2DBuffer> texture;
+    Referenced<ComputeProgram> sample_compute;
 };
 
 class ComputeTextureSceneControls : public ControlsSystem<ComputeTextureScene>

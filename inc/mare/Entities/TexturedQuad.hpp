@@ -18,6 +18,12 @@ namespace mare
     class TexturedQuad : public Entity
     {
     public:
+        TexturedQuad()
+        {
+            push_asset<QuadrangleMesh>();
+            push_asset<BasicTextureMaterial>();
+            push_component<TexturedQuadRenderer>();
+        }
         TexturedQuad(const char *filepath)
         {
             push_asset<QuadrangleMesh>();

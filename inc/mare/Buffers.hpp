@@ -192,7 +192,13 @@ namespace mare
     // Buffers for storage of a texture sampler in a glsl shader
     enum class TextureType
     {
+        R8,
+        RG8,
+        RGB8,
         RGBA8,
+        R32F,
+        RG32F,
+        RGB32F,
         RGBA32F,
         DEPTH
     };
@@ -203,6 +209,7 @@ namespace mare
         Texture2DBuffer(TextureType type, int width, int height) : type_(type), width_(width), height_(height) {}
         virtual ~Texture2DBuffer() = 0;
         inline uint32_t name() const { return texture_ID_; }
+        inline TextureType type() const { return type_; }
 
     protected:
         uint32_t texture_ID_;
@@ -220,8 +227,8 @@ namespace mare
         Framebuffer(int width, int height) {}
         virtual ~Framebuffer() = 0;
         inline uint32_t name() const { return framebuffer_ID_; }
-        inline Texture2DBuffer* depth_texture() { return depth_texture_.get(); }
-        inline Texture2DBuffer* color_texture() { return color_texture_.get(); }
+        inline Texture2DBuffer *depth_texture() { return depth_texture_.get(); }
+        inline Texture2DBuffer *color_texture() { return color_texture_.get(); }
 
     protected:
         uint32_t framebuffer_ID_;

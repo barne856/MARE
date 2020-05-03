@@ -1,6 +1,7 @@
 #include "mare/Shader.hpp"
 #include "mare/Entities/Camera.hpp"
 #include "mare/Meshes.hpp"
+#include "mare/Renderer.hpp"
 
 namespace mare
 {
@@ -18,6 +19,12 @@ namespace mare
         {
             shader_ = shader_cache_[std::string(directory)];
         }
+    }
+
+    void ComputeProgram::compute(uint32_t x, uint32_t y, uint32_t z)
+    {
+        compute();
+        Renderer::API->dispatch_compute(x, y, z);
     }
 
     void Material::upload_camera(Camera *camera, bool suppress_warnings)

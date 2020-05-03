@@ -1,16 +1,11 @@
 // TODO version 1:
 
 // PHYSICS
-// Make ShaderProgram class base class of GraphicsProgram and ComputeProgram
-// Make Material base class of GraphicsProgram
-// Move shader cahces to material and only compile each shader once an reuse across materials
-// Compute Shaders (ComputeProgram class)
 // Particle system
 // Cloth physics
 // MetaComponent for collisions
 
 // CLEANUP
-// make push entity a tempalte function for scenes
 // add exception handling
 // compile on linux with gcc
 // Document the API
@@ -34,6 +29,7 @@
 #include "mare/GL/GLRenderer.hpp"
 #include "mare/Scenes/SampleScene.hpp"
 #include "mare/Scenes/ComputeTextureScene.hpp"
+#include "mare/Scenes/SampleScene.hpp"
 
 class Sandbox : public mare::GLRenderer
 {
@@ -53,6 +49,7 @@ public:
     {
         using namespace mare;
         auto scene_1 = GenNamedRef<ComputeTextureScene>("Scene 1");
+        //auto scene_1 = GenNamedRef<SampleScene>("Scene 1");
         load_scene("Scene 1");
     }
     void shutdown() override

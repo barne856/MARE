@@ -1,6 +1,7 @@
 // MARE GL
 #include "mare/GL/GLRenderer.hpp"
 #include "mare/GL/GLShader.hpp"
+#include "mare/GL/GLBuffers.hpp"
 
 // MARE
 #include "mare/Meshes.hpp"
@@ -354,6 +355,10 @@ namespace mare
     {
         return std::make_unique<GLTexture2DBuffer>(image_filepath);
     }
+    Scoped<Texture2DBuffer> GLRenderer::GenTexture2DBuffer(TextureType type, int width, int height)
+    {
+        return std::make_unique<GLTexture2DBuffer>(type, width, height);
+    }
 
     // Framebuffers
     Scoped<Framebuffer> GLRenderer::GenFramebuffer(int width, int height)
@@ -480,6 +485,12 @@ namespace mare
         mesh->index_render_count = index_buffer->count();
         mesh->index_buffer = std::move(index_buffer);
         mesh->invalidate_render_state_cache();
+    }
+
+    // Compute Programs
+    void GLRenderer::dispatch_compute(uint32_t x, uint32_t y, uint32_t z)
+    {
+        glDispatchCompute(x, y, z);
     }
 
     // Debug functions

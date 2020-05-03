@@ -31,11 +31,11 @@ public:
         face_towards(glm::vec3(0.0f, 0.2f, -1.0f));
 
         // Push entities
-        push_entity(Renderer::API->GenScoped<SampleTorus>(100, 200, 0.1f, 0.2f));
-        push_entity(Renderer::API->GenScoped<SampleCube>());
+        push_entity<SampleTorus>(100, 200, 0.1f, 0.2f);
+        push_entity<SampleCube>();
 
         // Push overlays to the layer stack
-        push_overlay(Renderer::API->GenScoped<SampleOverlay>());
+        push_overlay<SampleOverlay>();
     }
 
     void on_enter() override
@@ -55,8 +55,8 @@ public:
         Renderer::API->clear_depth_buffer();
 
         // get SliderUI value and scale torus
-        float v = std::get<float>(get_overlay(0)->get_widget(0)->get_value());
-        get_entity(0)->set_scale(glm::vec3(2.0f * v + 0.05f));
+        float v = std::get<float>(get_overlay<SampleOverlay>()->get_widget<SliderUI>()->get_value());
+        get_entity<SampleTorus>()->set_scale(glm::vec3(2.0f * v + 0.05f));
     }
 
     void on_exit() override
@@ -102,7 +102,7 @@ public:
             Renderer::API->get_info().focus = scene;
             if (input.LEFT_CONTROL_PRESSED)
             {
-                scene->get_entity(0)->set_position(Renderer::API->raycast(scene));
+                scene->get_entity<SampleTorus>()->set_position(Renderer::API->raycast(scene));
             }
             return true;
         }

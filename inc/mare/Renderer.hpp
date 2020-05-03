@@ -330,6 +330,7 @@ public:
 
     // Textures
     virtual Scoped<Texture2DBuffer> GenTexture2DBuffer(const char *image_filepath) = 0;
+    virtual Scoped<Texture2DBuffer> GenTexture2DBuffer(TextureType type, int width, int height) = 0;
 
     // Framebuffers
     virtual Scoped<Framebuffer> GenFramebuffer(int width, int height) = 0;
@@ -345,6 +346,9 @@ public:
     virtual void destroy_mesh_render_states(SimpleMesh* mesh) = 0;
     virtual void push_mesh_geometry_buffer(SimpleMesh* mesh, Scoped<Buffer<float>> geometry_buffer) = 0;
     virtual void set_mesh_index_buffer(SimpleMesh* mesh, Scoped<Buffer<uint32_t>> index_buffer) = 0;
+
+    // Compute Programs
+    virtual void dispatch_compute(uint32_t x, uint32_t y, uint32_t z) = 0;
 
     // Create scoped or referenced assets
     template <typename T, typename... Args>

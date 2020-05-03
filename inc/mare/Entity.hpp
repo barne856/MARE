@@ -100,7 +100,7 @@ public:
         }
         return assets;
     }
-        // get first assets of a type in the stack
+    // get first assets of a type in the stack
     template <typename T>
     T * get_asset()
     {
