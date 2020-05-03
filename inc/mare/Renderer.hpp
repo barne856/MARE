@@ -12,7 +12,6 @@
 #include "mare/Mare.hpp"
 #include "mare/Buffers.hpp"
 #include "mare/GL/GLBuffers.hpp"
-#include "mare/Material.hpp"
 #include "mare/Shader.hpp"
 
 namespace mare
@@ -307,8 +306,8 @@ public:
     virtual void enable_depth_testing(bool enable) = 0;
     virtual void enable_face_culling(bool enable) = 0;
     virtual void enable_blending(bool enable) = 0;
-    virtual glm::vec3 raycast(Layer *layer) = 0;
-    virtual glm::vec3 raycast(Layer *layer, glm::ivec2 screen_coords) = 0;
+    virtual glm::vec3 raycast(Camera *camera) = 0;
+    virtual glm::vec3 raycast(Camera *camera, glm::ivec2 screen_coords) = 0;
     virtual void set_framebuffer(Framebuffer* framebuffer) = 0;
 
     // Scenes

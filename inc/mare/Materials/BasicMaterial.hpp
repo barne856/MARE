@@ -5,7 +5,7 @@
 #include "glm.hpp"
 
 // MARE
-#include "mare/Material.hpp"
+#include "mare/Shader.hpp"
 
 namespace mare
 {

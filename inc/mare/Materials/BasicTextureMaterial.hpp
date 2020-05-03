@@ -5,7 +5,7 @@
 #include "glm.hpp"
 
 // MARE
-#include "mare/Material.hpp"
+#include "mare/Shader.hpp"
 #include "mare/Mare.hpp"
 
 namespace mare
@@ -17,9 +17,14 @@ public:
     virtual ~BasicTextureMaterial() {}
     void render() override
     {
-        upload_texture2D("tex", texture);
+        upload_texture2D("tex", texture_.get());
     }
-    Texture2DBuffer* texture;
+    void set_texture(Referenced<Texture2DBuffer> texture)
+    {
+        texture_ = texture;
+    }
+private:
+    Referenced<Texture2DBuffer> texture_;
 };
 } // namespace mare
 

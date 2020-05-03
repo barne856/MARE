@@ -1,18 +1,16 @@
 // TODO version 1:
 
-// SHADOWS & LIGHTS
-// Render in Stages: Compute Shader -> Material -> Shadows and Lights
-// MetaRenderSystem that holds shadowmap textures, framebuffers, and light buffers in a Scene (MetaSystems can access every entity in the scene)
-// MetaRenderSystem operates on every entity with corresponding component (eg. MetaLightComponent holds buffer of types of lights, torusRenderer has a lightComponent that sources lights from the metaComponent, Requires material that reacts to lights) 
-//                                                                              (eg. MetaShadowComponent holds shadowbuffer, torusRenderer has a shadowComponent(Material) that will render into the depthbuffer of the metaComponent) 
-
 // PHYSICS
-// Compute Shaders
-// Particle system with transform feedback
-// Cloth physics with transform feedback
+// Make ShaderProgram class base class of GraphicsProgram and ComputeProgram
+// Make Material base class of GraphicsProgram
+// Move shader cahces to material and only compile each shader once an reuse across materials
+// Compute Shaders (ComputeProgram class)
+// Particle system
+// Cloth physics
 // MetaComponent for collisions
 
 // CLEANUP
+// make push entity a tempalte function for scenes
 // add exception handling
 // compile on linux with gcc
 // Document the API
@@ -28,13 +26,14 @@
 // Text billboards
 // raypicking entities
 // add more widgets (buttons, switches, checkboxes, color picker, text entry, message box)
-// Add more materials (Basic, Depth(Material for a scene in the scene's render component), Phong, Toon, Shadow material): normal maps and other physically based rendering techniques
+// Add more materials (BasicColor, BasicTexture, Depth(Material for a scene in the scene's render component), Phong, Toon, Shadow material): normal maps and other physically based rendering techniques
 // loaders for models?
 // loaders sound? sound implimentation
 // loaders for animations? animation implimentation
 
 #include "mare/GL/GLRenderer.hpp"
 #include "mare/Scenes/SampleScene.hpp"
+#include "mare/Scenes/ComputeTextureScene.hpp"
 
 class Sandbox : public mare::GLRenderer
 {
@@ -53,7 +52,7 @@ public:
     void startup() override
     {
         using namespace mare;
-        auto scene_1 = GenNamedRef<SampleScene>("Scene 1");
+        auto scene_1 = GenNamedRef<ComputeTextureScene>("Scene 1");
         load_scene("Scene 1");
     }
     void shutdown() override

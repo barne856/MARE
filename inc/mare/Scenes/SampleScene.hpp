@@ -26,7 +26,7 @@ public:
         push_component<Rigidbody>();
         push_component<FlyControls>();
         push_component<SampleSceneControls>();
-        push_component<ShadowMap>(4);
+        push_component<ShadowMap>(8);
         set_position(glm::vec3(0.0f, 0.0f, 1.0f));
         face_towards(glm::vec3(0.0f, 0.2f, -1.0f));
 

@@ -22,11 +22,11 @@ set(SRC
 ./src/app/main.cpp
 ./src/mare/Buffers.cpp
 ./src/mare/Mare.cpp
-./src/mare/Material.cpp
 ./src/mare/Meshes.cpp
 ./src/mare/Overlay.cpp
 ./src/mare/Renderer.cpp
 ./src/mare/Scene.cpp
+./src/mare/Shader.cpp
 ./src/mare/Transform.cpp
 ./src/mare/Widget.cpp
 ./src/mare/GL/GLBuffers.cpp

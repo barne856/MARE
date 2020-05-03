@@ -37,7 +37,7 @@ layout(binding = 0) uniform sampler2D tex;
 uniform float constant_attenuation = 1;
 uniform float linear_attenuation = 1;
 uniform float quadratic_attenuation = 1;
-float strength = 10.0;
+float strength = 1.0;
 
 layout(binding = 1) uniform sampler2DShadow depth_texture;
 in vec4 shadow_coord;
@@ -70,7 +70,7 @@ void main(void)
     float f = textureProj(depth_texture, shadow_coord);
     vec3 scattered_light = max(f, 0.5)*ambient + f*vec3(light.ambient) * diffuse * attenuation;
     vec3 reflected_light = vec3(light.ambient) * specular * attenuation;
-    //vec3 rgb = min(ambient * scattered_light + reflected_light, vec3(1.0));
-    vec3 rgb = min(ambient * scattered_light, vec3(1.0));
+    vec3 rgb = min(ambient * scattered_light + reflected_light, vec3(1.0));
+    //vec3 rgb = min(ambient * scattered_light, vec3(1.0));
     color = vec4(rgb, 1.0);
 }

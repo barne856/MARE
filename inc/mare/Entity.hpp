@@ -100,6 +100,19 @@ public:
         }
         return assets;
     }
+        // get first assets of a type in the stack
+    template <typename T>
+    T * get_asset()
+    {
+        for (auto asset_it = asset_begin(); asset_it != asset_end(); asset_it++)
+        {
+            if (auto asset = std::dynamic_pointer_cast<T>(*asset_it))
+            {
+                return asset.get();
+            }
+        }
+        return nullptr;
+    }
 
     std::vector<Referenced<Component>>::const_iterator component_begin() const { return components_.begin(); }
     std::vector<Referenced<Component>>::const_iterator component_end() const { return components_.end(); }

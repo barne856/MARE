@@ -309,9 +309,9 @@ namespace mare
         }
     }
 
-    glm::vec3 GLRenderer::raycast(Layer *layer)
+    glm::vec3 GLRenderer::raycast(Camera *camera)
     {
-        glm::mat4 inversed_camera = glm::inverse(layer->projection() * layer->view());
+        glm::mat4 inversed_camera = glm::inverse(camera->projection() * camera->view());
         float x = 2.0f * (float)input.mouse_pos.x / (float)(info.window_width) - 1.0f;
         float y = -2.0f * (float)input.mouse_pos.y / (float)(info.window_height) + 1.0f;
         float z = 0.0f;
@@ -323,9 +323,9 @@ namespace mare
         return glm::vec3(world_vector);
     }
 
-    glm::vec3 GLRenderer::raycast(Layer *layer, glm::ivec2 screen_coords)
+    glm::vec3 GLRenderer::raycast(Camera *camera, glm::ivec2 screen_coords)
     {
-        glm::mat4 inversed_camera = glm::inverse(layer->projection() * layer->view());
+        glm::mat4 inversed_camera = glm::inverse(camera->projection() * camera->view());
         float x = 2.0f * (float)screen_coords.x / (float)(info.window_width) - 1.0f;
         float y = -2.0f * (float)screen_coords.y / (float)(info.window_height) + 1.0f;
         float z = 0.0f;
@@ -373,8 +373,7 @@ namespace mare
         material->bind();
         mesh->bind(material);
         material->upload_camera(camera);
-        material->upload_mat4("model", mesh->get_model());
-        material->upload_mat3("normal_matrix", glm::mat3(mesh->get_normal()));
+        material->upload_mesh(mesh, true);
         material->render();
         if (mesh->is_indexed())
         {
@@ -393,8 +392,7 @@ namespace mare
         material->bind();
         mesh->bind(material);
         material->upload_camera(camera);
-        material->upload_mat4("model", parent_model * mesh->get_model());
-        material->upload_mat3("normal_matrix", glm::transpose(glm::inverse(glm::mat3(parent_model * (mesh->get_model())))));
+        material->upload_mesh(mesh, parent_model, true);
         material->render();
         if (mesh->is_indexed())
         {
@@ -413,9 +411,7 @@ namespace mare
         material->bind();
         mesh->bind(material);
         material->upload_camera(camera);
-        material->upload_mat4("model", parent_model * mesh->get_model());
-        material->upload_mat3("normal_matrix", glm::transpose(glm::inverse(glm::mat3(parent_model * (mesh->get_model())))));
-        material->upload_storage(models);
+        material->upload_mesh(mesh, parent_model, models, true);
         material->render();
         if (mesh->is_indexed())
         {

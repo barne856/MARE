@@ -27,8 +27,8 @@ public:
     void enable_depth_testing(bool enable) override;
     void enable_face_culling(bool enable) override;
     void enable_blending(bool enable) override;
-    glm::vec3 raycast(Layer *layer) override;
-    glm::vec3 raycast(Layer *layer, glm::ivec2 screen_coords) override;
+    glm::vec3 raycast(Camera *camera) override;
+    glm::vec3 raycast(Camera *camera, glm::ivec2 screen_coords) override;
     virtual void set_framebuffer(Framebuffer* framebuffer) override;
 
     // Textures

@@ -3,7 +3,7 @@
 
 // MARE
 #include "mare/Mare.hpp"
-#include "mare/Material.hpp"
+#include "mare/Shader.hpp"
 #include "mare/Buffers.hpp"
 #include "mare/Entities/Camera.hpp"
 #include "mare/Transform.hpp"

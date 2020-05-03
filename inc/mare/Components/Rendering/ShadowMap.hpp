@@ -22,13 +22,13 @@ namespace mare
     class ShadowMap : public RenderSystem<Scene>
     {
     public:
-        ShadowMap(int oversample = 1) :oversample_(oversample)
+        ShadowMap(int oversample = 1) : oversample_(oversample)
         {
             scale_bias_matrix = glm::mat4(glm::vec4(0.5f, 0.0f, 0.0f, 0.0f),
                                           glm::vec4(0.0f, 0.5f, 0.0f, 0.0f),
                                           glm::vec4(0.0f, 0.0f, 0.5f, 0.0f),
                                           glm::vec4(0.5f, 0.5f, 0.5f, 1.0f));
-            depth_buffer = Renderer::API->GenFramebuffer(oversample_*Renderer::get_info().window_width, oversample_*Renderer::get_info().window_height);
+            depth_buffer = Renderer::API->GenFramebuffer(oversample_ * Renderer::get_info().window_width, oversample_ * Renderer::get_info().window_height);
             light_view = Renderer::API->GenScoped<Camera>(ProjectionType::PERSPECTIVE);
             material = Renderer::API->GenScoped<BasicMaterial>();
             light_pos = glm::vec3(5.0f, 0.0f, 5.0f);
@@ -39,6 +39,7 @@ namespace mare
         ~ShadowMap() {}
         void render(Scene *scene, Camera *camera, float dt) override
         {
+
             // Render all meshes from all entities in the scene from the perspective of the light into the depth buffer
             Renderer::API->set_framebuffer(depth_buffer.get());
 
@@ -48,9 +49,9 @@ namespace mare
             // Clear depth buffer
             Renderer::API->clear_depth_buffer();
 
-            glViewport(0, 0, oversample_*Renderer::API->get_info().window_width, oversample_*Renderer::API->get_info().window_height);
+            glViewport(0, 0, oversample_ * Renderer::API->get_info().window_width, oversample_ * Renderer::API->get_info().window_height);
             glEnable(GL_POLYGON_OFFSET_FILL);
-            glPolygonOffset(2.0f, 4.0f);
+            glPolygonOffset(4.0f, 4.0f);
             for (auto entity_it = scene->entity_begin(); entity_it != scene->entity_end(); entity_it++)
             {
                 Entity *entity = entity_it->get();
@@ -73,8 +74,9 @@ namespace mare
         Scoped<BasicMaterial> material;
         glm::vec3 light_pos;
         glm::vec3 light_center;
-        private:
-            int oversample_;
+
+    private:
+        int oversample_;
     };
 } // namespace mare
 
