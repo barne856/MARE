@@ -183,4 +183,15 @@ void InstancedMesh::render(Camera *camera, Material *material, glm::mat4 &parent
     }
 }
 
+Buffer<glm::mat4>* InstancedMesh::get_instance_models()
+{
+    return instance_transforms_.get();
+}
+
+Scoped<Buffer<glm::mat4>> InstancedMesh::swap_instance_models(Scoped<Buffer<glm::mat4>> models)
+{
+    models.swap(instance_transforms_);
+    return models;
+}
+
 } // namespace mare

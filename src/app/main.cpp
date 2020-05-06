@@ -1,7 +1,8 @@
 // TODO version 1:
 
+// add gen component/asset to replace push and make push add existing component to stack
+
 // PHYSICS
-// Particle system
 // Cloth physics
 // MetaComponent for collisions
 
@@ -11,6 +12,7 @@
 // Document the API
 
 // TODO version 2:
+// Automated ShadowMap camera view creation
 // Beef up the Buffer, Texture, and Framebuffer classes to have all of the OpenGL features
 // Beef-up Renderer blending to have all the opengl features like custum blend functions
 // Bezier curves and spline curves / surfaces
@@ -22,6 +24,7 @@
 // raypicking entities
 // add more widgets (buttons, switches, checkboxes, color picker, text entry, message box)
 // Add more materials (BasicColor, BasicTexture, Depth(Material for a scene in the scene's render component), Phong, Toon, Shadow material): normal maps and other physically based rendering techniques
+// metaballs (marching cubes? quads with inverse distance shading?)
 // loaders for models?
 // loaders sound? sound implimentation
 // loaders for animations? animation implimentation
@@ -29,6 +32,7 @@
 #include "mare/GL/GLRenderer.hpp"
 #include "mare/Scenes/SampleScene.hpp"
 #include "mare/Scenes/ComputeTextureScene.hpp"
+#include "mare/Scenes/SampleParticleScene.hpp"
 #include "mare/Scenes/SampleScene.hpp"
 
 class Sandbox : public mare::GLRenderer
@@ -48,7 +52,8 @@ public:
     void startup() override
     {
         using namespace mare;
-        auto scene_1 = GenNamedRef<ComputeTextureScene>("Scene 1");
+        auto scene_1 = GenNamedRef<SampleParticleScene>("Scene 1");
+        //auto scene_1 = GenNamedRef<ComputeTextureScene>("Scene 1");
         //auto scene_1 = GenNamedRef<SampleScene>("Scene 1");
         load_scene("Scene 1");
     }

@@ -50,8 +50,8 @@ public:
     void render() override
     {
         upload_texture2D("tex", texture.get());
-        upload_uniform(properties.get());
-        upload_uniform(light.get());
+        upload_uniform("material_properties", properties.get());
+        upload_uniform("light_properties", light.get());
         upload_vec3("light_position", light_position);
     }
     inline glm::vec3 get_light_position() const

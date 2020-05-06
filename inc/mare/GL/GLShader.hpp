@@ -32,8 +32,8 @@ namespace mare
         void upload_vec4(const char *name, glm::vec4 value, bool suppress_warnings = false) override;
         void upload_mat3(const char *name, glm::mat3 value, bool suppress_warnings = false) override;
         void upload_mat4(const char *name, glm::mat4 value, bool suppress_warnings = false) override;
-        virtual void upload_uniform(IBuffer *uniform, bool suppress_warnings = false) override;
-        virtual void upload_storage(IBuffer *storage, bool suppress_warnings = false) override;
+        virtual void upload_uniform(const char *name, IBuffer *uniform, bool suppress_warnings = false) override;
+        virtual void upload_storage(const char *name, IBuffer *storage, bool suppress_warnings = false) override;
         virtual void upload_texture2D(const char *name, Texture2DBuffer *texture2D, bool suppress_warnings = false) override;
         virtual void upload_image2D(const char *name, Texture2DBuffer *texture2D, bool suppress_warnings = false) override;
 

@@ -29,8 +29,8 @@ namespace mare
         virtual void upload_vec4(const char *name, glm::vec4 value, bool suppress_warnings = false) = 0;
         virtual void upload_mat3(const char *name, glm::mat3 value, bool suppress_warnings = false) = 0;
         virtual void upload_mat4(const char *name, glm::mat4 value, bool suppress_warnings = false) = 0;
-        virtual void upload_uniform(IBuffer *uniform, bool suppress_warnings = false) = 0;
-        virtual void upload_storage(IBuffer *storage, bool suppress_warnings = false) = 0;
+        virtual void upload_uniform(const char* name, IBuffer *uniform, bool suppress_warnings = false) = 0;
+        virtual void upload_storage(const char* name, IBuffer *storage, bool suppress_warnings = false) = 0;
         virtual void upload_texture2D(const char *name, Texture2DBuffer *texture2D, bool suppress_warnings = false) = 0;
         virtual void upload_image2D(const char *name, Texture2DBuffer *texture2D, bool suppress_warnings = false) = 0;
 
@@ -51,8 +51,8 @@ namespace mare
         void upload_vec4(const char *name, glm::vec4 value, bool suppress_warnings = false) { shader_->upload_vec4(name, value, suppress_warnings); }
         void upload_mat3(const char *name, glm::mat3 value, bool suppress_warnings = false) { shader_->upload_mat3(name, value, suppress_warnings); }
         void upload_mat4(const char *name, glm::mat4 value, bool suppress_warnings = false) { shader_->upload_mat4(name, value, suppress_warnings); }
-        void upload_uniform(IBuffer *uniform, bool suppress_warnings = false) { shader_->upload_uniform(uniform, suppress_warnings); }
-        void upload_storage(IBuffer *storage, bool suppress_warnings = false) { shader_->upload_storage(storage, suppress_warnings); }
+        void upload_uniform(const char* name, IBuffer *uniform, bool suppress_warnings = false) { shader_->upload_uniform(name, uniform, suppress_warnings); }
+        void upload_storage(const char* name, IBuffer *storage, bool suppress_warnings = false) { shader_->upload_storage(name, storage, suppress_warnings); }
         void upload_texture2D(const char *name, Texture2DBuffer *texture2D, bool suppress_warnings = false) { shader_->upload_texture2D(name, texture2D, suppress_warnings); }
         void upload_image2D(const char *name, Texture2DBuffer *texture2D, bool suppress_warnings = false) { shader_->upload_image2D(name, texture2D, suppress_warnings); }
 
@@ -77,7 +77,7 @@ namespace mare
     public:
         ComputeProgram(const char *directory) : ShaderProgram(directory) {}
         virtual ~ComputeProgram() {}
-        void compute(uint32_t x, uint32_t y, uint32_t z);
+        void dispatch_compute(uint32_t x = 1, uint32_t y = 1, uint32_t z = 1);
         virtual void compute() {}
     };
 

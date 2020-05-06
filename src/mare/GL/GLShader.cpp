@@ -225,9 +225,8 @@ namespace mare
         }
     }
 
-    void GLShader::upload_uniform(IBuffer *uniform, bool suppress_warnings)
+    void GLShader::upload_uniform(const char *name, IBuffer *uniform, bool suppress_warnings)
     {
-        const char *name = uniform->format().attributes()[0].name.c_str();
         if (!resource_cache_.count(name))
         {
             // cache the location
@@ -241,9 +240,8 @@ namespace mare
             std::cerr << "SHADER WARNING: No uniform block '" << name << "' exists in the shader" << std::endl;
         }
     }
-    void GLShader::upload_storage(IBuffer *storage, bool suppress_warnings)
+    void GLShader::upload_storage(const char *name, IBuffer *storage, bool suppress_warnings)
     {
-        const char *name = storage->format().attributes()[0].name.c_str();
         if (!resource_cache_.count(name))
         {
             // cache the location

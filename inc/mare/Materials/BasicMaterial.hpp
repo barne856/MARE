@@ -12,7 +12,7 @@ namespace mare
 class BasicMaterial : public virtual Material
 {
 public:
-    BasicMaterial() : Material("./res/Shaders/Basic"), m_color(glm::vec4(0.0f)) {}
+    BasicMaterial() : Material("./res/Shaders/Basic"), m_color(glm::vec4(1.0f)) {}
     virtual ~BasicMaterial() {}
     void render() override
     {

@@ -29,7 +29,7 @@ public:
         sample_compute->bind();
         sample_compute->upload_image2D("data", texture.get());
         // run compute program
-        sample_compute->compute(32, 32, 1);
+        sample_compute->dispatch_compute(32, 32, 1);
         // upload texture to texturedQuad
         tex_quad->set_texture(texture);
         tex_quad->set_scale(glm::vec3(2.0f*aspect(), 2.0f, 1.0f));

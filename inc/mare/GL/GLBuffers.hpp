@@ -99,7 +99,7 @@ namespace mare
         {
             assert(type_ != BufferType::STATIC);                      // Buffer must not be static
             assert(type_ != BufferType::READ_ONLY);                   // Buffer must not be read only
-            assert(size_in_bytes + offset_index * sizeof(T) > size_); // buffer must have enough space to flush data
+            assert(size_in_bytes + offset_index * sizeof(T) <= size_); // buffer must have enough space to flush data
 
             count_ = std::max(static_cast<uint32_t>(size_in_bytes / sizeof(T)) + offset_index, count_);
             size_t write_offset = sizeof(T) * (offset_index + buffer_index_ * static_cast<uint32_t>(size_in_bytes / sizeof(T)));
@@ -107,17 +107,6 @@ namespace mare
             wait_buffer();
             // write into back buffer
             std::memcpy(static_cast<void *>(&buffer_pointer_[write_offset]), data, size_in_bytes);
-        }
-        void clear(uint32_t offset_index)
-        {
-            if (!format_.stride)
-            {
-                count_ = offset_index;
-            }
-            else
-            {
-                count_ = static_cast<uint32_t>(sizeof(T) / format_.stride) * offset_index;
-            }
         }
         T &operator[](uint32_t i)
         {
@@ -170,6 +159,10 @@ namespace mare
                 }
                 buffer_fence_[this->buffer_index_] = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
             }
+        }
+        void clear(T value)
+        {
+            //glClearNamedBufferData(buffer_ID_, GL_R32F, GL_RED, GL_FLOAT, &value); // <-- determine internal format, format, and type
         }
 
     private:

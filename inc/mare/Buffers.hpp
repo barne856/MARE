@@ -102,7 +102,6 @@ namespace mare
         inline void swap_buffer() { buffer_index_ = (buffer_index_ + 1) % num_buffers_; }
         inline BufferFormat &format() { return format_; }
 
-        virtual void clear(uint32_t offset_index) = 0; // READ_WRITE or WRITE_ONLY - decrease count to offset_index
         virtual void wait_buffer() = 0;                // used to sync rendering when using double or triple buffers
         virtual void lock_buffer() = 0;                // used to sync rendering when using double or triple buffers
     protected:
@@ -185,6 +184,7 @@ namespace mare
         virtual void flush(T *data, uint32_t offset_index, size_t size_in_bytes) = 0; // READ_WRITE or WRITE_ONLY - flush the back buffer with data
         virtual T &operator[](uint32_t i) = 0;                                        // write to back buffer using subscript operator if buffer WRITE_ONLY or READ_WRITE. This makes a copy of the data on the CPU side
         virtual T operator[](uint32_t i) const = 0;                                   // read from to back buffer using subscript operator if buffer READ_ONLY or READ_WRITE
+        virtual void clear(T value) = 0;                                              // clear the buffer to a value
     };
     // --------------------------------------------------------------------------------------------------------
 

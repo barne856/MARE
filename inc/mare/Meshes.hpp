@@ -107,6 +107,8 @@ public:
     void flush_instances(std::vector<glm::mat4> *models, uint32_t offset);
     glm::mat4 &operator[](unsigned int i);
     glm::mat4 operator[](unsigned int i) const;
+    Buffer<glm::mat4>* get_instance_models();
+    Scoped<Buffer<glm::mat4>> swap_instance_models(Scoped<Buffer<glm::mat4>> models);
 
 protected:
     unsigned int instance_count_;

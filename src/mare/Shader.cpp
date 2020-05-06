@@ -21,7 +21,7 @@ namespace mare
         }
     }
 
-    void ComputeProgram::compute(uint32_t x, uint32_t y, uint32_t z)
+    void ComputeProgram::dispatch_compute(uint32_t x, uint32_t y, uint32_t z)
     {
         compute();
         Renderer::API->dispatch_compute(x, y, z);
@@ -50,7 +50,7 @@ namespace mare
     }
     void Material::upload_mesh_instance_matrices(Buffer<glm::mat4> *models, bool suppress_warnings)
     {
-        shader_->upload_storage(models, suppress_warnings);
+        shader_->upload_storage(models->format().attributes()[0].name.c_str(), models, suppress_warnings);
     }
     void Material::upload_mesh(Mesh *mesh, bool suppress_warnings)
     {
