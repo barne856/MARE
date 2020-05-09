@@ -1,6 +1,12 @@
 // TODO version 1:
 // compile on linux with gcc
 // Document the API
+//  Each class should list every property and method with a description and example of usage
+//  Renderer is special case for discussion, and functions in math, util and Mare.hpp are discussed separatly
+//  gen_shader, gen_framebuffer, gen_texture*, gen_buffer
+//  gen_scoped, gen_ref
+//  assets, components, entities, overlays, widgets, scenes
+//  Examples for GLRenderer spec, scene, overlay, entity, widget, mesh, material, component, graphics program, and compute program
 
 // TODO version 2:
 // Automated ShadowMap camera view creation
