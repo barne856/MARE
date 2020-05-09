@@ -10,31 +10,31 @@ SimpleMesh::SimpleMesh()
 }
 SimpleMesh::~SimpleMesh()
 {
-    Renderer::API->destroy_mesh_render_states(this);
+    Renderer::destroy_mesh_render_states(this);
 }
 void SimpleMesh::render(Camera *camera, Material *material)
 {
-    Renderer::API->render_simple_mesh(camera, this, material);
+    Renderer::render_simple_mesh(camera, this, material);
 }
 void SimpleMesh::render(Camera *camera, Material *material, glm::mat4 &parent_model)
 {
-    Renderer::API->render_simple_mesh(camera, this, material, parent_model);
+    Renderer::render_simple_mesh(camera, this, material, parent_model);
 }
 void SimpleMesh::render(Camera *camera, Material *material, glm::mat4 &parent_model, unsigned int instance_count, Buffer<glm::mat4> *models)
 {
-    Renderer::API->render_simple_mesh(camera, this, material, parent_model, instance_count, models);
+    Renderer::render_simple_mesh(camera, this, material, parent_model, instance_count, models);
 }
 void SimpleMesh::bind(Material *material)
 {
-    Renderer::API->bind_mesh_render_state(this, material);
+    Renderer::bind_mesh_render_state(this, material);
 }
 void SimpleMesh::add_geometry_buffer(Scoped<Buffer<float>> geometry_buffer)
 {
-    Renderer::API->push_mesh_geometry_buffer(this, std::move(geometry_buffer));
+    Renderer::push_mesh_geometry_buffer(this, std::move(geometry_buffer));
 }
 void SimpleMesh::set_index_buffer(Scoped<Buffer<uint32_t>> index_buffer)
 {
-    Renderer::API->set_mesh_index_buffer(this, std::move(index_buffer));
+    Renderer::set_mesh_index_buffer(this, std::move(index_buffer));
 }
 size_t SimpleMesh::render_count() const
 {
@@ -49,6 +49,7 @@ size_t SimpleMesh::render_count() const
 }
 void SimpleMesh::invalidate_render_state_cache()
 {
+    Renderer::destroy_mesh_render_states(this);
     render_states.clear();
 }
 bool SimpleMesh::is_indexed() const { return static_cast<bool>(index_buffer); }
@@ -123,8 +124,7 @@ void CompositeMesh::clear()
 InstancedMesh::InstancedMesh(unsigned int max_instances)
     : instance_count_(0), instance_transforms_(nullptr), mesh_(nullptr), max_instances_(max_instances)
 {
-    instance_transforms_ = Renderer::API->GenBuffer<glm::mat4>(nullptr, max_instances * sizeof(glm::mat4), BufferType::READ_WRITE);
-    instance_transforms_->set_format({{Attribute::STORAGE, "model_instances"}});
+    instance_transforms_ = Renderer::gen_buffer<glm::mat4>(nullptr, max_instances * sizeof(glm::mat4), BufferType::READ_WRITE);
 }
 
 void InstancedMesh::set_mesh(Scoped<Mesh> mesh)
@@ -188,10 +188,15 @@ Buffer<glm::mat4>* InstancedMesh::get_instance_models()
     return instance_transforms_.get();
 }
 
-Scoped<Buffer<glm::mat4>> InstancedMesh::swap_instance_models(Scoped<Buffer<glm::mat4>> models)
+Referenced<Buffer<glm::mat4>> InstancedMesh::swap_instance_models(Referenced<Buffer<glm::mat4>> models)
 {
     models.swap(instance_transforms_);
     return models;
+}
+
+void InstancedMesh::set_instance_models(Referenced<Buffer<glm::mat4>> models)
+{
+    instance_transforms_ = models;
 }
 
 } // namespace mare

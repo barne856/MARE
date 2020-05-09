@@ -21,24 +21,8 @@ layout(std430) buffer particle_velocities
     Velocity velocities[];
 };
 
-layout(std430) buffer particle_velocities_out
-{
-    Velocity velocities_out[];
-};
-
 uniform float dt = 0.01;
 uniform float G = 1.0;
-
-vec3 direction(mat4 m1, mat4 m2)
-{
-    // m1 <-- m2
-    return normalize(m1[3].xyz - m2[3].xyz);
-}
-
-float model_dist(mat4 m1, mat4 m2)
-{
-    return length(m1[3].xyz - m2[3].xyz);
-}
 
 shared vec3 force;
 
@@ -66,17 +50,17 @@ void main(void)
     // update position and velocity
     if(gl_LocalInvocationID.x == 1)
     {
-        velocities_out[index].x = velocities[index].x + force.x*dt;
+        velocities[index].x = velocities[index].x + force.x*dt;
         models_out[index][3].x = models[index][3].x + velocities[index].x*dt;
     }
     else if(gl_LocalInvocationID.x == 2)
     {
-        velocities_out[index].y = velocities[index].y + force.y*dt;
+        velocities[index].y = velocities[index].y + force.y*dt;
         models_out[index][3].y = models[index][3].y + velocities[index].y*dt;
     }
     else if(gl_LocalInvocationID.x == 3)
     {
-        velocities_out[index].z = velocities[index].z + force.z*dt;
+        velocities[index].z = velocities[index].z + force.z*dt;
         models_out[index][3].z = models[index][3].z + velocities[index].z*dt;
     }
 }

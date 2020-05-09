@@ -18,40 +18,40 @@ namespace mare
         void start_renderer() final;
 
         // Renderer Commands
-        void set_window_title(const char *title) override;
-        void set_cursor(CURSOR type) override;
-        void clear_color_buffer(glm::vec4 color) override;
-        void clear_depth_buffer() override;
-        void resize_window(int width, int height) override;
-        void wireframe_mode(bool wireframe) override;
-        void enable_depth_testing(bool enable) override;
-        void enable_face_culling(bool enable) override;
-        void enable_blending(bool enable) override;
-        glm::vec3 raycast(Camera *camera) override;
-        glm::vec3 raycast(Camera *camera, glm::ivec2 screen_coords) override;
-        virtual void set_framebuffer(Framebuffer *framebuffer) override;
+        void api_set_window_title(const char *title) override;
+        void api_set_cursor(CURSOR type) override;
+        void api_clear_color_buffer(glm::vec4 color) override;
+        void api_clear_depth_buffer() override;
+        void api_resize_window(int width, int height) override;
+        void api_wireframe_mode(bool wireframe) override;
+        void api_enable_depth_testing(bool enable) override;
+        void api_enable_face_culling(bool enable) override;
+        void api_enable_blending(bool enable) override;
+        glm::vec3 api_raycast(Camera *camera) override;
+        glm::vec3 api_raycast(Camera *camera, glm::ivec2 screen_coords) override;
+        virtual void api_set_framebuffer(Framebuffer *framebuffer) override;
 
         // Textures
-        virtual Scoped<Texture2DBuffer> GenTexture2DBuffer(const char *image_filepath) override;
-        virtual Scoped<Texture2DBuffer> GenTexture2DBuffer(TextureType type, int width, int height) override;
+        virtual Scoped<Texture2D> api_gen_texture2D(const char *image_filepath) override;
+        virtual Scoped<Texture2D> api_gen_texture2D(TextureType type, int width, int height) override;
 
         // Framebuffers
-        virtual Scoped<Framebuffer> GenFramebuffer(int width, int height) override;
+        virtual Scoped<Framebuffer> api_gen_framebuffer(int width, int height) override;
 
         // Shaders
-        virtual Scoped<Shader> GenShader(const char *directory) override;
+        virtual Scoped<Shader> api_gen_shader(const char *directory) override;
 
         // Rendering Simple Meshes with no Composite or Instanced Meshes (Composite and Instanced Meshes are rendered by themselves)
-        virtual void render_simple_mesh(Camera *camera, SimpleMesh *mesh, Material *material) override;
-        virtual void render_simple_mesh(Camera *camera, SimpleMesh *mesh, Material *material, glm::mat4 &parent_model) override;
-        virtual void render_simple_mesh(Camera *camera, SimpleMesh *mesh, Material *material, glm::mat4 &parent_model, unsigned int instance_count, Buffer<glm::mat4> *models) override;
-        virtual void bind_mesh_render_state(SimpleMesh *mesh, Material *material) override;
-        virtual void destroy_mesh_render_states(SimpleMesh *mesh) override;
-        virtual void push_mesh_geometry_buffer(SimpleMesh *mesh, Scoped<Buffer<float>> geometry_buffer) override;
-        virtual void set_mesh_index_buffer(SimpleMesh *mesh, Scoped<Buffer<uint32_t>> index_buffer) override;
+        virtual void api_render_simple_mesh(Camera *camera, SimpleMesh *mesh, Material *material) override;
+        virtual void api_render_simple_mesh(Camera *camera, SimpleMesh *mesh, Material *material, glm::mat4 &parent_model) override;
+        virtual void api_render_simple_mesh(Camera *camera, SimpleMesh *mesh, Material *material, glm::mat4 &parent_model, unsigned int instance_count, Buffer<glm::mat4> *models) override;
+        virtual void api_bind_mesh_render_state(SimpleMesh *mesh, Material *material) override;
+        virtual void api_destroy_mesh_render_states(SimpleMesh *mesh) override;
+        virtual void api_push_mesh_geometry_buffer(SimpleMesh *mesh, Scoped<Buffer<float>> geometry_buffer) override;
+        virtual void api_set_mesh_index_buffer(SimpleMesh *mesh, Scoped<Buffer<uint32_t>> index_buffer) override;
 
         // Compute Programs
-        virtual void dispatch_compute(uint32_t x, uint32_t y, uint32_t z) override;
+        virtual void api_dispatch_compute(uint32_t x, uint32_t y, uint32_t z) override;
 
     private:
         static GLFWwindow *window;

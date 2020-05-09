@@ -2,6 +2,6 @@
 
 namespace mare
 {
-    Texture2DBuffer::~Texture2DBuffer() {}
+    Texture2D::~Texture2D() {}
     Framebuffer::~Framebuffer() {}
 }

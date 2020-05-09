@@ -21,9 +21,9 @@ namespace mare
     public:
         SampleCube()
         {
-            push_asset<CubeMesh>(1.0f);
-            push_asset<PhongMaterial>();
-            push_component<SampleCubeRenderer>();
+            gen_asset<CubeMesh>(1.0f);
+            gen_asset<PhongMaterial>();
+            gen_component<SampleCubeRenderer>();
         }
     };
 

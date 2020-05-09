@@ -84,7 +84,7 @@ public:
             vertex_data.push_back(vert[2]);
         }
 
-        Scoped<Buffer<float>> vertex_buffer = Renderer::API->GenBuffer<float>(&vertex_data[0], vertex_data.size()*sizeof(float));
+        Scoped<Buffer<float>> vertex_buffer = Renderer::gen_buffer<float>(&vertex_data[0], vertex_data.size()*sizeof(float));
         vertex_buffer->set_format({{Attribute::POSITON_3D, "position"},
                                     {Attribute::NORMAL, "normal"}});
 

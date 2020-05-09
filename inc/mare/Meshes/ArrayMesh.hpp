@@ -40,14 +40,14 @@ public:
             vertex_data.push_back(texture_coords[i][0]);
             vertex_data.push_back(texture_coords[i][1]);
         }
-        Scoped<Buffer<float>> vb = Renderer::API->GenBuffer<float>(&vertex_data[0], vertex_data.size()*sizeof(float));
+        Scoped<Buffer<float>> vb = Renderer::gen_buffer<float>(&vertex_data[0], vertex_data.size()*sizeof(float));
         vb->set_format({{Attribute::POSITON_3D, "position"},
                                     {Attribute::NORMAL, "normals"},
                                     {Attribute::TEXTURE_MAP, "texture_coords"}});
         add_geometry_buffer(std::move(vb));
         if (indices)
         {
-            Scoped<Buffer<uint32_t>> ib = Renderer::API->GenBuffer<uint32_t>(&(indices->front()), indices->size()*sizeof(uint32_t));
+            Scoped<Buffer<uint32_t>> ib = Renderer::gen_buffer<uint32_t>(&(indices->front()), indices->size()*sizeof(uint32_t));
             set_index_buffer(std::move(ib));
         }
         set_draw_method(method);

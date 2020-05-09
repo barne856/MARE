@@ -108,11 +108,12 @@ public:
     glm::mat4 &operator[](unsigned int i);
     glm::mat4 operator[](unsigned int i) const;
     Buffer<glm::mat4>* get_instance_models();
-    Scoped<Buffer<glm::mat4>> swap_instance_models(Scoped<Buffer<glm::mat4>> models);
+    Referenced<Buffer<glm::mat4>> swap_instance_models(Referenced<Buffer<glm::mat4>> models);
+    void set_instance_models(Referenced<Buffer<glm::mat4>> models);
 
 protected:
     unsigned int instance_count_;
-    Scoped<Buffer<glm::mat4>> instance_transforms_;
+    Referenced<Buffer<glm::mat4>> instance_transforms_;
     Scoped<Mesh> mesh_;
     unsigned int max_instances_;
 };

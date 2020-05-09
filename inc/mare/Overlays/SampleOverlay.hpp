@@ -13,7 +13,7 @@ public:
     SampleOverlay() : Overlay(ProjectionType::ORTHOGRAPHIC)
     {
         // Create Widgets
-        push_widget<SliderUI>(this);
+        gen_widget<SliderUI>(this);
         get_widget<SliderUI>()->set_color(glm::vec4(0.1f, 0.1f, 0.1f, 1.0f));
         get_widget<SliderUI>()->set_value(0.5f);
     }
@@ -25,8 +25,8 @@ public:
     void render(float delta_time) override
     {
         // Renderer properties
-        Renderer::API->enable_depth_testing(false);
-        Renderer::API->enable_face_culling(true);
+        Renderer::enable_depth_testing(false);
+        Renderer::enable_face_culling(true);
     }
 
     void on_exit() override

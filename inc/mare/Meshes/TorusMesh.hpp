@@ -66,12 +66,12 @@ public:
             indices.push_back(static_cast<unsigned int>((i + q + 1) % n_vertices));
         }
 
-        Scoped<Buffer<float>> vertex_buffer = Renderer::API->GenBuffer<float>(&vertex_data[0], vertex_data.size()*sizeof(float));
+        Scoped<Buffer<float>> vertex_buffer = Renderer::gen_buffer<float>(&vertex_data[0], vertex_data.size()*sizeof(float));
         vertex_buffer->set_format({{Attribute::POSITON_3D, "position"},
                                     {Attribute::NORMAL, "normal"},
                                     {Attribute::TEXTURE_MAP, "texcoords"}});
 
-        Scoped<Buffer<unsigned int>> index_buffer = Renderer::API->GenBuffer<uint32_t>(&indices[0], indices.size()*sizeof(float));
+        Scoped<Buffer<unsigned int>> index_buffer = Renderer::gen_buffer<uint32_t>(&indices[0], indices.size()*sizeof(float));
 
         add_geometry_buffer(std::move(vertex_buffer));
         set_index_buffer(std::move(index_buffer));

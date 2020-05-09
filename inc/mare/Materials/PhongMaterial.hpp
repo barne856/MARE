@@ -32,7 +32,7 @@ class PhongMaterial : public virtual Material
 public:
     PhongMaterial() : Material("./res/Shaders/Phong")
     {
-        texture = Renderer::API->GenTexture2DBuffer("./res/Textures/weave_diffuse.jpg");
+        texture = Renderer::gen_texture2D("./res/Textures/weave_diffuse.jpg");
         phong_properties props = {glm::vec4(0.0f, 0.0f, 0.0f, 1.0f),
                                   glm::vec4(0.1f, 0.1f, 0.5f, 1.0f),
                                   glm::vec4(1.0f),
@@ -41,9 +41,9 @@ public:
                            glm::vec4(1.0f),
                            glm::vec4(1.0f)};
         light_position = glm::vec3(0.0f, 1.0f, 1.0f);
-        properties = Renderer::API->GenBuffer<phong_properties>(&props, sizeof(phong_properties));
+        properties = Renderer::gen_buffer<phong_properties>(&props, sizeof(phong_properties));
         properties->set_format({{Attribute::UNIFORM, "material_properties"}});
-        light = Renderer::API->GenBuffer<phong_light>(&lit, sizeof(phong_light));
+        light = Renderer::gen_buffer<phong_light>(&lit, sizeof(phong_light));
         light->set_format({{Attribute::UNIFORM, "light_properties"}});
     }
     virtual ~PhongMaterial() {}
@@ -61,7 +61,7 @@ public:
     glm::vec3 light_position;
 
 private:
-    Scoped<Texture2DBuffer> texture;
+    Scoped<Texture2D> texture;
     Scoped<Buffer<phong_properties>> properties;
     Scoped<Buffer<phong_light>> light;
 };

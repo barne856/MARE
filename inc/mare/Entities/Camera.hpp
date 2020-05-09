@@ -31,12 +31,12 @@ namespace mare
             }
             set_forward_vector(direction_);
             recalculate_projection();
-            push_component<CameraControls>();
+            gen_component<CameraControls>();
         }
         ~Camera() {}
         void recalculate_projection()
         {
-            aspect_ = Renderer::API->get_info().window_aspect;
+            aspect_ = Renderer::get_info().window_aspect;
             switch (type_)
             {
             case ProjectionType::PERSPECTIVE:
@@ -99,7 +99,7 @@ namespace mare
         bool on_resize(Camera *camera_entity, const RendererInput &input) override
         {
             // recalcualte the projection with the new aspect
-            camera_entity->set_aspect(Renderer::API->get_info().window_aspect);
+            camera_entity->set_aspect(Renderer::get_info().window_aspect);
             camera_entity->recalculate_projection();
             return false; // continue
         }

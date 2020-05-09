@@ -32,6 +32,18 @@ using Referenced = std::shared_ptr<T>;
 // Variant type for scalars, vectors, and matrices
 using shader_data_type = std::variant<unsigned int, int, unsigned short, short, unsigned char, float, bool, glm::vec2, glm::vec3, glm::vec4, glm::ivec2, glm::ivec3, glm::ivec4, glm::mat2, glm::mat3, glm::mat4>;
 
+// Create scoped or referenced types
+template <typename T, typename... Args>
+Scoped<T> gen_scoped(Args... args)
+{
+    return std::make_unique<T>(args...);
+}
+template <typename T, typename... Args>
+Referenced<T> gen_ref(Args... args)
+{
+    return std::make_shared<T>(args...);
+}
+
 namespace util
 {
 // get index of a type in a variant - "get_index<type, variant_type>"

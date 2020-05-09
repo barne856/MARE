@@ -202,12 +202,12 @@ namespace mare
         RGBA32F,
         DEPTH
     };
-    class Texture2DBuffer
+    class Texture2D
     {
     public:
-        Texture2DBuffer(const char *filepath) {}
-        Texture2DBuffer(TextureType type, int width, int height) : type_(type), width_(width), height_(height) {}
-        virtual ~Texture2DBuffer() = 0;
+        Texture2D(const char *filepath) {}
+        Texture2D(TextureType type, int width, int height) : type_(type), width_(width), height_(height) {}
+        virtual ~Texture2D() = 0;
         inline uint32_t name() const { return texture_ID_; }
         inline TextureType type() const { return type_; }
 
@@ -227,13 +227,13 @@ namespace mare
         Framebuffer(int width, int height) {}
         virtual ~Framebuffer() = 0;
         inline uint32_t name() const { return framebuffer_ID_; }
-        inline Texture2DBuffer *depth_texture() { return depth_texture_.get(); }
-        inline Texture2DBuffer *color_texture() { return color_texture_.get(); }
+        inline Texture2D *depth_texture() { return depth_texture_.get(); }
+        inline Texture2D *color_texture() { return color_texture_.get(); }
 
     protected:
         uint32_t framebuffer_ID_;
-        Scoped<Texture2DBuffer> color_texture_;
-        Scoped<Texture2DBuffer> depth_texture_;
+        Scoped<Texture2D> color_texture_;
+        Scoped<Texture2D> depth_texture_;
     };
     // --------------------------------------------------------------------------------------------------------
 } // namespace mare

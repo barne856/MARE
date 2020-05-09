@@ -1,33 +1,30 @@
 // TODO version 1:
-
-// add gen component/asset to replace push and make push add existing component to stack
-
-// PHYSICS
-// Cloth physics
-// MetaComponent for collisions
-
-// CLEANUP
-// add exception handling
 // compile on linux with gcc
 // Document the API
 
 // TODO version 2:
 // Automated ShadowMap camera view creation
-// Beef up the Buffer, Texture, and Framebuffer classes to have all of the OpenGL features
-// Beef-up Renderer blending to have all the opengl features like custum blend functions
-// Bezier curves and spline curves / surfaces
-// Add teapot primative mesh with bezier curves and surfaces
-// Cylinder, Cone, and Tube meshes should have an option for flat shading normals or smooth shading normals
 // Add Text Thickness to CharMesh
 // Font Loader: bitmap fonts, maybe other formats too like vector fonts with ability to extrude text?
 // Text billboards
 // raypicking entities
+// Cylinder, Cone, and Tube meshes should have an option for flat shading normals or smooth shading normals
 // add more widgets (buttons, switches, checkboxes, color picker, text entry, message box)
 // Add more materials (BasicColor, BasicTexture, Depth(Material for a scene in the scene's render component), Phong, Toon, Shadow material): normal maps and other physically based rendering techniques
+// ComputeProgram memory barriers
+
+// TODO version 3:
+// Cloth physics
+// MetaComponent for collisions
+// Bezier curves and spline curves / surfaces
+// Add teapot primative mesh with bezier curves and surfaces
 // metaballs (marching cubes? quads with inverse distance shading?)
 // loaders for models?
-// loaders sound? sound implimentation
+// loaders sound? sound implementation
 // loaders for animations? animation implimentation
+// batch rendering, convert composite meshes to meshes that can be rendered with gl multidraw calls
+// Beefed-up Renderer blending to have all the opengl features like custom blend functions
+// Beefed-up Buffer, Texture, and Framebuffer classes to have all of the OpenGL features
 
 #include "mare/GL/GLRenderer.hpp"
 #include "mare/Scenes/SampleScene.hpp"
@@ -52,14 +49,11 @@ public:
     void startup() override
     {
         using namespace mare;
-        auto scene_1 = GenNamedRef<SampleParticleScene>("Scene 1");
-        //auto scene_1 = GenNamedRef<ComputeTextureScene>("Scene 1");
-        //auto scene_1 = GenNamedRef<SampleScene>("Scene 1");
-        load_scene("Scene 1");
+        gen_scene<SampleParticleScene>();
+        load_scene(0);
     }
     void shutdown() override
     {
-        DeleteRef("Scene 1");
     }
 };
 

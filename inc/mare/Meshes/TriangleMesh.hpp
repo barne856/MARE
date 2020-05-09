@@ -23,7 +23,7 @@ public:
         verts.push_back(v3[0]);
         verts.push_back(v3[1]);
 
-        Scoped<Buffer<float>> vertex_buffer = Renderer::API->GenBuffer<float>(&verts[0], verts.size()*sizeof(float));
+        Scoped<Buffer<float>> vertex_buffer = Renderer::gen_buffer<float>(&verts[0], verts.size()*sizeof(float));
         vertex_buffer->set_format({{Attribute::POSITION_2D, "position"}});
 
         add_geometry_buffer(std::move(vertex_buffer));

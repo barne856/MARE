@@ -78,7 +78,7 @@ public:
         set_draw_method(DrawMethod::LINES);
 
         // if dynamic, create extra space to hold resized strings
-        Scoped<Buffer<float>> vb = Renderer::API->GenBuffer<float>(&verts[0], verts.size()*sizeof(float));
+        Scoped<Buffer<float>> vb = Renderer::gen_buffer<float>(&verts[0], verts.size()*sizeof(float));
         vb->set_format({{Attribute::POSITION_2D, "position"}});
 
         add_geometry_buffer(std::move(vb));

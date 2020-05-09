@@ -19,12 +19,12 @@ public:
     {
         upload_texture2D("tex", texture_.get());
     }
-    void set_texture(Referenced<Texture2DBuffer> texture)
+    void set_texture(Referenced<Texture2D> texture)
     {
         texture_ = texture;
     }
 private:
-    Referenced<Texture2DBuffer> texture_;
+    Referenced<Texture2D> texture_;
 };
 } // namespace mare
 

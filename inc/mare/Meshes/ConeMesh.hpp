@@ -60,7 +60,7 @@ public:
             vertex_data.push_back(normals[i][2]);
         }
 
-        Scoped<Buffer<float>> vb = Renderer::API->GenBuffer<float>(&vertex_data[0], vertex_data.size()*sizeof(float));
+        Scoped<Buffer<float>> vb = Renderer::gen_buffer<float>(&vertex_data[0], vertex_data.size()*sizeof(float));
         vb->set_format({{Attribute::POSITON_3D, "position"},
                         {Attribute::NORMAL, "normal"}});
 

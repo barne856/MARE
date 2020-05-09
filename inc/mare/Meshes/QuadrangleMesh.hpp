@@ -52,7 +52,7 @@ namespace mare
             data.push_back(0.0f);
             data.push_back(0.0f);
 
-            Scoped<Buffer<float>> geometry_buffer = Renderer::API->GenBuffer<float>(&data[0], data.size() * sizeof(float));
+            Scoped<Buffer<float>> geometry_buffer = Renderer::gen_buffer<float>(&data[0], data.size() * sizeof(float));
             geometry_buffer->set_format({{Attribute::POSITION_2D, "position"},
                                          {Attribute::TEXTURE_MAP, "texcoords"}});
 
@@ -88,8 +88,8 @@ namespace mare
             tex_coords.push_back(0.0f);
             tex_coords.push_back(0.0f);
 
-            Scoped<Buffer<float>> vertex_buffer = Renderer::API->GenBuffer<float>(&verts[0], verts.size() * sizeof(float));
-            Scoped<Buffer<float>> tex_coord_buffer = Renderer::API->GenBuffer<float>(&tex_coords[0], tex_coords.size() * sizeof(float));
+            Scoped<Buffer<float>> vertex_buffer = Renderer::gen_buffer<float>(&verts[0], verts.size() * sizeof(float));
+            Scoped<Buffer<float>> tex_coord_buffer = Renderer::gen_buffer<float>(&tex_coords[0], tex_coords.size() * sizeof(float));
             vertex_buffer->set_format({{Attribute::POSITION_2D, "position"}});
             tex_coord_buffer->set_format({{Attribute::TEXTURE_MAP, "texcoords"}});
 

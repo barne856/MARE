@@ -228,11 +228,11 @@ public:
         indes.push_back(unsigned int(data.size() / 6 - 3));
         indes.push_back(unsigned int(data.size() / 6 - 4));
 
-        Scoped<Buffer<float>> vertex_buffer = Renderer::API->GenBuffer<float>(&data[0], data.size()*sizeof(float));
+        Scoped<Buffer<float>> vertex_buffer = Renderer::gen_buffer<float>(&data[0], data.size()*sizeof(float));
         vertex_buffer->set_format({{Attribute::POSITON_3D, "position"},
                                    {Attribute::NORMAL, "normal"}});
 
-        Scoped<Buffer<unsigned int>> index_buffer = Renderer::API->GenBuffer<uint32_t>(&indes[0], indes.size()*sizeof(uint32_t));
+        Scoped<Buffer<unsigned int>> index_buffer = Renderer::gen_buffer<uint32_t>(&indes[0], indes.size()*sizeof(uint32_t));
 
         add_geometry_buffer(std::move(vertex_buffer));
         set_index_buffer(std::move(index_buffer));

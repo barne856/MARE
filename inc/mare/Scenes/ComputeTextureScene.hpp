@@ -17,15 +17,15 @@ class ComputeTextureScene : public Scene
 public:
     ComputeTextureScene() : Scene(ProjectionType::ORTHOGRAPHIC)
     {
-        push_component<ComputeTextureSceneControls>();
-        push_entity<TexturedQuad>();
+        gen_component<ComputeTextureSceneControls>();
+        gen_entity<TexturedQuad>();
         auto tex_quad = get_entity<TexturedQuad>();
         
         // create empty texture
-        texture = Renderer::API->GenTexture2DBuffer(TextureType::RGBA32F, 16*32, 16*32);
+        texture = Renderer::gen_texture2D(TextureType::RGBA32F, 16*32, 16*32);
         //texture = Renderer::API->GenTexture2DBuffer("./res/Textures/checkerboard.png");
         // upload texture to comp shader
-        sample_compute = Renderer::API->GenRef<ComputeProgram>("./res/Shaders/SampleCompute");
+        sample_compute = gen_ref<ComputeProgram>("./res/Shaders/SampleCompute");
         sample_compute->bind();
         sample_compute->upload_image2D("data", texture.get());
         // run compute program
@@ -38,29 +38,29 @@ public:
     void on_enter() override
     {
         // Start with the cursor disabled
-        Renderer::API->set_cursor(CURSOR::ENABLED);
+        Renderer::set_cursor(CURSOR::ENABLED);
     }
 
     void render(float delta_time) override
     {
         // Renderer properties
-        Renderer::API->enable_blending(true);
-        Renderer::API->enable_depth_testing(true);
-        Renderer::API->enable_face_culling(true);
+        Renderer::enable_blending(true);
+        Renderer::enable_depth_testing(true);
+        Renderer::enable_face_culling(true);
         // Clear color and depth buffer
-        Renderer::API->clear_color_buffer(bg_color);
-        Renderer::API->clear_depth_buffer();
+        Renderer::clear_color_buffer(bg_color);
+        Renderer::clear_depth_buffer();
     }
 
     void on_exit() override
     {
         // Show cursor on new scenes
-        Renderer::API->set_cursor(CURSOR::ENABLED);
+        Renderer::set_cursor(CURSOR::ENABLED);
     }
 
 private:
     glm::vec4 bg_color{0.9f, 0.9f, 0.9f, 1.0f};
-    Referenced<Texture2DBuffer> texture;
+    Referenced<Texture2D> texture;
     Referenced<ComputeProgram> sample_compute;
 };
 

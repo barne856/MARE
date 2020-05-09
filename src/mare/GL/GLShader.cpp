@@ -255,7 +255,7 @@ namespace mare
             std::cerr << "SHADER WARNING: No storage buffer block '" << name << "' exists in the shader" << std::endl;
         }
     }
-    void GLShader::upload_texture2D(const char *name, Texture2DBuffer *texture2D, bool suppress_warnings)
+    void GLShader::upload_texture2D(const char *name, Texture2D *texture2D, bool suppress_warnings)
     {
         if (!resource_cache_.count(name))
         {
@@ -271,7 +271,7 @@ namespace mare
         }
     }
 
-    void GLShader::upload_image2D(const char *name, Texture2DBuffer *texture2D, bool suppress_warnings)
+    void GLShader::upload_image2D(const char *name, Texture2D *texture2D, bool suppress_warnings)
     {
         if (!resource_cache_.count(name))
         {

@@ -12,7 +12,7 @@ namespace mare
         if (!shader_cache_.count(std::string(directory)))
         {
             // create shader and cache the location
-            shader_ = Renderer::API->GenShader(directory);
+            shader_ = Renderer::gen_shader(directory);
             shader_cache_.insert({std::string(directory), shader_});
         }
         else
@@ -24,7 +24,7 @@ namespace mare
     void ComputeProgram::dispatch_compute(uint32_t x, uint32_t y, uint32_t z)
     {
         compute();
-        Renderer::API->dispatch_compute(x, y, z);
+        Renderer::dispatch_compute(x, y, z);
     }
 
     void Material::upload_camera(Camera *camera, bool suppress_warnings)
@@ -50,7 +50,7 @@ namespace mare
     }
     void Material::upload_mesh_instance_matrices(Buffer<glm::mat4> *models, bool suppress_warnings)
     {
-        shader_->upload_storage(models->format().attributes()[0].name.c_str(), models, suppress_warnings);
+        shader_->upload_storage("model_instances", models, suppress_warnings);
     }
     void Material::upload_mesh(Mesh *mesh, bool suppress_warnings)
     {

@@ -20,9 +20,9 @@ namespace mare
     public:
         SampleTorus(unsigned int n_segments, unsigned int n_rings, float inner_radius, float outer_radius)
         {
-            push_asset<TorusMesh>(n_segments, n_rings, inner_radius, outer_radius);
-            push_asset<PhongMaterial>();
-            push_component<SampleTorusRenderer>();
+            gen_asset<TorusMesh>(n_segments, n_rings, inner_radius, outer_radius);
+            gen_asset<PhongMaterial>();
+            gen_component<SampleTorusRenderer>();
         }
     };
 

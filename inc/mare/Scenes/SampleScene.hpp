@@ -23,36 +23,36 @@ public:
     SampleScene() : Scene(ProjectionType::PERSPECTIVE)
     {
         // Set the components
-        push_component<Rigidbody>();
-        push_component<FlyControls>();
-        push_component<SampleSceneControls>();
-        push_component<ShadowMap>(8);
+        gen_component<Rigidbody>();
+        gen_component<FlyControls>();
+        gen_component<SampleSceneControls>();
+        gen_component<ShadowMap>(8);
         set_position(glm::vec3(0.0f, 0.0f, 1.0f));
         face_towards(glm::vec3(0.0f, 0.2f, -1.0f));
 
         // Push entities
-        push_entity<SampleTorus>(100, 200, 0.1f, 0.2f);
-        push_entity<SampleCube>();
+        gen_entity<SampleTorus>(100, 200, 0.1f, 0.2f);
+        gen_entity<SampleCube>();
 
         // Push overlays to the layer stack
-        push_overlay<SampleOverlay>();
+        gen_overlay<SampleOverlay>();
     }
 
     void on_enter() override
     {
         // Start with the cursor disabled for Fly Contorls
-        Renderer::API->set_cursor(CURSOR::DISABLED);
+        Renderer::set_cursor(CURSOR::DISABLED);
     }
 
     void render(float delta_time) override
     {
         // Renderer properties
-        Renderer::API->enable_blending(true);
-        Renderer::API->enable_depth_testing(true);
-        Renderer::API->enable_face_culling(true);
+        Renderer::enable_blending(true);
+        Renderer::enable_depth_testing(true);
+        Renderer::enable_face_culling(true);
         // Clear color and depth buffer
-        Renderer::API->clear_color_buffer(bg_color);
-        Renderer::API->clear_depth_buffer();
+        Renderer::clear_color_buffer(bg_color);
+        Renderer::clear_depth_buffer();
 
         // get SliderUI value and scale torus
         float v = std::get<float>(get_overlay<SampleOverlay>()->get_widget<SliderUI>()->get_value());
@@ -62,7 +62,7 @@ public:
     void on_exit() override
     {
         // Show cursor on new scenes
-        Renderer::API->set_cursor(CURSOR::ENABLED);
+        Renderer::set_cursor(CURSOR::ENABLED);
     }
 
 private:
@@ -76,21 +76,21 @@ public:
     {
         if (input.T_JUST_PRESSED)
         {
-            Renderer::API->get_info().wireframe = !(Renderer::API->get_info().wireframe);
+            Renderer::get_info().wireframe = !(Renderer::get_info().wireframe);
         }
-        Renderer::API->wireframe_mode(Renderer::API->get_info().wireframe);
+        Renderer::wireframe_mode(Renderer::get_info().wireframe);
         // show mouse and disable controls
         if (input.LEFT_CONTROL_PRESSED)
         {
-            Renderer::API->set_cursor(CURSOR::ENABLED);
+            Renderer::set_cursor(CURSOR::ENABLED);
             scene->pull_component<FlyControls>();
             scene->get_component<Rigidbody>()->linear_velocity = glm::vec3(0.0f, 0.0f, 0.0f);
             return true;
         }
         else
         {
-            Renderer::API->set_cursor(CURSOR::DISABLED);
-            scene->push_component<FlyControls>();
+            Renderer::set_cursor(CURSOR::DISABLED);
+            scene->gen_component<FlyControls>();
         }
         // event is handled
         return false;
@@ -99,14 +99,14 @@ public:
     {
         if (input.mouse_button == 1)
         {
-            Renderer::API->get_info().focus = scene;
+            Renderer::get_info().focus = scene;
             if (input.LEFT_CONTROL_PRESSED)
             {
-                scene->get_entity<SampleTorus>()->set_position(Renderer::API->raycast(scene));
+                scene->get_entity<SampleTorus>()->set_position(Renderer::raycast(scene));
             }
             return true;
         }
-        Renderer::API->get_info().focus = nullptr;
+        Renderer::get_info().focus = nullptr;
         return false;
     }
 };

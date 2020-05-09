@@ -22,12 +22,12 @@ public:
     SliderUI(Layer* layer) : Widget(layer), quad_mesh(nullptr), slider_mesh(nullptr), solid_material(nullptr), color(glm::vec4(1.0f))
     {
         // create object
-        quad_mesh = Renderer::API->GenScoped<QuadrangleMesh>();
-        slider_mesh = Renderer::API->GenRef<InstancedMesh>(2);
+        quad_mesh = gen_scoped<QuadrangleMesh>();
+        slider_mesh = gen_ref<InstancedMesh>(2);
         slider_mesh->set_mesh(std::move(quad_mesh));
         slider_mesh->push_instance(glm::translate(glm::mat4(1.0f), {-0.5f, 0.0f, 0.0f}) * glm::scale(glm::mat4(1.0f), glm::vec3(0.1f)));
         slider_mesh->push_instance(glm::scale(glm::mat4(1.0f), {1.0f, 0.01f, 0.0f}));
-        solid_material = Renderer::API->GenRef<BasicMaterial>();
+        solid_material = gen_ref<BasicMaterial>();
         solid_material->bind();
         solid_material->set_color(color);
         // set bounds
@@ -37,13 +37,13 @@ public:
         bounds.bottom() = -0.05f;
 
         // set initial position
-        glm::ivec2 screen_size = glm::ivec2(Renderer::API->get_info().window_width, Renderer::API->get_info().window_height);
-        glm::vec3 world_size = Renderer::API->raycast(get_layer(), screen_size);
+        glm::ivec2 screen_size = glm::ivec2(Renderer::get_info().window_width, Renderer::get_info().window_height);
+        glm::vec3 world_size = Renderer::raycast(get_layer(), screen_size);
         set_position({-world_size.x + 0.6f, -0.9f, 0.0f});
 
         // push components
-        push_component<SliderUIRenderer>();
-        push_component<SliderUIControls>();
+        gen_component<SliderUIRenderer>();
+        gen_component<SliderUIControls>();
     }
     void set_color(glm::vec4 color)
     {
@@ -78,15 +78,15 @@ public:
     {
         if (input.mouse_button == 1 && slider_ui->is_in_bounds())
         {
-            Renderer::API->get_info().focus = slider_ui->get_layer();
+            Renderer::get_info().focus = slider_ui->get_layer();
             return on_mouse_move(slider_ui, input);
         }
-        Renderer::API->get_info().focus = nullptr;
+        Renderer::get_info().focus = nullptr;
         return false;
     }
     bool on_mouse_move(SliderUI *slider_ui, const RendererInput &input)
     {
-        if (Renderer::API->get_info().focus == slider_ui->get_layer())
+        if (Renderer::get_info().focus == slider_ui->get_layer())
         {
             glm::vec2 relative_position = slider_ui->get_widget_coords();
             float x = glm::clamp(relative_position.x, -0.5f, 0.5f);
@@ -100,8 +100,8 @@ public:
     bool on_resize(SliderUI *slider_ui, const RendererInput &input)
     {
         // position widgets on the screen
-        glm::ivec2 screen_size = glm::ivec2(Renderer::API->get_info().window_width, Renderer::API->get_info().window_height);
-        glm::vec3 world_size = Renderer::API->raycast(slider_ui->get_layer(), screen_size);
+        glm::ivec2 screen_size = glm::ivec2(Renderer::get_info().window_width, Renderer::get_info().window_height);
+        glm::vec3 world_size = Renderer::raycast(slider_ui->get_layer(), screen_size);
         slider_ui->set_position({-world_size.x + 0.6f, -0.9f, 0.0f});
         return false;
     }

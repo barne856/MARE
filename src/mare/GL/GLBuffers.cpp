@@ -119,8 +119,8 @@ namespace mare
     }
   }
 
-  GLTexture2DBuffer::GLTexture2DBuffer(const char *filepath)
-      : Texture2DBuffer(filepath)
+  GLTexture2D::GLTexture2D(const char *filepath)
+      : Texture2D(filepath)
   {
     unsigned char *texture_data_ = stbi_load(filepath, &width_, &height_, &channels_, 0);
     texture_buffer_ = std::make_unique<GLBuffer<uint8_t>>(texture_data_, width_ * height_ * channels_, BufferType::STATIC);
@@ -148,8 +148,8 @@ namespace mare
     glTextureSubImage2D(texture_ID_, 0, 0, 0, width_, height_, gl_tex_format(type_), gl_tex_type(type_), nullptr);
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
   }
-  GLTexture2DBuffer::GLTexture2DBuffer(TextureType type, int width, int height)
-      : Texture2DBuffer(type, width, height)
+  GLTexture2D::GLTexture2D(TextureType type, int width, int height)
+      : Texture2D(type, width, height)
   {
     glCreateTextures(GL_TEXTURE_2D, 1, &texture_ID_);
     glTextureStorage2D(texture_ID_, 1, gl_sized_tex_format(type_), width_, height_);
@@ -207,7 +207,7 @@ namespace mare
     glTextureSubImage2D(texture_ID_, 0, 0, 0, width_, height_, gl_tex_format(type_), gl_tex_type(type_), nullptr);
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
   }
-  GLTexture2DBuffer::~GLTexture2DBuffer()
+  GLTexture2D::~GLTexture2D()
   {
     glDeleteTextures(1, &texture_ID_);
   }
@@ -216,8 +216,8 @@ namespace mare
       : Framebuffer(width, height)
   {
     glCreateFramebuffers(1, &framebuffer_ID_);
-    depth_texture_ = std::make_unique<GLTexture2DBuffer>(TextureType::DEPTH, width, height);
-    color_texture_ = std::make_unique<GLTexture2DBuffer>(TextureType::RGBA32F, width, height);
+    depth_texture_ = std::make_unique<GLTexture2D>(TextureType::DEPTH, width, height);
+    color_texture_ = std::make_unique<GLTexture2D>(TextureType::RGBA32F, width, height);
     glNamedFramebufferTexture(framebuffer_ID_, GL_DEPTH_ATTACHMENT, depth_texture_->name(), 0);
     glNamedFramebufferTexture(framebuffer_ID_, GL_COLOR_ATTACHMENT0, color_texture_->name(), 0);
     GLenum draw_buffer[1] = {GL_COLOR_ATTACHMENT0};
