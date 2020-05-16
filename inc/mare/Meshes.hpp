@@ -6,7 +6,7 @@
 #include "mare/Shader.hpp"
 #include "mare/Buffers.hpp"
 #include "mare/Entities/Camera.hpp"
-#include "mare/Transform.hpp"
+#include "mare/Components/Transform.hpp"
 
 // Standard Library
 #include <vector>
@@ -37,8 +37,8 @@ public:
     virtual ~Mesh() {}
 
     virtual void render(Camera *camera, Material *material) = 0;
-    virtual void render(Camera *camera, Material *material, glm::mat4 &parent_model) = 0;
-    virtual void render(Camera *camera, Material *material, glm::mat4 &parent_model, unsigned int instance_count, Buffer<glm::mat4> *models) = 0;
+    virtual void render(Camera *camera, Material *material, glm::mat4 parent_model) = 0;
+    virtual void render(Camera *camera, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models) = 0;
 };
 
 class SimpleMesh : public Mesh
@@ -48,8 +48,8 @@ public:
     ~SimpleMesh();
 
     void render(Camera *camera, Material *material) override;
-    void render(Camera *camera, Material *material, glm::mat4 &parent_model) override;
-    void render(Camera *camera, Material *material, glm::mat4 &parent_model, unsigned int instance_count, Buffer<glm::mat4> *models) override;
+    void render(Camera *camera, Material *material, glm::mat4 parent_model) override;
+    void render(Camera *camera, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models) override;
 
     virtual void bind(Material *material);
     virtual void add_geometry_buffer(Scoped<Buffer<float>> geometry_buffer);
@@ -82,8 +82,8 @@ public:
     CompositeMesh() {}
     virtual ~CompositeMesh() {}
     void render(Camera *camera, Material *material) override;
-    void render(Camera *camera, Material *material, glm::mat4 &parent_model) override;
-    void render(Camera *camera, Material *material, glm::mat4 &parent_model, unsigned int instance_count, Buffer<glm::mat4> *models) override;
+    void render(Camera *camera, Material *material, glm::mat4 parent_model) override;
+    void render(Camera *camera, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models) override;
     void push_mesh(Scoped<Mesh> mesh); // push a mesh onto the mesh stack
     void pop_mesh();                   // remove the last mesh on the mesh stack
     void clear();                      // clear the entire mesh stack
@@ -98,8 +98,8 @@ public:
     InstancedMesh(unsigned int max_instances);
     virtual ~InstancedMesh() {}
     void render(Camera *camera, Material *material) override;
-    void render(Camera *camera, Material *material, glm::mat4 &parent_model) override;
-    void render(Camera *camera, Material *material, glm::mat4 &parent_model, unsigned int instance_count, Buffer<glm::mat4> *models) override;
+    void render(Camera *camera, Material *material, glm::mat4 parent_model) override;
+    void render(Camera *camera, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models) override;
     void set_mesh(Scoped<Mesh> mesh);
     void push_instance(glm::mat4 model);
     void pop_instance();

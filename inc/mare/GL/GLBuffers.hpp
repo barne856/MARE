@@ -8,6 +8,7 @@
 // Standard Library
 #include <algorithm>
 #include <type_traits>
+#include <cstring>
 
 
 // OpenGL
@@ -18,7 +19,7 @@ namespace mare {
 GLenum gl_sized_tex_format(TextureType type);
 GLenum gl_tex_format(TextureType type);
 int gl_tex_bytes(TextureType type);
-int gl_tex_type(TextureType type);
+GLenum gl_tex_type(TextureType type);
 
 template <typename T> class GLBuffer : public Buffer<T> {
 public:
@@ -28,6 +29,7 @@ public:
   using IBuffer::num_buffers_;
   using IBuffer::size_;
   using IBuffer::type_;
+  using IBuffer::swap_buffer;
   GLBuffer(T *data, size_t size_in_bytes,
            BufferType buffer_type = BufferType::STATIC)
       : Buffer<T>(data, size_in_bytes, buffer_type), buffer_pointer_(nullptr),

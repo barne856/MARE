@@ -37,6 +37,9 @@ namespace mare
         virtual void upload_texture2D(const char *name, Texture2D *texture2D, bool suppress_warnings = false) override;
         virtual void upload_image2D(const char *name, Texture2D *texture2D, bool suppress_warnings = false) override;
 
+        // Memory Barriers
+        virtual void barrier(BarrierType type) override;
+
     private:
         std::vector<GLuint> shaders_;
 

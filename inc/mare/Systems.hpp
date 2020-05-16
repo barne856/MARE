@@ -3,94 +3,106 @@
 
 // MARE
 #include "mare/Mare.hpp"
-#include "mare/Entity.hpp"
 #include "mare/Renderer.hpp"
 
 // Standard Library
 #include <type_traits>
 
-namespace mare
-{
-class Camera; // forward declaration
-class IPhysicsSystem : public Component
-{
+// External Libraries
+#include "glm.hpp"
+#include "gtc/matrix_transform.hpp"
+
+namespace mare {
+// forward declaration
+class Camera;
+class Entity;
+class IPhysicsSystem : public System {
 public:
-    virtual ~IPhysicsSystem() {}
-    virtual void update(Entity *entity, float dt) = 0;
+  virtual ~IPhysicsSystem() {}
+  virtual void update(float dt, Entity *entity) = 0;
 };
-template <class T>
-class PhysicsSystem : public IPhysicsSystem
-{
-    static_assert(std::is_base_of<Entity, T>::value, "Type must be derived from Entity.");
+template <class... Ts> class PhysicsSystem : public IPhysicsSystem {
 
 public:
-    virtual void update(Entity *entity, float dt) final
-    {
-        update(static_cast<T *>(entity), dt);
-    }
-    virtual void update(T *derived_entity, float dt) = 0;
+  virtual void update(float dt, Entity *entity) final {
+    update(dt, dynamic_cast<Ts *>(entity)...);
+  }
+  virtual void update(float dt, Ts *... derived_entities) = 0;
 };
 
-class IRenderSystem : public Component
-{
+class IRenderSystem : public System {
 public:
-    virtual ~IRenderSystem() {}
-    virtual void render(Entity *entity, Camera *camera, float dt) = 0;
+  virtual ~IRenderSystem() {}
+  virtual void render(float dt, Camera *camera, Entity *entity) = 0;
 };
-template <class T>
-class RenderSystem : public IRenderSystem
-{
-    static_assert(std::is_base_of<Entity, T>::value, "Type must be derived from Entity.");
+template <class... Ts> class RenderSystem : public IRenderSystem {
 
 public:
-    virtual void render(Entity *entity, Camera *camera, float dt) final
-    {
-        render(static_cast<T *>(entity), camera, dt);
-    }
-    virtual void render(T *derived_entity, Camera *camera, float dt) = 0;
+  virtual void render(float dt, Camera *camera, Entity *entity) final {
+    render(dt, camera, dynamic_cast<Ts *>(entity)...);
+  }
+  virtual void render(float dt, Camera *camera, Ts *... derived_entities) = 0;
 };
 
-class IControlsSystem : public Component
-{
+class IControlsSystem : public System {
 public:
-    virtual ~IControlsSystem() {}
-    virtual bool on_key(Entity *entity, const RendererInput &input) {return false;}
-    virtual bool on_mouse_button(Entity *entity, const RendererInput &input)  {return false;}
-    virtual bool on_mouse_move(Entity *entity, const RendererInput &input)  {return false;}
-    virtual bool on_mouse_wheel(Entity *entity, const RendererInput &input)  {return false;}
-    virtual bool on_resize(Entity *entity, const RendererInput &input)  {return false;}
+  virtual ~IControlsSystem() {}
+  virtual bool on_key(const RendererInput &input, Entity *entity) {
+    return false;
+  }
+  virtual bool on_mouse_button(const RendererInput &input, Entity *entity) {
+    return false;
+  }
+  virtual bool on_mouse_move(const RendererInput &input, Entity *entity) {
+    return false;
+  }
+  virtual bool on_mouse_wheel(const RendererInput &input, Entity *entity) {
+    return false;
+  }
+  virtual bool on_resize(const RendererInput &input, Entity *entity) {
+    return false;
+  }
 };
-template <class T>
-class ControlsSystem : public IControlsSystem
-{
-    static_assert(std::is_base_of<Entity, T>::value, "Type must be derived from Entity.");
+template <class... Ts> class ControlsSystem : public IControlsSystem {
+
 public:
-    virtual bool on_key(T *derived_entity, const RendererInput &input)  {return false;}
-    virtual bool on_mouse_button(T *derived_entity, const RendererInput &input)  {return false;}
-    virtual bool on_mouse_move(T *derived_entity, const RendererInput &input)  {return false;}
-    virtual bool on_mouse_wheel(T *derived_entity, const RendererInput &input)  {return false;}
-    virtual bool on_resize(T *derived_entity, const RendererInput &input)  {return false;}
-    virtual bool on_key(Entity *entity, const RendererInput &input) final
-    {
-        return on_key(static_cast<T *>(entity), input);
-    }
-    virtual bool on_mouse_button(Entity *entity, const RendererInput &input) final
-    {
-        return on_mouse_button(static_cast<T *>(entity), input);
-    }
-    virtual bool on_mouse_move(Entity *entity, const RendererInput &input) final
-    {
-        return on_mouse_move(static_cast<T *>(entity), input);
-    }
-    virtual bool on_mouse_wheel(Entity *entity, const RendererInput &input) final
-    {
-        return on_mouse_wheel(static_cast<T *>(entity), input);
-    }
-    virtual bool on_resize(Entity *entity, const RendererInput &input) final
-    {
-        return on_resize(static_cast<T *>(entity), input);
-    }
+  virtual bool on_key(const RendererInput &input, Ts *... derived_entities) {
+    return false;
+  }
+  virtual bool on_mouse_button(const RendererInput &input,
+                               Ts *... derived_entities) {
+    return false;
+  }
+  virtual bool on_mouse_move(const RendererInput &input,
+                             Ts *... derived_entities) {
+    return false;
+  }
+  virtual bool on_mouse_wheel(const RendererInput &input,
+                              Ts *... derived_entities) {
+    return false;
+  }
+  virtual bool on_resize(const RendererInput &input, Ts *... derived_entities) {
+    return false;
+  }
+  virtual bool on_key(const RendererInput &input, Entity *entity) final {
+    return on_key(input, dynamic_cast<Ts *>(entity)...);
+  }
+  virtual bool on_mouse_button(const RendererInput &input,
+                               Entity *entity) final {
+    return on_mouse_button(input, dynamic_cast<Ts*>(entity)...);
+  }
+  virtual bool on_mouse_move(const RendererInput &input, Entity *entity) final {
+    return on_mouse_move(input, dynamic_cast<Ts *>(entity)...);
+  }
+  virtual bool on_mouse_wheel(const RendererInput &input,
+                              Entity *entity) final {
+    return on_mouse_wheel(input, dynamic_cast<Ts *>(entity)...);
+  }
+  virtual bool on_resize(const RendererInput &input, Entity *entity) final {
+    return on_resize(input, dynamic_cast<Ts *>(entity)...);
+  }
 };
+
 } // namespace mare
 
 #endif

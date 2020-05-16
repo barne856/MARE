@@ -3,14 +3,11 @@
 #include "mare/GL/GLBuffers.hpp"
 #include "mare/GL/GLShader.hpp"
 
-
 // MARE
 #include "mare/Entity.hpp"
 #include "mare/Layer.hpp"
 #include "mare/Meshes.hpp"
 #include "mare/Scene.hpp"
-#include "mare/Widget.hpp"
-
 
 // Standard Library
 #include <iostream>
@@ -117,54 +114,56 @@ void GLRenderer::start_renderer() {
   do {
     double time = glfwGetTime();
     float delta_time = (float)(time - info.current_time);
-    // Update render and physics components
+    // Update render and physics systems
     if (info.scene) {
-      // Scene and camera components
-      auto physics_systems = info.scene->get_components<IPhysicsSystem>();
-      auto render_systems = info.scene->get_components<IRenderSystem>();
+      info.scene->render(delta_time);
+      // Scene/Camera systems
+      auto physics_systems = info.scene->get_systems<IPhysicsSystem>();
+      auto render_systems = info.scene->get_systems<IRenderSystem>();
       for (auto system : physics_systems) {
-        system->update(info.scene, delta_time);
+        system->update(delta_time, info.scene);
       }
       for (auto system : render_systems) {
-        system->render(info.scene, info.scene, delta_time);
+        system->render(delta_time, info.scene, info.scene);
       }
-      info.scene->render(delta_time);
+
       // Entities in scene
       for (auto entity_it = info.scene->entity_begin();
            entity_it != info.scene->entity_end(); entity_it++) {
         Entity *entity = entity_it->get();
-        physics_systems = entity->get_components<IPhysicsSystem>();
-        render_systems = entity->get_components<IRenderSystem>();
+        physics_systems = entity->get_systems<IPhysicsSystem>();
+        render_systems = entity->get_systems<IRenderSystem>();
         for (auto system : physics_systems) {
-          system->update(entity, delta_time);
+          system->update(delta_time, entity);
         }
         for (auto system : render_systems) {
-          system->render(entity, info.scene, delta_time);
+          system->render(delta_time, info.scene, entity);
         }
       }
-      // Overlays on scene and widgets in overlays
-      for (auto overlay_it = info.scene->overlay_begin();
-           overlay_it != info.scene->overlay_end(); overlay_it++) {
-        Overlay *overlay = overlay_it->get();
-        physics_systems = overlay->get_components<IPhysicsSystem>();
-        render_systems = overlay->get_components<IRenderSystem>();
+      // Layers on scene and entities/widgets in overlays
+      for (auto layr_it = info.scene->layer_begin();
+           layr_it != info.scene->layer_end(); layr_it++) {
+        Layer *layer = layr_it->get();
+        layer->render(delta_time);
+        physics_systems = layer->get_systems<IPhysicsSystem>();
+        render_systems = layer->get_systems<IRenderSystem>();
         for (auto system : physics_systems) {
-          system->update(overlay, delta_time);
+          system->update(delta_time, layer);
         }
         for (auto system : render_systems) {
-          system->render(overlay, overlay, delta_time);
+          system->render(delta_time, layer, layer);
         }
-        overlay->render(delta_time);
-        for (auto widget_it = overlay->widget_begin();
-             widget_it != overlay->widget_end(); widget_it++) {
-          Widget *widget = widget_it->get();
-          physics_systems = widget->get_components<IPhysicsSystem>();
-          render_systems = widget->get_components<IRenderSystem>();
+
+        for (auto ent_it = layer->entity_begin(); ent_it != layer->entity_end();
+             ent_it++) {
+          Entity *entity = ent_it->get();
+          physics_systems = entity->get_systems<IPhysicsSystem>();
+          render_systems = entity->get_systems<IRenderSystem>();
           for (auto system : physics_systems) {
-            system->update(widget, delta_time);
+            system->update(delta_time, entity);
           }
           for (auto system : render_systems) {
-            system->render(widget, overlay, delta_time);
+            system->render(delta_time, layer, entity);
           }
         }
       }
@@ -345,7 +344,7 @@ void GLRenderer::api_render_simple_mesh(Camera *camera, SimpleMesh *mesh,
 // composite rendering
 void GLRenderer::api_render_simple_mesh(Camera *camera, SimpleMesh *mesh,
                                         Material *material,
-                                        glm::mat4 &parent_model) {
+                                        glm::mat4 parent_model) {
   material->bind();
   mesh->bind(material);
   material->upload_camera(camera);
@@ -365,7 +364,7 @@ void GLRenderer::api_render_simple_mesh(Camera *camera, SimpleMesh *mesh,
 // instanced rendering
 void GLRenderer::api_render_simple_mesh(Camera *camera, SimpleMesh *mesh,
                                         Material *material,
-                                        glm::mat4 &parent_model,
+                                        glm::mat4 parent_model,
                                         unsigned int instance_count,
                                         Buffer<glm::mat4> *models) {
   material->bind();
@@ -546,55 +545,55 @@ void GLRenderer::glfw_onResize(GLFWwindow *window, int w, int h) {
   Renderer::API->resize_window(w, h);
 
   if (info.scene) {
-    // reverse iterate through overlay callbacks first
+    // reverse iterate through layer callbacks first
     bool handled = false;
-    for (auto overlay_it = info.scene->overlay_rbegin();
-         overlay_it != info.scene->overlay_rend(); overlay_it++) {
-      Overlay *overlay = overlay_it->get();
-      // reverse iterate through overlay widgets
-      for (auto widget_it = overlay->widget_rbegin();
-           widget_it != overlay->widget_rend(); widget_it++) {
-        Widget *widget = widget_it->get();
-        auto controls_systems = widget->get_components<IControlsSystem>();
-        // reverse iterate through widget controls callbacks
+    for (auto layr_it = info.scene->layer_rbegin();
+         layr_it != info.scene->layer_rend(); layr_it++) {
+      Layer *layer = layr_it->get();
+      // reverse iterate through layer entities
+      for (auto ent_it = layer->entity_rbegin(); ent_it != layer->entity_rend();
+           ent_it++) {
+        Entity *entity = ent_it->get();
+        auto controls_systems = entity->get_systems<IControlsSystem>();
+        // reverse iterate through entity controls callbacks
         for (auto controls_it = controls_systems.rbegin();
              controls_it != controls_systems.rend(); controls_it++) {
-          handled = (*controls_it)->on_resize(widget, input);
+          handled = (*controls_it)->on_resize(input, entity);
           if (handled) {
             return;
           }
         }
       }
-      auto controls_systems = overlay->get_components<IControlsSystem>();
-      // reverse iterate through overlay controls callbacks
+      auto controls_systems = layer->get_systems<IControlsSystem>();
+      // reverse iterate through layer controls callbacks
       for (auto controls_it = controls_systems.rbegin();
            controls_it != controls_systems.rend(); controls_it++) {
-        handled = (*controls_it)->on_resize(overlay, input);
+        handled = (*controls_it)->on_resize(input, layer);
         if (handled) {
           return;
         }
       }
     }
-    // if event is not handled by overlays, callback to the scene
+    // if event is not handled by layers, callback to the scene
     // reverse iterate through scene entities
     for (auto entity_it = info.scene->entity_rbegin();
          entity_it != info.scene->entity_rend(); entity_it++) {
       Entity *entity = entity_it->get();
-      auto controls_systems = entity->get_components<IControlsSystem>();
+      auto controls_systems = entity->get_systems<IControlsSystem>();
       // reverse iterate through entity controls callbacks
       for (auto controls_it = controls_systems.rbegin();
            controls_it != controls_systems.rend(); controls_it++) {
-        handled = (*controls_it)->on_resize(entity, input);
+        handled = (*controls_it)->on_resize(input, entity);
         if (handled) {
           return;
         }
       }
     }
-    auto controls_systems = info.scene->get_components<IControlsSystem>();
+    auto controls_systems = info.scene->get_systems<IControlsSystem>();
     // reverse iterate through scene controls callbacks
     for (auto controls_it = controls_systems.rbegin();
          controls_it != controls_systems.rend(); controls_it++) {
-      handled = (*controls_it)->on_resize(info.scene, input);
+      handled = (*controls_it)->on_resize(input, info.scene);
       if (handled) {
         return;
       }
@@ -609,1248 +608,1975 @@ void GLRenderer::glfw_onKey(GLFWwindow *window, int key, int scancode,
     if (action == GLFW_PRESS) {
       input.SPACE_PRESSED = true;
       input.SPACE_JUST_PRESSED = true;
+      input.SPACE_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.SPACE_PRESSED = true;
       input.SPACE_JUST_PRESSED = false;
+      input.SPACE_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.SPACE_PRESSED = false;
+      input.SPACE_JUST_PRESSED = false;
+      input.SPACE_RELEASED = true;
     } else {
       input.SPACE_PRESSED = false;
       input.SPACE_JUST_PRESSED = false;
+      input.SPACE_RELEASED = true;
     }
     break;
   case GLFW_KEY_APOSTROPHE:
     if (action == GLFW_PRESS) {
       input.APOSTROPHE_PRESSED = true;
       input.APOSTROPHE_JUST_PRESSED = true;
+      input.APOSTROPHE_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.APOSTROPHE_PRESSED = true;
       input.APOSTROPHE_JUST_PRESSED = false;
+      input.APOSTROPHE_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.APOSTROPHE_PRESSED = false;
+      input.APOSTROPHE_JUST_PRESSED = false;
+      input.APOSTROPHE_RELEASED = true;
     } else {
       input.APOSTROPHE_PRESSED = false;
       input.APOSTROPHE_JUST_PRESSED = false;
+      input.APOSTROPHE_RELEASED = true;
     }
     break;
   case GLFW_KEY_COMMA:
     if (action == GLFW_PRESS) {
       input.COMMA_PRESSED = true;
       input.COMMA_JUST_PRESSED = true;
+      input.COMMA_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.COMMA_PRESSED = true;
       input.COMMA_JUST_PRESSED = false;
+      input.COMMA_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.COMMA_PRESSED = false;
+      input.COMMA_JUST_PRESSED = false;
+      input.COMMA_RELEASED = true;
     } else {
       input.COMMA_PRESSED = false;
       input.COMMA_JUST_PRESSED = false;
+      input.COMMA_RELEASED = true;
     }
     break;
   case GLFW_KEY_MINUS:
     if (action == GLFW_PRESS) {
       input.MINUS_PRESSED = true;
       input.MINUS_JUST_PRESSED = true;
+      input.MINUS_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.MINUS_PRESSED = true;
       input.MINUS_JUST_PRESSED = false;
+      input.MINUS_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.MINUS_PRESSED = false;
+      input.MINUS_JUST_PRESSED = false;
+      input.MINUS_RELEASED = true;
     } else {
       input.MINUS_PRESSED = false;
       input.MINUS_JUST_PRESSED = false;
+      input.MINUS_RELEASED = true;
     }
     break;
   case GLFW_KEY_PERIOD:
     if (action == GLFW_PRESS) {
       input.PERIOD_PRESSED = true;
       input.PERIOD_JUST_PRESSED = true;
+      input.PERIOD_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.PERIOD_PRESSED = true;
       input.PERIOD_JUST_PRESSED = false;
+      input.PERIOD_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.PERIOD_PRESSED = false;
+      input.PERIOD_JUST_PRESSED = false;
+      input.PERIOD_RELEASED = true;
     } else {
       input.PERIOD_PRESSED = false;
       input.PERIOD_JUST_PRESSED = false;
+      input.PERIOD_RELEASED = true;
     }
     break;
   case GLFW_KEY_SLASH:
     if (action == GLFW_PRESS) {
       input.FORWARD_SLASH_PRESSED = true;
       input.FORWARD_SLASH_JUST_PRESSED = true;
+      input.FORWARD_SLASH_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.FORWARD_SLASH_PRESSED = true;
       input.FORWARD_SLASH_JUST_PRESSED = false;
+      input.FORWARD_SLASH_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.FORWARD_SLASH_PRESSED = false;
+      input.FORWARD_SLASH_JUST_PRESSED = false;
+      input.FORWARD_SLASH_RELEASED = true;
     } else {
       input.FORWARD_SLASH_PRESSED = false;
       input.FORWARD_SLASH_JUST_PRESSED = false;
+      input.FORWARD_SLASH_RELEASED = true;
     }
     break;
   case GLFW_KEY_0:
     if (action == GLFW_PRESS) {
       input.ZERO_PRESSED = true;
       input.ZERO_JUST_PRESSED = true;
+      input.ZERO_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.ZERO_PRESSED = true;
       input.ZERO_JUST_PRESSED = false;
+      input.ZERO_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.ZERO_PRESSED = false;
+      input.ZERO_JUST_PRESSED = false;
+      input.ZERO_RELEASED = true;
     } else {
       input.ZERO_PRESSED = false;
       input.ZERO_JUST_PRESSED = false;
+      input.ZERO_RELEASED = true;
     }
     break;
   case GLFW_KEY_1:
     if (action == GLFW_PRESS) {
       input.ONE_PRESSED = true;
       input.ONE_JUST_PRESSED = true;
+      input.ONE_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.ONE_PRESSED = true;
       input.ONE_JUST_PRESSED = false;
+      input.ONE_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.ONE_PRESSED = false;
+      input.ONE_JUST_PRESSED = false;
+      input.ONE_RELEASED = true;
     } else {
       input.ONE_PRESSED = false;
       input.ONE_JUST_PRESSED = false;
+      input.ONE_RELEASED = true;
     }
     break;
   case GLFW_KEY_2:
     if (action == GLFW_PRESS) {
       input.TWO_PRESSED = true;
       input.TWO_JUST_PRESSED = true;
+      input.TWO_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.TWO_PRESSED = true;
       input.TWO_JUST_PRESSED = false;
+      input.TWO_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.TWO_PRESSED = false;
+      input.TWO_JUST_PRESSED = false;
+      input.TWO_RELEASED = true;
     } else {
       input.TWO_PRESSED = false;
       input.TWO_JUST_PRESSED = false;
+      input.TWO_RELEASED = true;
     }
     break;
   case GLFW_KEY_3:
     if (action == GLFW_PRESS) {
       input.THREE_PRESSED = true;
       input.THREE_JUST_PRESSED = true;
+      input.THREE_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.THREE_PRESSED = true;
       input.THREE_JUST_PRESSED = false;
+      input.THREE_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.THREE_PRESSED = false;
+      input.THREE_JUST_PRESSED = false;
+      input.THREE_RELEASED = true;
     } else {
       input.THREE_PRESSED = false;
       input.THREE_JUST_PRESSED = false;
+      input.THREE_RELEASED = true;
     }
     break;
   case GLFW_KEY_4:
     if (action == GLFW_PRESS) {
       input.FOUR_PRESSED = true;
       input.FOUR_JUST_PRESSED = true;
+      input.FOUR_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.FOUR_PRESSED = true;
       input.FOUR_JUST_PRESSED = false;
+      input.FOUR_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.FOUR_PRESSED = false;
+      input.FOUR_JUST_PRESSED = false;
+      input.FOUR_RELEASED = true;
     } else {
       input.FOUR_PRESSED = false;
       input.FOUR_JUST_PRESSED = false;
+      input.FOUR_RELEASED = true;
     }
     break;
   case GLFW_KEY_5:
     if (action == GLFW_PRESS) {
       input.FIVE_PRESSED = true;
       input.FIVE_JUST_PRESSED = true;
+      input.FIVE_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.FIVE_PRESSED = true;
       input.FIVE_JUST_PRESSED = false;
+      input.FIVE_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.FIVE_PRESSED = false;
+      input.FIVE_JUST_PRESSED = false;
+      input.FIVE_RELEASED = true;
     } else {
       input.FIVE_PRESSED = false;
       input.FIVE_JUST_PRESSED = false;
+      input.FIVE_RELEASED = true;
     }
     break;
   case GLFW_KEY_6:
     if (action == GLFW_PRESS) {
       input.SIX_PRESSED = true;
       input.SIX_JUST_PRESSED = true;
+      input.SIX_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.SIX_PRESSED = true;
       input.SIX_JUST_PRESSED = false;
+      input.SIX_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.SIX_PRESSED = false;
+      input.SIX_JUST_PRESSED = false;
+      input.SIX_RELEASED = true;
     } else {
       input.SIX_PRESSED = false;
       input.SIX_JUST_PRESSED = false;
+      input.SIX_RELEASED = true;
     }
     break;
   case GLFW_KEY_7:
     if (action == GLFW_PRESS) {
       input.SEVEN_PRESSED = true;
       input.SEVEN_JUST_PRESSED = true;
+      input.SEVEN_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.SEVEN_PRESSED = true;
       input.SEVEN_JUST_PRESSED = false;
+      input.SEVEN_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.SEVEN_PRESSED = false;
+      input.SEVEN_JUST_PRESSED = false;
+      input.SEVEN_RELEASED = true;
     } else {
       input.SEVEN_PRESSED = false;
       input.SEVEN_JUST_PRESSED = false;
+      input.SEVEN_RELEASED = true;
     }
     break;
   case GLFW_KEY_8:
     if (action == GLFW_PRESS) {
       input.EIGHT_PRESSED = true;
       input.EIGHT_JUST_PRESSED = true;
+      input.EIGHT_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.EIGHT_PRESSED = true;
       input.EIGHT_JUST_PRESSED = false;
+      input.EIGHT_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.EIGHT_PRESSED = false;
+      input.EIGHT_JUST_PRESSED = false;
+      input.EIGHT_RELEASED = true;
     } else {
       input.EIGHT_PRESSED = false;
       input.EIGHT_JUST_PRESSED = false;
+      input.EIGHT_RELEASED = true;
     }
     break;
   case GLFW_KEY_9:
     if (action == GLFW_PRESS) {
       input.NINE_PRESSED = true;
       input.NINE_JUST_PRESSED = true;
+      input.NINE_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.NINE_PRESSED = true;
       input.NINE_JUST_PRESSED = false;
+      input.NINE_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.NINE_PRESSED = false;
+      input.NINE_JUST_PRESSED = false;
+      input.NINE_RELEASED = true;
     } else {
       input.NINE_PRESSED = false;
       input.NINE_JUST_PRESSED = false;
+      input.NINE_RELEASED = true;
     }
     break;
   case GLFW_KEY_SEMICOLON:
     if (action == GLFW_PRESS) {
       input.SEMICOLON_PRESSED = true;
       input.SEMICOLON_JUST_PRESSED = true;
+      input.SEMICOLON_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.SEMICOLON_PRESSED = true;
       input.SEMICOLON_JUST_PRESSED = false;
+      input.SEMICOLON_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.SEMICOLON_PRESSED = false;
+      input.SEMICOLON_JUST_PRESSED = false;
+      input.SEMICOLON_RELEASED = true;
     } else {
       input.SEMICOLON_PRESSED = false;
       input.SEMICOLON_JUST_PRESSED = false;
+      input.SEMICOLON_RELEASED = true;
     }
     break;
   case GLFW_KEY_EQUAL:
     if (action == GLFW_PRESS) {
       input.EQUAL_PRESSED = true;
       input.EQUAL_JUST_PRESSED = true;
+      input.EQUAL_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.EQUAL_PRESSED = true;
       input.EQUAL_JUST_PRESSED = false;
+      input.EQUAL_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.EQUAL_PRESSED = false;
+      input.EQUAL_JUST_PRESSED = false;
+      input.EQUAL_RELEASED = true;
     } else {
       input.EQUAL_PRESSED = false;
       input.EQUAL_JUST_PRESSED = false;
+      input.EQUAL_RELEASED = true;
     }
     break;
   case GLFW_KEY_A:
     if (action == GLFW_PRESS) {
       input.A_PRESSED = true;
       input.A_JUST_PRESSED = true;
+      input.A_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.A_PRESSED = true;
       input.A_JUST_PRESSED = false;
+      input.A_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.A_PRESSED = false;
+      input.A_JUST_PRESSED = false;
+      input.A_RELEASED = true;
     } else {
       input.A_PRESSED = false;
       input.A_JUST_PRESSED = false;
+      input.A_RELEASED = true;
     }
     break;
   case GLFW_KEY_B:
     if (action == GLFW_PRESS) {
       input.B_PRESSED = true;
       input.B_JUST_PRESSED = true;
+      input.B_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.B_PRESSED = true;
       input.B_JUST_PRESSED = false;
+      input.B_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.B_PRESSED = false;
+      input.B_JUST_PRESSED = false;
+      input.B_RELEASED = true;
     } else {
       input.B_PRESSED = false;
       input.B_JUST_PRESSED = false;
+      input.B_RELEASED = true;
     }
     break;
   case GLFW_KEY_C:
     if (action == GLFW_PRESS) {
       input.C_PRESSED = true;
       input.C_JUST_PRESSED = true;
+      input.C_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.C_PRESSED = true;
       input.C_JUST_PRESSED = false;
+      input.C_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.C_PRESSED = false;
+      input.C_JUST_PRESSED = false;
+      input.C_RELEASED = true;
     } else {
       input.C_PRESSED = false;
       input.C_JUST_PRESSED = false;
+      input.C_RELEASED = true;
     }
     break;
   case GLFW_KEY_D:
     if (action == GLFW_PRESS) {
       input.D_PRESSED = true;
       input.D_JUST_PRESSED = true;
+      input.D_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.D_PRESSED = true;
       input.D_JUST_PRESSED = false;
+      input.D_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.D_PRESSED = false;
+      input.D_JUST_PRESSED = false;
+      input.D_RELEASED = true;
     } else {
       input.D_PRESSED = false;
       input.D_JUST_PRESSED = false;
+      input.D_RELEASED = true;
     }
     break;
   case GLFW_KEY_E:
     if (action == GLFW_PRESS) {
       input.E_PRESSED = true;
       input.E_JUST_PRESSED = true;
+      input.E_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.E_PRESSED = true;
       input.E_JUST_PRESSED = false;
+      input.E_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.E_PRESSED = false;
+      input.E_JUST_PRESSED = false;
+      input.E_RELEASED = true;
     } else {
       input.E_PRESSED = false;
       input.E_JUST_PRESSED = false;
+      input.E_RELEASED = true;
     }
     break;
   case GLFW_KEY_F:
     if (action == GLFW_PRESS) {
       input.F_PRESSED = true;
       input.F_JUST_PRESSED = true;
+      input.F_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.F_PRESSED = true;
       input.F_JUST_PRESSED = false;
+      input.F_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.F_PRESSED = false;
+      input.F_JUST_PRESSED = false;
+      input.F_RELEASED = true;
     } else {
       input.F_PRESSED = false;
       input.F_JUST_PRESSED = false;
+      input.F_RELEASED = true;
     }
     break;
   case GLFW_KEY_G:
     if (action == GLFW_PRESS) {
       input.G_PRESSED = true;
       input.G_JUST_PRESSED = true;
+      input.G_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.G_PRESSED = true;
       input.G_JUST_PRESSED = false;
+      input.G_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.G_PRESSED = false;
+      input.G_JUST_PRESSED = false;
+      input.G_RELEASED = true;
     } else {
       input.G_PRESSED = false;
       input.G_JUST_PRESSED = false;
+      input.G_RELEASED = true;
     }
     break;
   case GLFW_KEY_H:
     if (action == GLFW_PRESS) {
       input.H_PRESSED = true;
       input.H_JUST_PRESSED = true;
+      input.H_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.H_PRESSED = true;
       input.H_JUST_PRESSED = false;
+      input.H_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.H_PRESSED = false;
+      input.H_JUST_PRESSED = false;
+      input.H_RELEASED = true;
     } else {
       input.H_PRESSED = false;
       input.H_JUST_PRESSED = false;
+      input.H_RELEASED = true;
     }
     break;
   case GLFW_KEY_I:
     if (action == GLFW_PRESS) {
       input.I_PRESSED = true;
       input.I_JUST_PRESSED = true;
+      input.I_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.I_PRESSED = true;
       input.I_JUST_PRESSED = false;
+      input.I_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.I_PRESSED = false;
+      input.I_JUST_PRESSED = false;
+      input.I_RELEASED = true;
     } else {
       input.I_PRESSED = false;
       input.I_JUST_PRESSED = false;
+      input.I_RELEASED = true;
     }
     break;
   case GLFW_KEY_J:
     if (action == GLFW_PRESS) {
       input.J_PRESSED = true;
       input.J_JUST_PRESSED = true;
+      input.J_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.J_PRESSED = true;
       input.J_JUST_PRESSED = false;
+      input.J_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.J_PRESSED = false;
+      input.J_JUST_PRESSED = false;
+      input.J_RELEASED = true;
     } else {
       input.J_PRESSED = false;
       input.J_JUST_PRESSED = false;
+      input.J_RELEASED = true;
     }
     break;
   case GLFW_KEY_K:
     if (action == GLFW_PRESS) {
       input.K_PRESSED = true;
       input.K_JUST_PRESSED = true;
+      input.K_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.K_PRESSED = true;
       input.K_JUST_PRESSED = false;
+      input.K_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.K_PRESSED = false;
+      input.K_JUST_PRESSED = false;
+      input.K_RELEASED = true;
     } else {
       input.K_PRESSED = false;
       input.K_JUST_PRESSED = false;
+      input.K_RELEASED = true;
     }
     break;
   case GLFW_KEY_L:
     if (action == GLFW_PRESS) {
       input.L_PRESSED = true;
       input.L_JUST_PRESSED = true;
+      input.L_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.L_PRESSED = true;
       input.L_JUST_PRESSED = false;
+      input.L_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.L_PRESSED = false;
+      input.L_JUST_PRESSED = false;
+      input.L_RELEASED = true;
     } else {
       input.L_PRESSED = false;
       input.L_JUST_PRESSED = false;
+      input.L_RELEASED = true;
     }
     break;
   case GLFW_KEY_M:
     if (action == GLFW_PRESS) {
       input.M_PRESSED = true;
       input.M_JUST_PRESSED = true;
+      input.M_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.M_PRESSED = true;
       input.M_JUST_PRESSED = false;
+      input.M_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.M_PRESSED = false;
+      input.M_JUST_PRESSED = false;
+      input.M_RELEASED = true;
     } else {
       input.M_PRESSED = false;
       input.M_JUST_PRESSED = false;
+      input.M_RELEASED = true;
     }
     break;
   case GLFW_KEY_N:
     if (action == GLFW_PRESS) {
       input.N_PRESSED = true;
       input.N_JUST_PRESSED = true;
+      input.N_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.N_PRESSED = true;
       input.N_JUST_PRESSED = false;
+      input.N_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.N_PRESSED = false;
+      input.N_JUST_PRESSED = false;
+      input.N_RELEASED = true;
     } else {
       input.N_PRESSED = false;
       input.N_JUST_PRESSED = false;
+      input.N_RELEASED = true;
     }
     break;
   case GLFW_KEY_O:
     if (action == GLFW_PRESS) {
       input.O_PRESSED = true;
       input.O_JUST_PRESSED = true;
+      input.O_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.O_PRESSED = true;
       input.O_JUST_PRESSED = false;
+      input.O_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.O_PRESSED = false;
+      input.O_JUST_PRESSED = false;
+      input.O_RELEASED = true;
     } else {
       input.O_PRESSED = false;
       input.O_JUST_PRESSED = false;
+      input.O_RELEASED = true;
     }
     break;
   case GLFW_KEY_P:
     if (action == GLFW_PRESS) {
       input.P_PRESSED = true;
       input.P_JUST_PRESSED = true;
+      input.P_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.P_PRESSED = true;
       input.P_JUST_PRESSED = false;
+      input.P_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.P_PRESSED = false;
+      input.P_JUST_PRESSED = false;
+      input.P_RELEASED = true;
     } else {
       input.P_PRESSED = false;
       input.P_JUST_PRESSED = false;
+      input.P_RELEASED = true;
     }
     break;
   case GLFW_KEY_Q:
     if (action == GLFW_PRESS) {
       input.Q_PRESSED = true;
       input.Q_JUST_PRESSED = true;
+      input.Q_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.Q_PRESSED = true;
       input.Q_JUST_PRESSED = false;
+      input.Q_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.Q_PRESSED = false;
+      input.Q_JUST_PRESSED = false;
+      input.Q_RELEASED = true;
     } else {
       input.Q_PRESSED = false;
       input.Q_JUST_PRESSED = false;
+      input.Q_RELEASED = true;
     }
     break;
   case GLFW_KEY_R:
     if (action == GLFW_PRESS) {
       input.R_PRESSED = true;
       input.R_JUST_PRESSED = true;
+      input.R_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.R_PRESSED = true;
       input.R_JUST_PRESSED = false;
+      input.R_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.R_PRESSED = false;
+      input.R_JUST_PRESSED = false;
+      input.R_RELEASED = true;
     } else {
       input.R_PRESSED = false;
       input.R_JUST_PRESSED = false;
+      input.R_RELEASED = true;
     }
     break;
   case GLFW_KEY_S:
     if (action == GLFW_PRESS) {
       input.S_PRESSED = true;
       input.S_JUST_PRESSED = true;
+      input.S_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.S_PRESSED = true;
       input.S_JUST_PRESSED = false;
+      input.S_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.S_PRESSED = false;
+      input.S_JUST_PRESSED = false;
+      input.S_RELEASED = true;
     } else {
       input.S_PRESSED = false;
       input.S_JUST_PRESSED = false;
+      input.S_RELEASED = true;
     }
     break;
   case GLFW_KEY_T:
     if (action == GLFW_PRESS) {
       input.T_PRESSED = true;
       input.T_JUST_PRESSED = true;
+      input.T_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.T_PRESSED = true;
       input.T_JUST_PRESSED = false;
+      input.T_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.T_PRESSED = false;
+      input.T_JUST_PRESSED = false;
+      input.T_RELEASED = true;
     } else {
       input.T_PRESSED = false;
       input.T_JUST_PRESSED = false;
+      input.T_RELEASED = true;
     }
     break;
   case GLFW_KEY_U:
     if (action == GLFW_PRESS) {
       input.U_PRESSED = true;
       input.U_JUST_PRESSED = true;
+      input.U_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.U_PRESSED = true;
       input.U_JUST_PRESSED = false;
+      input.U_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.U_PRESSED = false;
+      input.U_JUST_PRESSED = false;
+      input.U_RELEASED = true;
     } else {
       input.U_PRESSED = false;
       input.U_JUST_PRESSED = false;
+      input.U_RELEASED = true;
     }
     break;
   case GLFW_KEY_V:
     if (action == GLFW_PRESS) {
       input.V_PRESSED = true;
       input.V_JUST_PRESSED = true;
+      input.V_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.V_PRESSED = true;
       input.V_JUST_PRESSED = false;
+      input.V_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.V_PRESSED = false;
+      input.V_JUST_PRESSED = false;
+      input.V_RELEASED = true;
     } else {
       input.V_PRESSED = false;
       input.V_JUST_PRESSED = false;
+      input.V_RELEASED = true;
     }
     break;
   case GLFW_KEY_W:
     if (action == GLFW_PRESS) {
       input.W_PRESSED = true;
       input.W_JUST_PRESSED = true;
+      input.W_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.W_PRESSED = true;
       input.W_JUST_PRESSED = false;
+      input.W_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.W_PRESSED = false;
+      input.W_JUST_PRESSED = false;
+      input.W_RELEASED = true;
     } else {
       input.W_PRESSED = false;
       input.W_JUST_PRESSED = false;
+      input.W_RELEASED = true;
     }
     break;
   case GLFW_KEY_X:
     if (action == GLFW_PRESS) {
       input.X_PRESSED = true;
       input.X_JUST_PRESSED = true;
+      input.X_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.X_PRESSED = true;
       input.X_JUST_PRESSED = false;
+      input.X_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.X_PRESSED = false;
+      input.X_JUST_PRESSED = false;
+      input.X_RELEASED = true;
     } else {
       input.X_PRESSED = false;
       input.X_JUST_PRESSED = false;
+      input.X_RELEASED = true;
     }
     break;
   case GLFW_KEY_Y:
     if (action == GLFW_PRESS) {
       input.Y_PRESSED = true;
       input.Y_JUST_PRESSED = true;
+      input.Y_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.Y_PRESSED = true;
       input.Y_JUST_PRESSED = false;
+      input.Y_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.Y_PRESSED = false;
+      input.Y_JUST_PRESSED = false;
+      input.Y_RELEASED = true;
     } else {
       input.Y_PRESSED = false;
       input.Y_JUST_PRESSED = false;
+      input.Y_RELEASED = true;
     }
     break;
   case GLFW_KEY_Z:
     if (action == GLFW_PRESS) {
       input.Z_PRESSED = true;
       input.Z_JUST_PRESSED = true;
+      input.Z_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.Z_PRESSED = true;
       input.Z_JUST_PRESSED = false;
+      input.Z_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.Z_PRESSED = false;
+      input.Z_JUST_PRESSED = false;
+      input.Z_RELEASED = true;
     } else {
       input.Z_PRESSED = false;
       input.Z_JUST_PRESSED = false;
+      input.Z_RELEASED = true;
     }
     break;
   case GLFW_KEY_LEFT_BRACKET:
     if (action == GLFW_PRESS) {
       input.LEFT_BRACKET_PRESSED = true;
       input.LEFT_BRACKET_JUST_PRESSED = true;
+      input.LEFT_BRACKET_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.LEFT_BRACKET_PRESSED = true;
       input.LEFT_BRACKET_JUST_PRESSED = false;
+      input.LEFT_BRACKET_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.LEFT_BRACKET_PRESSED = false;
+      input.LEFT_BRACKET_JUST_PRESSED = false;
+      input.LEFT_BRACKET_RELEASED = true;
     } else {
       input.LEFT_BRACKET_PRESSED = false;
       input.LEFT_BRACKET_JUST_PRESSED = false;
+      input.LEFT_BRACKET_RELEASED = true;
     }
     break;
   case GLFW_KEY_RIGHT_BRACKET:
     if (action == GLFW_PRESS) {
       input.RIGHT_BRACKET_PRESSED = true;
       input.RIGHT_BRACKET_JUST_PRESSED = true;
+      input.RIGHT_BRACKET_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.RIGHT_BRACKET_PRESSED = true;
       input.RIGHT_BRACKET_JUST_PRESSED = false;
+      input.RIGHT_BRACKET_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.RIGHT_BRACKET_PRESSED = false;
+      input.RIGHT_BRACKET_JUST_PRESSED = false;
+      input.RIGHT_BRACKET_RELEASED = true;
     } else {
       input.RIGHT_BRACKET_PRESSED = false;
       input.RIGHT_BRACKET_JUST_PRESSED = false;
+      input.RIGHT_BRACKET_RELEASED = true;
     }
     break;
   case GLFW_KEY_GRAVE_ACCENT:
     if (action == GLFW_PRESS) {
       input.GRAVE_ACCENT_PRESSED = true;
       input.GRAVE_ACCENT_JUST_PRESSED = true;
+      input.GRAVE_ACCENT_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.GRAVE_ACCENT_PRESSED = true;
       input.GRAVE_ACCENT_JUST_PRESSED = false;
+      input.GRAVE_ACCENT_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.GRAVE_ACCENT_PRESSED = false;
+      input.GRAVE_ACCENT_JUST_PRESSED = false;
+      input.GRAVE_ACCENT_RELEASED = true;
     } else {
       input.GRAVE_ACCENT_PRESSED = false;
       input.GRAVE_ACCENT_JUST_PRESSED = false;
+      input.GRAVE_ACCENT_RELEASED = true;
     }
     break;
   case GLFW_KEY_ESCAPE:
     if (action == GLFW_PRESS) {
       input.ESCAPE_PRESSED = true;
       input.ESCAPE_JUST_PRESSED = true;
+      input.ESCAPE_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.ESCAPE_PRESSED = true;
       input.ESCAPE_JUST_PRESSED = false;
+      input.ESCAPE_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.ESCAPE_PRESSED = false;
+      input.ESCAPE_JUST_PRESSED = false;
+      input.ESCAPE_RELEASED = true;
     } else {
       input.ESCAPE_PRESSED = false;
       input.ESCAPE_JUST_PRESSED = false;
+      input.ESCAPE_RELEASED = true;
     }
     break;
   case GLFW_KEY_ENTER:
     if (action == GLFW_PRESS) {
       input.ENTER_PRESSED = true;
       input.ENTER_JUST_PRESSED = true;
+      input.ENTER_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.ENTER_PRESSED = true;
       input.ENTER_JUST_PRESSED = false;
+      input.ENTER_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.ENTER_PRESSED = false;
+      input.ENTER_JUST_PRESSED = false;
+      input.ENTER_RELEASED = true;
     } else {
       input.ENTER_PRESSED = false;
       input.ENTER_JUST_PRESSED = false;
+      input.ENTER_RELEASED = true;
     }
     break;
   case GLFW_KEY_TAB:
     if (action == GLFW_PRESS) {
       input.TAB_PRESSED = true;
       input.TAB_JUST_PRESSED = true;
+      input.TAB_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.TAB_PRESSED = true;
       input.TAB_JUST_PRESSED = false;
+      input.TAB_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.TAB_PRESSED = false;
+      input.TAB_JUST_PRESSED = false;
+      input.TAB_RELEASED = true;
     } else {
       input.TAB_PRESSED = false;
       input.TAB_JUST_PRESSED = false;
+      input.TAB_RELEASED = true;
     }
     break;
   case GLFW_KEY_BACKSPACE:
     if (action == GLFW_PRESS) {
       input.BACKSPACE_PRESSED = true;
       input.BACKSPACE_JUST_PRESSED = true;
+      input.BACKSPACE_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.BACKSPACE_PRESSED = true;
       input.BACKSPACE_JUST_PRESSED = false;
+      input.BACKSPACE_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.BACKSPACE_PRESSED = false;
+      input.BACKSPACE_JUST_PRESSED = false;
+      input.BACKSPACE_RELEASED = true;
     } else {
       input.BACKSPACE_PRESSED = false;
       input.BACKSPACE_JUST_PRESSED = false;
+      input.BACKSPACE_RELEASED = true;
     }
     break;
   case GLFW_KEY_INSERT:
     if (action == GLFW_PRESS) {
       input.INSERT_PRESSED = true;
       input.INSERT_JUST_PRESSED = true;
+      input.INSERT_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.INSERT_PRESSED = true;
       input.INSERT_JUST_PRESSED = false;
+      input.INSERT_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.INSERT_PRESSED = false;
+      input.INSERT_JUST_PRESSED = false;
+      input.INSERT_RELEASED = true;
     } else {
       input.INSERT_PRESSED = false;
       input.INSERT_JUST_PRESSED = false;
+      input.INSERT_RELEASED = true;
     }
     break;
   case GLFW_KEY_DELETE:
     if (action == GLFW_PRESS) {
       input.DELETE_PRESSED = true;
       input.DELETE_JUST_PRESSED = true;
+      input.DELETE_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.DELETE_PRESSED = true;
       input.DELETE_JUST_PRESSED = false;
+      input.DELETE_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.DELETE_PRESSED = false;
+      input.DELETE_JUST_PRESSED = false;
+      input.DELETE_RELEASED = true;
     } else {
       input.DELETE_PRESSED = false;
       input.DELETE_JUST_PRESSED = false;
+      input.DELETE_RELEASED = true;
     }
     break;
   case GLFW_KEY_RIGHT:
     if (action == GLFW_PRESS) {
       input.RIGHT_PRESSED = true;
       input.RIGHT_JUST_PRESSED = true;
+      input.RIGHT_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.RIGHT_PRESSED = true;
       input.RIGHT_JUST_PRESSED = false;
+      input.RIGHT_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.RIGHT_PRESSED = false;
+      input.RIGHT_JUST_PRESSED = false;
+      input.RIGHT_RELEASED = true;
     } else {
       input.RIGHT_PRESSED = false;
       input.RIGHT_JUST_PRESSED = false;
+      input.RIGHT_RELEASED = true;
     }
     break;
   case GLFW_KEY_LEFT:
     if (action == GLFW_PRESS) {
       input.LEFT_PRESSED = true;
       input.LEFT_JUST_PRESSED = true;
+      input.LEFT_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.LEFT_PRESSED = true;
       input.LEFT_JUST_PRESSED = false;
+      input.LEFT_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.LEFT_PRESSED = false;
+      input.LEFT_JUST_PRESSED = false;
+      input.LEFT_RELEASED = true;
     } else {
       input.LEFT_PRESSED = false;
       input.LEFT_JUST_PRESSED = false;
+      input.LEFT_RELEASED = true;
     }
     break;
   case GLFW_KEY_UP:
     if (action == GLFW_PRESS) {
       input.UP_PRESSED = true;
       input.UP_JUST_PRESSED = true;
+      input.UP_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.UP_PRESSED = true;
       input.UP_JUST_PRESSED = false;
+      input.UP_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.UP_PRESSED = false;
+      input.UP_JUST_PRESSED = false;
+      input.UP_RELEASED = true;
     } else {
       input.UP_PRESSED = false;
       input.UP_JUST_PRESSED = false;
+      input.UP_RELEASED = true;
     }
     break;
   case GLFW_KEY_DOWN:
     if (action == GLFW_PRESS) {
       input.DOWN_PRESSED = true;
       input.DOWN_JUST_PRESSED = true;
+      input.DOWN_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.DOWN_PRESSED = true;
       input.DOWN_JUST_PRESSED = false;
+      input.DOWN_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.DOWN_PRESSED = false;
+      input.DOWN_JUST_PRESSED = false;
+      input.DOWN_RELEASED = true;
     } else {
       input.DOWN_PRESSED = false;
       input.DOWN_JUST_PRESSED = false;
+      input.DOWN_RELEASED = true;
     }
     break;
   case GLFW_KEY_PAGE_UP:
     if (action == GLFW_PRESS) {
       input.PAGE_UP_PRESSED = true;
       input.PAGE_UP_JUST_PRESSED = true;
+      input.PAGE_UP_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.PAGE_UP_PRESSED = true;
       input.PAGE_UP_JUST_PRESSED = false;
+      input.PAGE_UP_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.PAGE_UP_PRESSED = false;
+      input.PAGE_UP_JUST_PRESSED = false;
+      input.PAGE_UP_RELEASED = true;
     } else {
       input.PAGE_UP_PRESSED = false;
       input.PAGE_UP_JUST_PRESSED = false;
+      input.PAGE_UP_RELEASED = true;
     }
     break;
   case GLFW_KEY_PAGE_DOWN:
     if (action == GLFW_PRESS) {
       input.PAGE_DOWN_PRESSED = true;
       input.PAGE_DOWN_JUST_PRESSED = true;
+      input.PAGE_DOWN_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.PAGE_DOWN_PRESSED = true;
       input.PAGE_DOWN_JUST_PRESSED = false;
+      input.PAGE_DOWN_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.PAGE_DOWN_PRESSED = false;
+      input.PAGE_DOWN_JUST_PRESSED = false;
+      input.PAGE_DOWN_RELEASED = true;
     } else {
       input.PAGE_DOWN_PRESSED = false;
       input.PAGE_DOWN_JUST_PRESSED = false;
+      input.PAGE_DOWN_RELEASED = true;
     }
     break;
-  case GLFW_KEY_HOME:
     if (action == GLFW_PRESS) {
       input.HOME_PRESSED = true;
       input.HOME_JUST_PRESSED = true;
+      input.HOME_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.HOME_PRESSED = true;
       input.HOME_JUST_PRESSED = false;
+      input.HOME_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.HOME_PRESSED = false;
+      input.HOME_JUST_PRESSED = false;
+      input.HOME_RELEASED = true;
     } else {
       input.HOME_PRESSED = false;
       input.HOME_JUST_PRESSED = false;
+      input.HOME_RELEASED = true;
     }
     break;
   case GLFW_KEY_END:
     if (action == GLFW_PRESS) {
       input.END_PRESSED = true;
       input.END_JUST_PRESSED = true;
+      input.END_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.END_PRESSED = true;
       input.END_JUST_PRESSED = false;
+      input.END_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.END_PRESSED = false;
+      input.END_JUST_PRESSED = false;
+      input.END_RELEASED = true;
     } else {
       input.END_PRESSED = false;
       input.END_JUST_PRESSED = false;
+      input.END_RELEASED = true;
     }
     break;
   case GLFW_KEY_CAPS_LOCK:
     if (action == GLFW_PRESS) {
       input.CAPS_LOCK_PRESSED = true;
       input.CAPS_LOCK_JUST_PRESSED = true;
+      input.CAPS_LOCK_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.CAPS_LOCK_PRESSED = true;
       input.CAPS_LOCK_JUST_PRESSED = false;
+      input.CAPS_LOCK_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.CAPS_LOCK_PRESSED = false;
+      input.CAPS_LOCK_JUST_PRESSED = false;
+      input.CAPS_LOCK_RELEASED = true;
     } else {
       input.CAPS_LOCK_PRESSED = false;
       input.CAPS_LOCK_JUST_PRESSED = false;
+      input.CAPS_LOCK_RELEASED = true;
     }
     break;
   case GLFW_KEY_SCROLL_LOCK:
     if (action == GLFW_PRESS) {
       input.SCROLL_LOCK_PRESSED = true;
       input.SCROLL_LOCK_JUST_PRESSED = true;
+      input.SCROLL_LOCK_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.SCROLL_LOCK_PRESSED = true;
       input.SCROLL_LOCK_JUST_PRESSED = false;
+      input.SCROLL_LOCK_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.SCROLL_LOCK_PRESSED = false;
+      input.SCROLL_LOCK_JUST_PRESSED = false;
+      input.SCROLL_LOCK_RELEASED = true;
     } else {
       input.SCROLL_LOCK_PRESSED = false;
       input.SCROLL_LOCK_JUST_PRESSED = false;
+      input.SCROLL_LOCK_RELEASED = true;
     }
     break;
   case GLFW_KEY_NUM_LOCK:
     if (action == GLFW_PRESS) {
       input.NUM_LOCK_PRESSED = true;
       input.NUM_LOCK_JUST_PRESSED = true;
+      input.NUM_LOCK_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.NUM_LOCK_PRESSED = true;
       input.NUM_LOCK_JUST_PRESSED = false;
+      input.NUM_LOCK_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.NUM_LOCK_PRESSED = false;
+      input.NUM_LOCK_JUST_PRESSED = false;
+      input.NUM_LOCK_RELEASED = true;
     } else {
       input.NUM_LOCK_PRESSED = false;
       input.NUM_LOCK_JUST_PRESSED = false;
+      input.NUM_LOCK_RELEASED = true;
     }
     break;
   case GLFW_KEY_PRINT_SCREEN:
     if (action == GLFW_PRESS) {
       input.PRINT_SCREEN_PRESSED = true;
       input.PRINT_SCREEN_JUST_PRESSED = true;
+      input.PRINT_SCREEN_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.PRINT_SCREEN_PRESSED = true;
       input.PRINT_SCREEN_JUST_PRESSED = false;
+      input.PRINT_SCREEN_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.PRINT_SCREEN_PRESSED = false;
+      input.PRINT_SCREEN_JUST_PRESSED = false;
+      input.PRINT_SCREEN_RELEASED = true;
     } else {
       input.PRINT_SCREEN_PRESSED = false;
       input.PRINT_SCREEN_JUST_PRESSED = false;
+      input.PRINT_SCREEN_RELEASED = true;
     }
     break;
   case GLFW_KEY_PAUSE:
     if (action == GLFW_PRESS) {
       input.PAUSE_PRESSED = true;
       input.PAUSE_JUST_PRESSED = true;
+      input.PAUSE_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.PAUSE_PRESSED = true;
       input.PAUSE_JUST_PRESSED = false;
+      input.PAUSE_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.PAUSE_PRESSED = false;
+      input.PAUSE_JUST_PRESSED = false;
+      input.PAUSE_RELEASED = true;
     } else {
       input.PAUSE_PRESSED = false;
       input.PAUSE_JUST_PRESSED = false;
+      input.PAUSE_RELEASED = true;
     }
     break;
   case GLFW_KEY_F1:
     if (action == GLFW_PRESS) {
       input.F1_PRESSED = true;
       input.F1_JUST_PRESSED = true;
+      input.F1_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.F1_PRESSED = true;
       input.F1_JUST_PRESSED = false;
+      input.F1_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.F1_PRESSED = false;
+      input.F1_JUST_PRESSED = false;
+      input.F1_RELEASED = true;
     } else {
       input.F1_PRESSED = false;
       input.F1_JUST_PRESSED = false;
+      input.F1_RELEASED = true;
     }
     break;
   case GLFW_KEY_F2:
     if (action == GLFW_PRESS) {
       input.F2_PRESSED = true;
       input.F2_JUST_PRESSED = true;
+      input.F2_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.F2_PRESSED = true;
       input.F2_JUST_PRESSED = false;
+      input.F2_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.F2_PRESSED = false;
+      input.F2_JUST_PRESSED = false;
+      input.F2_RELEASED = true;
     } else {
       input.F2_PRESSED = false;
       input.F2_JUST_PRESSED = false;
+      input.F2_RELEASED = true;
     }
     break;
   case GLFW_KEY_F3:
     if (action == GLFW_PRESS) {
       input.F3_PRESSED = true;
       input.F3_JUST_PRESSED = true;
+      input.F3_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.F3_PRESSED = true;
       input.F3_JUST_PRESSED = false;
+      input.F3_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.F3_PRESSED = false;
+      input.F3_JUST_PRESSED = false;
+      input.F3_RELEASED = true;
     } else {
       input.F3_PRESSED = false;
       input.F3_JUST_PRESSED = false;
+      input.F3_RELEASED = true;
     }
     break;
   case GLFW_KEY_F4:
     if (action == GLFW_PRESS) {
       input.F4_PRESSED = true;
       input.F4_JUST_PRESSED = true;
+      input.F4_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.F4_PRESSED = true;
       input.F4_JUST_PRESSED = false;
+      input.F4_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.F4_PRESSED = false;
+      input.F4_JUST_PRESSED = false;
+      input.F4_RELEASED = true;
     } else {
       input.F4_PRESSED = false;
       input.F4_JUST_PRESSED = false;
+      input.F4_RELEASED = true;
     }
     break;
   case GLFW_KEY_F5:
     if (action == GLFW_PRESS) {
       input.F5_PRESSED = true;
       input.F5_JUST_PRESSED = true;
+      input.F5_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.F5_PRESSED = true;
       input.F5_JUST_PRESSED = false;
+      input.F5_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.F5_PRESSED = false;
+      input.F5_JUST_PRESSED = false;
+      input.F5_RELEASED = true;
     } else {
       input.F5_PRESSED = false;
       input.F5_JUST_PRESSED = false;
+      input.F5_RELEASED = true;
     }
     break;
   case GLFW_KEY_F6:
     if (action == GLFW_PRESS) {
       input.F6_PRESSED = true;
       input.F6_JUST_PRESSED = true;
+      input.F6_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.F6_PRESSED = true;
       input.F6_JUST_PRESSED = false;
+      input.F6_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.F6_PRESSED = false;
+      input.F6_JUST_PRESSED = false;
+      input.F6_RELEASED = true;
     } else {
       input.F6_PRESSED = false;
       input.F6_JUST_PRESSED = false;
+      input.F6_RELEASED = true;
     }
     break;
   case GLFW_KEY_F7:
     if (action == GLFW_PRESS) {
       input.F7_PRESSED = true;
       input.F7_JUST_PRESSED = true;
+      input.F7_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.F7_PRESSED = true;
       input.F7_JUST_PRESSED = false;
+      input.F7_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.F7_PRESSED = false;
+      input.F7_JUST_PRESSED = false;
+      input.F7_RELEASED = true;
     } else {
       input.F7_PRESSED = false;
       input.F7_JUST_PRESSED = false;
+      input.F7_RELEASED = true;
     }
     break;
   case GLFW_KEY_F8:
     if (action == GLFW_PRESS) {
       input.F8_PRESSED = true;
       input.F8_JUST_PRESSED = true;
+      input.F8_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.F8_PRESSED = true;
       input.F8_JUST_PRESSED = false;
+      input.F8_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.F8_PRESSED = false;
+      input.F8_JUST_PRESSED = false;
+      input.F8_RELEASED = true;
     } else {
       input.F8_PRESSED = false;
       input.F8_JUST_PRESSED = false;
+      input.F8_RELEASED = true;
     }
     break;
   case GLFW_KEY_F9:
     if (action == GLFW_PRESS) {
       input.F9_PRESSED = true;
       input.F9_JUST_PRESSED = true;
+      input.F9_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.F9_PRESSED = true;
       input.F9_JUST_PRESSED = false;
+      input.F9_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.F9_PRESSED = false;
+      input.F9_JUST_PRESSED = false;
+      input.F9_RELEASED = true;
     } else {
       input.F9_PRESSED = false;
       input.F9_JUST_PRESSED = false;
+      input.F9_RELEASED = true;
     }
     break;
   case GLFW_KEY_F10:
     if (action == GLFW_PRESS) {
       input.F10_PRESSED = true;
       input.F10_JUST_PRESSED = true;
+      input.F10_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.F10_PRESSED = true;
       input.F10_JUST_PRESSED = false;
+      input.F10_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.F10_PRESSED = false;
+      input.F10_JUST_PRESSED = false;
+      input.F10_RELEASED = true;
     } else {
       input.F10_PRESSED = false;
       input.F10_JUST_PRESSED = false;
+      input.F10_RELEASED = true;
     }
     break;
   case GLFW_KEY_F11:
     if (action == GLFW_PRESS) {
       input.F11_PRESSED = true;
       input.F11_JUST_PRESSED = true;
+      input.F11_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.F11_PRESSED = true;
       input.F11_JUST_PRESSED = false;
+      input.F11_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.F11_PRESSED = false;
+      input.F11_JUST_PRESSED = false;
+      input.F11_RELEASED = true;
     } else {
       input.F11_PRESSED = false;
       input.F11_JUST_PRESSED = false;
+      input.F11_RELEASED = true;
     }
     break;
   case GLFW_KEY_F12:
     if (action == GLFW_PRESS) {
       input.F12_PRESSED = true;
       input.F12_JUST_PRESSED = true;
+      input.F12_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.F12_PRESSED = true;
       input.F12_JUST_PRESSED = false;
+      input.F12_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.F12_PRESSED = false;
+      input.F12_JUST_PRESSED = false;
+      input.F12_RELEASED = true;
     } else {
       input.F12_PRESSED = false;
       input.F12_JUST_PRESSED = false;
+      input.F12_RELEASED = true;
     }
     break;
   case GLFW_KEY_KP_0:
     if (action == GLFW_PRESS) {
       input.KEY_PAD_0_PRESSED = true;
       input.KEY_PAD_0_JUST_PRESSED = true;
+      input.KEY_PAD_0_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.KEY_PAD_0_PRESSED = true;
       input.KEY_PAD_0_JUST_PRESSED = false;
+      input.KEY_PAD_0_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.KEY_PAD_0_PRESSED = false;
+      input.KEY_PAD_0_JUST_PRESSED = false;
+      input.KEY_PAD_0_RELEASED = true;
     } else {
       input.KEY_PAD_0_PRESSED = false;
       input.KEY_PAD_0_JUST_PRESSED = false;
+      input.KEY_PAD_0_RELEASED = true;
     }
     break;
   case GLFW_KEY_KP_1:
     if (action == GLFW_PRESS) {
       input.KEY_PAD_1_PRESSED = true;
       input.KEY_PAD_1_JUST_PRESSED = true;
+      input.KEY_PAD_1_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.KEY_PAD_1_PRESSED = true;
       input.KEY_PAD_1_JUST_PRESSED = false;
+      input.KEY_PAD_1_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.KEY_PAD_1_PRESSED = false;
+      input.KEY_PAD_1_JUST_PRESSED = false;
+      input.KEY_PAD_1_RELEASED = true;
     } else {
       input.KEY_PAD_1_PRESSED = false;
       input.KEY_PAD_1_JUST_PRESSED = false;
+      input.KEY_PAD_1_RELEASED = true;
     }
     break;
   case GLFW_KEY_KP_2:
     if (action == GLFW_PRESS) {
       input.KEY_PAD_2_PRESSED = true;
       input.KEY_PAD_2_JUST_PRESSED = true;
+      input.KEY_PAD_2_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.KEY_PAD_2_PRESSED = true;
       input.KEY_PAD_2_JUST_PRESSED = false;
+      input.KEY_PAD_2_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.KEY_PAD_2_PRESSED = false;
+      input.KEY_PAD_2_JUST_PRESSED = false;
+      input.KEY_PAD_2_RELEASED = true;
     } else {
       input.KEY_PAD_2_PRESSED = false;
       input.KEY_PAD_2_JUST_PRESSED = false;
+      input.KEY_PAD_2_RELEASED = true;
     }
     break;
   case GLFW_KEY_KP_3:
     if (action == GLFW_PRESS) {
       input.KEY_PAD_3_PRESSED = true;
       input.KEY_PAD_3_JUST_PRESSED = true;
+      input.KEY_PAD_3_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.KEY_PAD_3_PRESSED = true;
       input.KEY_PAD_3_JUST_PRESSED = false;
+      input.KEY_PAD_3_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.KEY_PAD_3_PRESSED = false;
+      input.KEY_PAD_3_JUST_PRESSED = false;
+      input.KEY_PAD_3_RELEASED = true;
     } else {
       input.KEY_PAD_3_PRESSED = false;
       input.KEY_PAD_3_JUST_PRESSED = false;
+      input.KEY_PAD_3_RELEASED = true;
     }
     break;
   case GLFW_KEY_KP_4:
     if (action == GLFW_PRESS) {
       input.KEY_PAD_4_PRESSED = true;
       input.KEY_PAD_4_JUST_PRESSED = true;
+      input.KEY_PAD_4_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.KEY_PAD_4_PRESSED = true;
       input.KEY_PAD_4_JUST_PRESSED = false;
+      input.KEY_PAD_4_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.KEY_PAD_4_PRESSED = false;
+      input.KEY_PAD_4_JUST_PRESSED = false;
+      input.KEY_PAD_4_RELEASED = true;
     } else {
       input.KEY_PAD_4_PRESSED = false;
       input.KEY_PAD_4_JUST_PRESSED = false;
+      input.KEY_PAD_4_RELEASED = true;
     }
     break;
   case GLFW_KEY_KP_5:
     if (action == GLFW_PRESS) {
       input.KEY_PAD_5_PRESSED = true;
       input.KEY_PAD_5_JUST_PRESSED = true;
+      input.KEY_PAD_5_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.KEY_PAD_5_PRESSED = true;
       input.KEY_PAD_5_JUST_PRESSED = false;
+      input.KEY_PAD_5_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.KEY_PAD_5_PRESSED = false;
+      input.KEY_PAD_5_JUST_PRESSED = false;
+      input.KEY_PAD_5_RELEASED = true;
     } else {
       input.KEY_PAD_5_PRESSED = false;
       input.KEY_PAD_5_JUST_PRESSED = false;
+      input.KEY_PAD_5_RELEASED = true;
     }
     break;
   case GLFW_KEY_KP_6:
     if (action == GLFW_PRESS) {
       input.KEY_PAD_6_PRESSED = true;
       input.KEY_PAD_6_JUST_PRESSED = true;
+      input.KEY_PAD_6_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.KEY_PAD_6_PRESSED = true;
       input.KEY_PAD_6_JUST_PRESSED = false;
+      input.KEY_PAD_6_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.KEY_PAD_6_PRESSED = false;
+      input.KEY_PAD_6_JUST_PRESSED = false;
+      input.KEY_PAD_6_RELEASED = true;
     } else {
       input.KEY_PAD_6_PRESSED = false;
       input.KEY_PAD_6_JUST_PRESSED = false;
+      input.KEY_PAD_6_RELEASED = true;
     }
     break;
   case GLFW_KEY_KP_7:
     if (action == GLFW_PRESS) {
       input.KEY_PAD_7_PRESSED = true;
       input.KEY_PAD_7_JUST_PRESSED = true;
+      input.KEY_PAD_7_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.KEY_PAD_7_PRESSED = true;
       input.KEY_PAD_7_JUST_PRESSED = false;
+      input.KEY_PAD_7_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.KEY_PAD_7_PRESSED = false;
+      input.KEY_PAD_7_JUST_PRESSED = false;
+      input.KEY_PAD_7_RELEASED = true;
     } else {
       input.KEY_PAD_7_PRESSED = false;
       input.KEY_PAD_7_JUST_PRESSED = false;
+      input.KEY_PAD_7_RELEASED = true;
     }
     break;
   case GLFW_KEY_KP_8:
     if (action == GLFW_PRESS) {
       input.KEY_PAD_8_PRESSED = true;
       input.KEY_PAD_8_JUST_PRESSED = true;
+      input.KEY_PAD_8_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.KEY_PAD_8_PRESSED = true;
       input.KEY_PAD_8_JUST_PRESSED = false;
+      input.KEY_PAD_8_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.KEY_PAD_8_PRESSED = false;
+      input.KEY_PAD_8_JUST_PRESSED = false;
+      input.KEY_PAD_8_RELEASED = true;
     } else {
       input.KEY_PAD_8_PRESSED = false;
       input.KEY_PAD_8_JUST_PRESSED = false;
+      input.KEY_PAD_8_RELEASED = true;
     }
     break;
   case GLFW_KEY_KP_9:
     if (action == GLFW_PRESS) {
       input.KEY_PAD_9_PRESSED = true;
       input.KEY_PAD_9_JUST_PRESSED = true;
+      input.KEY_PAD_9_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.KEY_PAD_9_PRESSED = true;
       input.KEY_PAD_9_JUST_PRESSED = false;
+      input.KEY_PAD_9_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.KEY_PAD_9_PRESSED = false;
+      input.KEY_PAD_9_JUST_PRESSED = false;
+      input.KEY_PAD_9_RELEASED = true;
     } else {
       input.KEY_PAD_9_PRESSED = false;
       input.KEY_PAD_9_JUST_PRESSED = false;
+      input.KEY_PAD_9_RELEASED = true;
     }
     break;
   case GLFW_KEY_KP_DECIMAL:
     if (action == GLFW_PRESS) {
       input.KEY_PAD_DECIMAL_PRESSED = true;
       input.KEY_PAD_DECIMAL_JUST_PRESSED = true;
+      input.KEY_PAD_DECIMAL_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.KEY_PAD_DECIMAL_PRESSED = true;
       input.KEY_PAD_DECIMAL_JUST_PRESSED = false;
+      input.KEY_PAD_DECIMAL_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.KEY_PAD_DECIMAL_PRESSED = false;
+      input.KEY_PAD_DECIMAL_JUST_PRESSED = false;
+      input.KEY_PAD_DECIMAL_RELEASED = true;
     } else {
       input.KEY_PAD_DECIMAL_PRESSED = false;
       input.KEY_PAD_DECIMAL_JUST_PRESSED = false;
+      input.KEY_PAD_DECIMAL_RELEASED = true;
     }
     break;
   case GLFW_KEY_KP_DIVIDE:
     if (action == GLFW_PRESS) {
       input.KEY_PAD_DIVIDE_PRESSED = true;
       input.KEY_PAD_DIVIDE_JUST_PRESSED = true;
+      input.KEY_PAD_DIVIDE_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.KEY_PAD_DIVIDE_PRESSED = true;
       input.KEY_PAD_DIVIDE_JUST_PRESSED = false;
+      input.KEY_PAD_DIVIDE_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.KEY_PAD_DIVIDE_PRESSED = false;
+      input.KEY_PAD_DIVIDE_JUST_PRESSED = false;
+      input.KEY_PAD_DIVIDE_RELEASED = true;
     } else {
       input.KEY_PAD_DIVIDE_PRESSED = false;
       input.KEY_PAD_DIVIDE_JUST_PRESSED = false;
+      input.KEY_PAD_DIVIDE_RELEASED = true;
     }
     break;
   case GLFW_KEY_KP_MULTIPLY:
     if (action == GLFW_PRESS) {
       input.KEY_PAD_MULTIPLY_PRESSED = true;
       input.KEY_PAD_MULTIPLY_JUST_PRESSED = true;
+      input.KEY_PAD_MULTIPLY_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.KEY_PAD_MULTIPLY_PRESSED = true;
       input.KEY_PAD_MULTIPLY_JUST_PRESSED = false;
+      input.KEY_PAD_MULTIPLY_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.KEY_PAD_MULTIPLY_PRESSED = false;
+      input.KEY_PAD_MULTIPLY_JUST_PRESSED = false;
+      input.KEY_PAD_MULTIPLY_RELEASED = true;
     } else {
       input.KEY_PAD_MULTIPLY_PRESSED = false;
       input.KEY_PAD_MULTIPLY_JUST_PRESSED = false;
+      input.KEY_PAD_MULTIPLY_RELEASED = true;
     }
     break;
   case GLFW_KEY_KP_SUBTRACT:
     if (action == GLFW_PRESS) {
       input.KEY_PAD_SUBTRACT_PRESSED = true;
       input.KEY_PAD_SUBTRACT_JUST_PRESSED = true;
+      input.KEY_PAD_SUBTRACT_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.KEY_PAD_SUBTRACT_PRESSED = true;
       input.KEY_PAD_SUBTRACT_JUST_PRESSED = false;
+      input.KEY_PAD_SUBTRACT_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.KEY_PAD_SUBTRACT_PRESSED = false;
+      input.KEY_PAD_SUBTRACT_JUST_PRESSED = false;
+      input.KEY_PAD_SUBTRACT_RELEASED = true;
     } else {
       input.KEY_PAD_SUBTRACT_PRESSED = false;
       input.KEY_PAD_SUBTRACT_JUST_PRESSED = false;
+      input.KEY_PAD_SUBTRACT_RELEASED = true;
     }
     break;
   case GLFW_KEY_KP_ADD:
     if (action == GLFW_PRESS) {
       input.KEY_PAD_ADD_PRESSED = true;
       input.KEY_PAD_ADD_JUST_PRESSED = true;
+      input.KEY_PAD_ADD_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.KEY_PAD_ADD_PRESSED = true;
       input.KEY_PAD_ADD_JUST_PRESSED = false;
+      input.KEY_PAD_ADD_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.KEY_PAD_ADD_PRESSED = false;
+      input.KEY_PAD_ADD_JUST_PRESSED = false;
+      input.KEY_PAD_ADD_RELEASED = true;
     } else {
       input.KEY_PAD_ADD_PRESSED = false;
       input.KEY_PAD_ADD_JUST_PRESSED = false;
+      input.KEY_PAD_ADD_RELEASED = true;
     }
     break;
   case GLFW_KEY_KP_ENTER:
     if (action == GLFW_PRESS) {
       input.KEY_PAD_ENTER_PRESSED = true;
       input.KEY_PAD_ENTER_JUST_PRESSED = true;
+      input.KEY_PAD_ENTER_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.KEY_PAD_ENTER_PRESSED = true;
       input.KEY_PAD_ENTER_JUST_PRESSED = false;
+      input.KEY_PAD_ENTER_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.KEY_PAD_ENTER_PRESSED = false;
+      input.KEY_PAD_ENTER_JUST_PRESSED = false;
+      input.KEY_PAD_ENTER_RELEASED = true;
     } else {
       input.KEY_PAD_ENTER_PRESSED = false;
       input.KEY_PAD_ENTER_JUST_PRESSED = false;
+      input.KEY_PAD_ENTER_RELEASED = true;
     }
     break;
   case GLFW_KEY_KP_EQUAL:
     if (action == GLFW_PRESS) {
       input.KEY_PAD_EQUAL_PRESSED = true;
       input.KEY_PAD_EQUAL_JUST_PRESSED = true;
+      input.KEY_PAD_EQUAL_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.KEY_PAD_EQUAL_PRESSED = true;
       input.KEY_PAD_EQUAL_JUST_PRESSED = false;
+      input.KEY_PAD_EQUAL_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.KEY_PAD_EQUAL_PRESSED = false;
+      input.KEY_PAD_EQUAL_JUST_PRESSED = false;
+      input.KEY_PAD_EQUAL_RELEASED = true;
     } else {
       input.KEY_PAD_EQUAL_PRESSED = false;
       input.KEY_PAD_EQUAL_JUST_PRESSED = false;
+      input.KEY_PAD_EQUAL_RELEASED = true;
     }
     break;
   case GLFW_KEY_LEFT_SHIFT:
     if (action == GLFW_PRESS) {
       input.LEFT_SHIFT_PRESSED = true;
       input.LEFT_SHIFT_JUST_PRESSED = true;
+      input.LEFT_SHIFT_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.LEFT_SHIFT_PRESSED = true;
       input.LEFT_SHIFT_JUST_PRESSED = false;
+      input.LEFT_SHIFT_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.LEFT_SHIFT_PRESSED = false;
+      input.LEFT_SHIFT_JUST_PRESSED = false;
+      input.LEFT_SHIFT_RELEASED = true;
     } else {
       input.LEFT_SHIFT_PRESSED = false;
       input.LEFT_SHIFT_JUST_PRESSED = false;
+      input.LEFT_SHIFT_RELEASED = true;
     }
     break;
   case GLFW_KEY_LEFT_CONTROL:
     if (action == GLFW_PRESS) {
       input.LEFT_CONTROL_PRESSED = true;
       input.LEFT_CONTROL_JUST_PRESSED = true;
+      input.LEFT_CONTROL_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.LEFT_CONTROL_PRESSED = true;
       input.LEFT_CONTROL_JUST_PRESSED = false;
+      input.LEFT_CONTROL_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.LEFT_CONTROL_PRESSED = false;
+      input.LEFT_CONTROL_JUST_PRESSED = false;
+      input.LEFT_CONTROL_RELEASED = true;
     } else {
       input.LEFT_CONTROL_PRESSED = false;
       input.LEFT_CONTROL_JUST_PRESSED = false;
+      input.LEFT_CONTROL_RELEASED = true;
     }
     break;
   case GLFW_KEY_LEFT_ALT:
     if (action == GLFW_PRESS) {
       input.LEFT_ALT_PRESSED = true;
       input.LEFT_ALT_JUST_PRESSED = true;
+      input.LEFT_ALT_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.LEFT_ALT_PRESSED = true;
       input.LEFT_ALT_JUST_PRESSED = false;
+      input.LEFT_ALT_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.LEFT_ALT_PRESSED = false;
+      input.LEFT_ALT_JUST_PRESSED = false;
+      input.LEFT_ALT_RELEASED = true;
     } else {
       input.LEFT_ALT_PRESSED = false;
       input.LEFT_ALT_JUST_PRESSED = false;
+      input.LEFT_ALT_RELEASED = true;
     }
     break;
   case GLFW_KEY_LEFT_SUPER:
     if (action == GLFW_PRESS) {
       input.LEFT_SUPER_PRESSED = true;
       input.LEFT_SUPER_JUST_PRESSED = true;
+      input.LEFT_SUPER_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.LEFT_SUPER_PRESSED = true;
       input.LEFT_SUPER_JUST_PRESSED = false;
+      input.LEFT_SUPER_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.LEFT_SUPER_PRESSED = false;
+      input.LEFT_SUPER_JUST_PRESSED = false;
+      input.LEFT_SUPER_RELEASED = true;
     } else {
       input.LEFT_SUPER_PRESSED = false;
       input.LEFT_SUPER_JUST_PRESSED = false;
+      input.LEFT_SUPER_RELEASED = true;
     }
     break;
   case GLFW_KEY_RIGHT_SHIFT:
     if (action == GLFW_PRESS) {
       input.RIGHT_SHIFT_PRESSED = true;
       input.RIGHT_SHIFT_JUST_PRESSED = true;
+      input.RIGHT_SHIFT_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.RIGHT_SHIFT_PRESSED = true;
       input.RIGHT_SHIFT_JUST_PRESSED = false;
+      input.RIGHT_SHIFT_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.RIGHT_SHIFT_PRESSED = false;
+      input.RIGHT_SHIFT_JUST_PRESSED = false;
+      input.RIGHT_SHIFT_RELEASED = true;
     } else {
       input.RIGHT_SHIFT_PRESSED = false;
       input.RIGHT_SHIFT_JUST_PRESSED = false;
+      input.RIGHT_SHIFT_RELEASED = true;
     }
     break;
   case GLFW_KEY_RIGHT_CONTROL:
     if (action == GLFW_PRESS) {
       input.RIGHT_CONTROL_PRESSED = true;
       input.RIGHT_CONTROL_JUST_PRESSED = true;
+      input.RIGHT_CONTROL_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.RIGHT_CONTROL_PRESSED = true;
       input.RIGHT_CONTROL_JUST_PRESSED = false;
+      input.RIGHT_CONTROL_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.RIGHT_CONTROL_PRESSED = false;
+      input.RIGHT_CONTROL_JUST_PRESSED = false;
+      input.RIGHT_CONTROL_RELEASED = true;
     } else {
       input.RIGHT_CONTROL_PRESSED = false;
       input.RIGHT_CONTROL_JUST_PRESSED = false;
+      input.RIGHT_CONTROL_RELEASED = true;
     }
     break;
   case GLFW_KEY_RIGHT_ALT:
     if (action == GLFW_PRESS) {
       input.RIGHT_ALT_PRESSED = true;
       input.RIGHT_ALT_JUST_PRESSED = true;
+      input.RIGHT_ALT_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.RIGHT_ALT_PRESSED = true;
       input.RIGHT_ALT_JUST_PRESSED = false;
+      input.RIGHT_ALT_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.RIGHT_ALT_PRESSED = false;
+      input.RIGHT_ALT_JUST_PRESSED = false;
+      input.RIGHT_ALT_RELEASED = true;
     } else {
       input.RIGHT_ALT_PRESSED = false;
       input.RIGHT_ALT_JUST_PRESSED = false;
+      input.RIGHT_ALT_RELEASED = true;
     }
     break;
   case GLFW_KEY_RIGHT_SUPER:
     if (action == GLFW_PRESS) {
       input.RIGHT_SUPER_PRESSED = true;
       input.RIGHT_SUPER_JUST_PRESSED = true;
+      input.RIGHT_SUPER_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.RIGHT_SUPER_PRESSED = true;
       input.RIGHT_SUPER_JUST_PRESSED = false;
+      input.RIGHT_SUPER_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.RIGHT_SUPER_PRESSED = false;
+      input.RIGHT_SUPER_JUST_PRESSED = false;
+      input.RIGHT_SUPER_RELEASED = true;
     } else {
       input.RIGHT_SUPER_PRESSED = false;
       input.RIGHT_SUPER_JUST_PRESSED = false;
+      input.RIGHT_SUPER_RELEASED = true;
     }
     break;
   case GLFW_KEY_MENU:
     if (action == GLFW_PRESS) {
       input.MENU_PRESSED = true;
       input.MENU_JUST_PRESSED = true;
+      input.MENU_RELEASED = false;
     } else if (action == GLFW_REPEAT) {
       input.MENU_PRESSED = true;
       input.MENU_JUST_PRESSED = false;
+      input.MENU_RELEASED = false;
+    } else if (action == GLFW_RELEASE) {
+      input.MENU_PRESSED = false;
+      input.MENU_JUST_PRESSED = false;
+      input.MENU_RELEASED = true;
     } else {
       input.MENU_PRESSED = false;
       input.MENU_JUST_PRESSED = false;
+      input.MENU_RELEASED = true;
     }
     break;
   default:
@@ -1859,28 +2585,28 @@ void GLRenderer::glfw_onKey(GLFWwindow *window, int key, int scancode,
   if (info.scene) {
     // reverse iterate through overlay callbacks first
     bool handled = false;
-    for (auto overlay_it = info.scene->overlay_rbegin();
-         overlay_it != info.scene->overlay_rend(); overlay_it++) {
-      Overlay *overlay = overlay_it->get();
+    for (auto layr_it = info.scene->layer_rbegin();
+         layr_it != info.scene->layer_rend(); layr_it++) {
+      Layer *layer = layr_it->get();
       // reverse iterate through overlay widgets
-      for (auto widget_it = overlay->widget_rbegin();
-           widget_it != overlay->widget_rend(); widget_it++) {
-        Widget *widget = widget_it->get();
-        auto controls_systems = widget->get_components<IControlsSystem>();
+      for (auto ent_it = layer->entity_rbegin(); ent_it != layer->entity_rend();
+           ent_it++) {
+        Entity *entity = ent_it->get();
+        auto controls_systems = entity->get_systems<IControlsSystem>();
         // reverse iterate through widget controls callbacks
         for (auto controls_it = controls_systems.rbegin();
              controls_it != controls_systems.rend(); controls_it++) {
-          handled = (*controls_it)->on_key(widget, input);
+          handled = (*controls_it)->on_key(input, entity);
           if (handled) {
             return;
           }
         }
       }
-      auto controls_systems = overlay->get_components<IControlsSystem>();
+      auto controls_systems = layer->get_systems<IControlsSystem>();
       // reverse iterate through overlay controls callbacks
       for (auto controls_it = controls_systems.rbegin();
            controls_it != controls_systems.rend(); controls_it++) {
-        handled = (*controls_it)->on_key(overlay, input);
+        handled = (*controls_it)->on_key(input, layer);
         if (handled) {
           return;
         }
@@ -1891,21 +2617,21 @@ void GLRenderer::glfw_onKey(GLFWwindow *window, int key, int scancode,
     for (auto entity_it = info.scene->entity_rbegin();
          entity_it != info.scene->entity_rend(); entity_it++) {
       Entity *entity = entity_it->get();
-      auto controls_systems = entity->get_components<IControlsSystem>();
+      auto controls_systems = entity->get_systems<IControlsSystem>();
       // reverse iterate through entity controls callbacks
       for (auto controls_it = controls_systems.rbegin();
            controls_it != controls_systems.rend(); controls_it++) {
-        handled = (*controls_it)->on_key(entity, input);
+        handled = (*controls_it)->on_key(input, entity);
         if (handled) {
           return;
         }
       }
     }
-    auto controls_systems = info.scene->get_components<IControlsSystem>();
+    auto controls_systems = info.scene->get_systems<IControlsSystem>();
     // reverse iterate through scene controls callbacks
     for (auto controls_it = controls_systems.rbegin();
          controls_it != controls_systems.rend(); controls_it++) {
-      handled = (*controls_it)->on_key(info.scene, input);
+      handled = (*controls_it)->on_key(input, info.scene);
       if (handled) {
         return;
       }
@@ -1929,55 +2655,55 @@ void GLRenderer::glfw_onMouseButton(GLFWwindow *window, int button, int action,
     input.mouse_button.set(2, 0);
   }
   if (info.scene) {
-    // reverse iterate through overlay callbacks first
+    // reverse iterate through layer callbacks first
     bool handled = false;
-    for (auto overlay_it = info.scene->overlay_rbegin();
-         overlay_it != info.scene->overlay_rend(); overlay_it++) {
-      Overlay *overlay = overlay_it->get();
-      // reverse iterate through overlay widgets
-      for (auto widget_it = overlay->widget_rbegin();
-           widget_it != overlay->widget_rend(); widget_it++) {
-        Widget *widget = widget_it->get();
-        auto controls_systems = widget->get_components<IControlsSystem>();
-        // reverse iterate through widget controls callbacks
+    for (auto layer_it = info.scene->layer_rbegin();
+         layer_it != info.scene->layer_rend(); layer_it++) {
+      Layer *layer = layer_it->get();
+      // reverse iterate through overlay entities
+      for (auto entity_it = layer->entity_rbegin();
+           entity_it != layer->entity_rend(); entity_it++) {
+        Entity *entity = entity_it->get();
+        auto controls_systems = entity->get_systems<IControlsSystem>();
+        // reverse iterate through entity controls callbacks
         for (auto controls_it = controls_systems.rbegin();
              controls_it != controls_systems.rend(); controls_it++) {
-          handled = (*controls_it)->on_mouse_button(widget, input);
+          handled = (*controls_it)->on_mouse_button(input, entity);
           if (handled) {
             return;
           }
         }
       }
-      auto controls_systems = overlay->get_components<IControlsSystem>();
-      // reverse iterate through overlay controls callbacks
+      auto controls_systems = layer->get_systems<IControlsSystem>();
+      // reverse iterate through layer controls callbacks
       for (auto controls_it = controls_systems.rbegin();
            controls_it != controls_systems.rend(); controls_it++) {
-        handled = (*controls_it)->on_mouse_button(overlay, input);
+        handled = (*controls_it)->on_mouse_button(input, layer);
         if (handled) {
           return;
         }
       }
     }
-    // if event is not handled by overlays, callback to the scene
+    // if event is not handled by layers, callback to the scene
     // reverse iterate through scene entities
     for (auto entity_it = info.scene->entity_rbegin();
          entity_it != info.scene->entity_rend(); entity_it++) {
       Entity *entity = entity_it->get();
-      auto controls_systems = entity->get_components<IControlsSystem>();
+      auto controls_systems = entity->get_systems<IControlsSystem>();
       // reverse iterate through entity controls callbacks
       for (auto controls_it = controls_systems.rbegin();
            controls_it != controls_systems.rend(); controls_it++) {
-        handled = (*controls_it)->on_mouse_button(entity, input);
+        handled = (*controls_it)->on_mouse_button(input, entity);
         if (handled) {
           return;
         }
       }
     }
-    auto controls_systems = info.scene->get_components<IControlsSystem>();
+    auto controls_systems = info.scene->get_systems<IControlsSystem>();
     // reverse iterate through scene controls callbacks
     for (auto controls_it = controls_systems.rbegin();
          controls_it != controls_systems.rend(); controls_it++) {
-      handled = (*controls_it)->on_mouse_button(info.scene, input);
+      handled = (*controls_it)->on_mouse_button(input, info.scene);
       if (handled) {
         return;
       }
@@ -1994,20 +2720,20 @@ void GLRenderer::glfw_onMouseMove(GLFWwindow *window, double x, double y) {
   input.mouse_pos = glm::ivec2(x, y);
   input.mouse_vel = glm::ivec2(x, y) - old_pos;
   if (info.scene) {
-    // reverse iterate through overlay callbacks first
+    // reverse iterate through layer callbacks first
     bool handled = false;
-    for (auto overlay_it = info.scene->overlay_rbegin();
-         overlay_it != info.scene->overlay_rend(); overlay_it++) {
-      Overlay *overlay = overlay_it->get();
-      // reverse iterate through overlay widgets
-      for (auto widget_it = overlay->widget_rbegin();
-           widget_it != overlay->widget_rend(); widget_it++) {
-        Widget *widget = widget_it->get();
-        auto controls_systems = widget->get_components<IControlsSystem>();
-        // reverse iterate through widget controls callbacks
+    for (auto layr_it = info.scene->layer_rbegin();
+         layr_it != info.scene->layer_rend(); layr_it++) {
+      Layer *layer = layr_it->get();
+      // reverse iterate through layer entities
+      for (auto ent_it = layer->entity_rbegin(); ent_it != layer->entity_rend();
+           ent_it++) {
+        Entity *entity = ent_it->get();
+        auto controls_systems = entity->get_systems<IControlsSystem>();
+        // reverse iterate through entity controls callbacks
         for (auto controls_it = controls_systems.rbegin();
              controls_it != controls_systems.rend(); controls_it++) {
-          handled = (*controls_it)->on_mouse_move(widget, input);
+          handled = (*controls_it)->on_mouse_move(input, entity);
           if (handled) {
             // mouse velocity is always zero outside of mouse move callbacks
             input.mouse_vel = glm::ivec2(0, 0);
@@ -2015,11 +2741,11 @@ void GLRenderer::glfw_onMouseMove(GLFWwindow *window, double x, double y) {
           }
         }
       }
-      auto controls_systems = overlay->get_components<IControlsSystem>();
-      // reverse iterate through overlay controls callbacks
+      auto controls_systems = layer->get_systems<IControlsSystem>();
+      // reverse iterate through layer controls callbacks
       for (auto controls_it = controls_systems.rbegin();
            controls_it != controls_systems.rend(); controls_it++) {
-        handled = (*controls_it)->on_mouse_move(overlay, input);
+        handled = (*controls_it)->on_mouse_move(input, layer);
         if (handled) {
           // mouse velocity is always zero outside of mouse move callbacks
           input.mouse_vel = glm::ivec2(0, 0);
@@ -2032,11 +2758,11 @@ void GLRenderer::glfw_onMouseMove(GLFWwindow *window, double x, double y) {
     for (auto entity_it = info.scene->entity_rbegin();
          entity_it != info.scene->entity_rend(); entity_it++) {
       Entity *entity = entity_it->get();
-      auto controls_systems = entity->get_components<IControlsSystem>();
+      auto controls_systems = entity->get_systems<IControlsSystem>();
       // reverse iterate through entity controls callbacks
       for (auto controls_it = controls_systems.rbegin();
            controls_it != controls_systems.rend(); controls_it++) {
-        handled = (*controls_it)->on_mouse_move(entity, input);
+        handled = (*controls_it)->on_mouse_move(input, entity);
         if (handled) {
           // mouse velocity is always zero outside of mouse move callbacks
           input.mouse_vel = glm::ivec2(0, 0);
@@ -2044,11 +2770,11 @@ void GLRenderer::glfw_onMouseMove(GLFWwindow *window, double x, double y) {
         }
       }
     }
-    auto controls_systems = info.scene->get_components<IControlsSystem>();
+    auto controls_systems = info.scene->get_systems<IControlsSystem>();
     // reverse iterate through scene controls callbacks
     for (auto controls_it = controls_systems.rbegin();
          controls_it != controls_systems.rend(); controls_it++) {
-      handled = (*controls_it)->on_mouse_move(info.scene, input);
+      handled = (*controls_it)->on_mouse_move(input, info.scene);
       if (handled) {
         // mouse velocity is always zero outside of mouse move callbacks
         input.mouse_vel = glm::ivec2(0, 0);
@@ -2069,20 +2795,20 @@ void GLRenderer::glfw_onMouseWheel(GLFWwindow *window, double xoffset,
     input.mouse_scroll = -1;
   }
   if (info.scene) {
-    // reverse iterate through overlay callbacks first
+    // reverse iterate through layer callbacks first
     bool handled = false;
-    for (auto overlay_it = info.scene->overlay_rbegin();
-         overlay_it != info.scene->overlay_rend(); overlay_it++) {
-      Overlay *overlay = overlay_it->get();
-      // reverse iterate through overlay widgets
-      for (auto widget_it = overlay->widget_rbegin();
-           widget_it != overlay->widget_rend(); widget_it++) {
-        Widget *widget = widget_it->get();
-        auto controls_systems = widget->get_components<IControlsSystem>();
+    for (auto layr_it = info.scene->layer_rbegin();
+         layr_it != info.scene->layer_rend(); layr_it++) {
+      Layer *layer = layr_it->get();
+      // reverse iterate through layer entities
+      for (auto ent_it = layer->entity_rbegin(); ent_it != layer->entity_rend();
+           ent_it++) {
+        Entity *entity = ent_it->get();
+        auto controls_systems = layer->get_systems<IControlsSystem>();
         // reverse iterate through widget controls callbacks
         for (auto controls_it = controls_systems.rbegin();
              controls_it != controls_systems.rend(); controls_it++) {
-          handled = (*controls_it)->on_mouse_wheel(widget, input);
+          handled = (*controls_it)->on_mouse_wheel(input, entity);
           if (handled) {
             // mouse scroll is always 0 outside of mouse scroll callbacks
             input.mouse_scroll = 0;
@@ -2090,11 +2816,11 @@ void GLRenderer::glfw_onMouseWheel(GLFWwindow *window, double xoffset,
           }
         }
       }
-      auto controls_systems = overlay->get_components<IControlsSystem>();
+      auto controls_systems = layer->get_systems<IControlsSystem>();
       // reverse iterate through overlay controls callbacks
       for (auto controls_it = controls_systems.rbegin();
            controls_it != controls_systems.rend(); controls_it++) {
-        handled = (*controls_it)->on_mouse_wheel(overlay, input);
+        handled = (*controls_it)->on_mouse_wheel(input, layer);
         if (handled) {
           // mouse scroll is always 0 outside of mouse scroll callbacks
           input.mouse_scroll = 0;
@@ -2107,11 +2833,11 @@ void GLRenderer::glfw_onMouseWheel(GLFWwindow *window, double xoffset,
     for (auto entity_it = info.scene->entity_rbegin();
          entity_it != info.scene->entity_rend(); entity_it++) {
       Entity *entity = entity_it->get();
-      auto controls_systems = entity->get_components<IControlsSystem>();
+      auto controls_systems = entity->get_systems<IControlsSystem>();
       // reverse iterate through entity controls callbacks
       for (auto controls_it = controls_systems.rbegin();
            controls_it != controls_systems.rend(); controls_it++) {
-        handled = (*controls_it)->on_mouse_wheel(entity, input);
+        handled = (*controls_it)->on_mouse_wheel(input, entity);
         if (handled) {
           // mouse scroll is always 0 outside of mouse scroll callbacks
           input.mouse_scroll = 0;
@@ -2119,11 +2845,11 @@ void GLRenderer::glfw_onMouseWheel(GLFWwindow *window, double xoffset,
         }
       }
     }
-    auto controls_systems = info.scene->get_components<IControlsSystem>();
+    auto controls_systems = info.scene->get_systems<IControlsSystem>();
     // reverse iterate through scene controls callbacks
     for (auto controls_it = controls_systems.rbegin();
          controls_it != controls_systems.rend(); controls_it++) {
-      handled = (*controls_it)->on_mouse_wheel(info.scene, input);
+      handled = (*controls_it)->on_mouse_wheel(input, info.scene);
       if (handled) {
         // mouse scroll is always 0 outside of mouse scroll callbacks
         input.mouse_scroll = 0;

@@ -10,18 +10,20 @@
 
 namespace mare
 {
-// wrap in until namespace
-// Create Asset class for all user created assets
 class Asset
 {
 public:
     virtual ~Asset() = 0;
 };
-// for all user created systems and components
-class Component : public Asset
+class Component
 {
 public:
     virtual ~Component() = 0;
+};
+class System
+{
+public:
+    virtual ~System() = 0;
 };
 
 // Scopes and References

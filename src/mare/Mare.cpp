@@ -5,6 +5,7 @@ namespace mare
 {
 Asset::~Asset() {}
 Component::~Component() {}
+System::~System() {}
 namespace math
 {
 float shoelace(std::vector<glm::vec2> points)

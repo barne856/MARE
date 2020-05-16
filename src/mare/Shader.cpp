@@ -26,6 +26,10 @@ namespace mare
         compute();
         Renderer::dispatch_compute(x, y, z);
     }
+    void ComputeProgram::barrier(BarrierType type)
+    {
+        shader_->barrier(type);
+    }
 
     void Material::upload_camera(Camera *camera, bool suppress_warnings)
     {

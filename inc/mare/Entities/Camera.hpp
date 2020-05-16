@@ -4,8 +4,11 @@
 // MARE
 #include "mare/Entity.hpp"
 #include "mare/Renderer.hpp"
-#include "mare/Components/Physics/Rigidbody.hpp"
-#include "mare/Components/Controls/FlyControls.hpp"
+#include "mare/Components/Rigidbody.hpp"
+#include "mare/Systems/Physics/EulerMethod.hpp"
+
+// External Libraries
+#include "glm.hpp"
 
 namespace mare
 {
@@ -16,10 +19,10 @@ namespace mare
         ORTHOGRAPHIC
     };
 
-    // forward declare camera components
+    // forward declare camera system
     class CameraControls;
 
-    class Camera : public Entity
+    class Camera : public Entity, public Rigidbody
     {
     public:
         Camera(ProjectionType type) : type_(type), eye_(glm::vec3(0.0f)), direction_(glm::vec3(0.0f, 0.0f, -1.0f)), up_(glm::vec3(0.0f, 1.0f, 0.0f))
@@ -31,7 +34,8 @@ namespace mare
             }
             set_forward_vector(direction_);
             recalculate_projection();
-            gen_component<CameraControls>();
+            gen_system<CameraControls>();
+            gen_system<EulerMethod>();
         }
         ~Camera() {}
         void recalculate_projection()
@@ -96,7 +100,7 @@ namespace mare
 
     class CameraControls : public ControlsSystem<Camera>
     {
-        bool on_resize(Camera *camera_entity, const RendererInput &input) override
+        bool on_resize(const RendererInput &input, Camera *camera_entity) override
         {
             // recalcualte the projection with the new aspect
             camera_entity->set_aspect(Renderer::get_info().window_aspect);

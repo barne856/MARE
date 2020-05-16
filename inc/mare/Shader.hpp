@@ -16,6 +16,26 @@ namespace mare
     // forward declarations
     class Camera;
     class Mesh;
+
+    enum class BarrierType
+    {
+        ATTRIBUTE,
+        INDEX,
+        UNIFORM,
+        TEXTURE_FETCH,
+        IMAGE,
+        COMMAND,
+        PIXEL_BUFFER,
+        TEXTURE_UPDATE,
+        BUFFER_UPDATE,
+        FRAMEBUFFER,
+        FEEDBACK,
+        ATOMIC_COUNTER,
+        STORAGE,
+        QUERY,
+        ALL
+    };
+
     class Shader
     {
     public:
@@ -33,6 +53,9 @@ namespace mare
         virtual void upload_storage(const char* name, IBuffer *storage, bool suppress_warnings = false) = 0;
         virtual void upload_texture2D(const char *name, Texture2D *texture2D, bool suppress_warnings = false) = 0;
         virtual void upload_image2D(const char *name, Texture2D *texture2D, bool suppress_warnings = false) = 0;
+
+        // Memory Barriers
+        virtual void barrier(BarrierType type) = 0;
 
     protected:
         uint32_t shader_ID_;
@@ -79,6 +102,7 @@ namespace mare
         virtual ~ComputeProgram() {}
         void dispatch_compute(uint32_t x = 1, uint32_t y = 1, uint32_t z = 1);
         virtual void compute() {}
+        void barrier(BarrierType type);
     };
 
     class Material : public GraphicsProgram

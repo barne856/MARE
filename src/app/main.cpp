@@ -1,5 +1,4 @@
 // TODO version 1:
-// compile on linux with gcc
 // Document the API
 //  Each class should list every property and method with a description and example of usage
 //  Renderer is special case for discussion, and functions in math, util and Mare.hpp are discussed separatly
@@ -9,7 +8,11 @@
 //  Examples for GLRenderer spec, scene, overlay, entity, widget, mesh, material, component, graphics program, and compute program
 
 // TODO version 2:
+// Phong material should ahve arrays for spotlight, point light, and directional lights, as well as shadowmaping for directional, point, and spot lights
+// shadowmap should have arrays for each type of light and depth buffers/light views for each
 // Automated ShadowMap camera view creation
+// Add just_released to renderer input
+// swap camera state function to swap a scene's camera with another camera
 // Add Text Thickness to CharMesh
 // Font Loader: bitmap fonts, maybe other formats too like vector fonts with ability to extrude text?
 // Text billboards
@@ -31,12 +34,11 @@
 // batch rendering, convert composite meshes to meshes that can be rendered with gl multidraw calls
 // Beefed-up Renderer blending to have all the opengl features like custom blend functions
 // Beefed-up Buffer, Texture, and Framebuffer classes to have all of the OpenGL features
+// Organize Examples
 
 #include "mare/GL/GLRenderer.hpp"
-#include "mare/Scenes/SampleScene.hpp"
-#include "mare/Scenes/ComputeTextureScene.hpp"
-#include "mare/Scenes/SampleParticleScene.hpp"
-#include "mare/Scenes/SampleScene.hpp"
+#include "app/Scenes/SampleScene.hpp"
+#include "app/Scenes/SampleParticleScene.hpp"
 
 class Sandbox : public mare::GLRenderer
 {
@@ -47,14 +49,15 @@ public:
         info.window_width = 1280;          // window width in pixels
         info.window_height = 720;          // window height in pixels
         info.window_aspect = 16.0f / 9.0f; // window aspect ratio
-        info.samples = 16;                 // antialiasing samples
+        info.samples = 8;                 // antialiasing samples
         info.fullscreen = false;           // render in fullscreen mode?
-        info.vsync = false;                // render in double buffered vsync mode?
+        info.vsync = true;                // render in double buffered vsync mode?
         info.debug_mode = 1;               // 0000 == off, 0001 == high, 0010 == med, 0100 == low, 1000 == notification
     }
     void startup() override
     {
         using namespace mare;
+        //gen_scene<SampleScene>();
         gen_scene<SampleParticleScene>();
         load_scene(0);
     }

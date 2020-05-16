@@ -25,8 +25,6 @@ set(SRC
 ./src/mare/Meshes.cpp
 ./src/mare/Renderer.cpp
 ./src/mare/Shader.cpp
-./src/mare/Transform.cpp
-./src/mare/Widget.cpp
 ./src/mare/GL/GLBuffers.cpp
 ./src/mare/GL/GLRenderer.cpp
 ./src/mare/GL/GLShader.cpp)

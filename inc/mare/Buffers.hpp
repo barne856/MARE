@@ -4,6 +4,7 @@
 // Standard Library
 #include <vector>
 #include <string>
+#include <iostream>
 
 // MARE
 #include "mare/Mare.hpp"
@@ -137,7 +138,7 @@ namespace mare
 
             if (buffer_type == BufferType::STATIC && !data)
             {
-                std::cerr << "ERROR: Static buffer needs to be initialized on construction!" << std::endl;
+                std::cerr << "BUFFER ERROR: Static buffer needs to be initialized on construction!" << std::endl;
             }
 
             switch (buffer_type)

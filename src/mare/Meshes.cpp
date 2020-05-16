@@ -16,11 +16,11 @@ void SimpleMesh::render(Camera *camera, Material *material)
 {
     Renderer::render_simple_mesh(camera, this, material);
 }
-void SimpleMesh::render(Camera *camera, Material *material, glm::mat4 &parent_model)
+void SimpleMesh::render(Camera *camera, Material *material, glm::mat4 parent_model)
 {
     Renderer::render_simple_mesh(camera, this, material, parent_model);
 }
-void SimpleMesh::render(Camera *camera, Material *material, glm::mat4 &parent_model, unsigned int instance_count, Buffer<glm::mat4> *models)
+void SimpleMesh::render(Camera *camera, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models)
 {
     Renderer::render_simple_mesh(camera, this, material, parent_model, instance_count, models);
 }
@@ -90,7 +90,7 @@ void CompositeMesh::render(Camera *camera, Material *material)
     }
 }
 
-void CompositeMesh::render(Camera *camera, Material *material, glm::mat4 &parent_model)
+void CompositeMesh::render(Camera *camera, Material *material, glm::mat4 parent_model)
 {
     for (auto &mesh : meshes_)
     {
@@ -98,7 +98,7 @@ void CompositeMesh::render(Camera *camera, Material *material, glm::mat4 &parent
     }
 }
 
-void CompositeMesh::render(Camera *camera, Material *material, glm::mat4 &parent_model, unsigned int instance_count, Buffer<glm::mat4> *models)
+void CompositeMesh::render(Camera *camera, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models)
 {
     for (auto &mesh : meshes_)
     {
@@ -168,12 +168,12 @@ void InstancedMesh::render(Camera *camera, Material *material)
     mesh_->render(camera, material, transform_, instance_count_, instance_transforms_.get());
 }
 
-void InstancedMesh::render(Camera *camera, Material *material, glm::mat4 &parent_model)
+void InstancedMesh::render(Camera *camera, Material *material, glm::mat4 parent_model)
 {
     mesh_->render(camera, material, parent_model * transform_, instance_count_, instance_transforms_.get());
 }
 
-void InstancedMesh::render(Camera *camera, Material *material, glm::mat4 &parent_model, unsigned int instance_count, Buffer<glm::mat4> *models)
+void InstancedMesh::render(Camera *camera, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models)
 {
     // rendering an instanced mesh of instanced meshes is a bad idea. It will not reduce draw calls and it will
     // read from the models buffer in a very ineffiecnt way, only render instances of simple meshes or composite meshes consisting only of simple meshes in their mesh trees.

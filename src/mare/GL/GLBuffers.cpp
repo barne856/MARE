@@ -34,7 +34,7 @@ namespace mare
     case TextureType::DEPTH:
       return GL_DEPTH_COMPONENT32F;
     default:
-      return NULL;
+      return GL_NONE;
     }
   }
 
@@ -61,7 +61,7 @@ namespace mare
     case TextureType::DEPTH:
       return GL_DEPTH_COMPONENT;
     default:
-      return NULL;
+      return GL_NONE;
     }
   }
 
@@ -88,11 +88,11 @@ namespace mare
     case TextureType::DEPTH:
       return 1;
     default:
-      return NULL;
+      return 0;
     }
   }
 
-  int gl_tex_type(TextureType type)
+  GLenum gl_tex_type(TextureType type)
   {
     switch (type)
     {
@@ -115,7 +115,7 @@ namespace mare
     case TextureType::DEPTH:
       return GL_FLOAT;
     default:
-      return NULL;
+      return GL_NONE;
     }
   }
 
@@ -123,6 +123,12 @@ namespace mare
       : Texture2D(filepath)
   {
     unsigned char *texture_data_ = stbi_load(filepath, &width_, &height_, &channels_, 0);
+    if(!texture_data_)
+    {
+      std::cerr<< "TEXTURE ERROR: could not read texture file..." << std::endl;
+      return;
+    }
+    
     texture_buffer_ = std::make_unique<GLBuffer<uint8_t>>(texture_data_, width_ * height_ * channels_, BufferType::STATIC);
     stbi_image_free(texture_data_);
     texture_data_ = nullptr;

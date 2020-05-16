@@ -43,8 +43,8 @@ namespace mare
 
         // Rendering Simple Meshes with no Composite or Instanced Meshes (Composite and Instanced Meshes are rendered by themselves)
         virtual void api_render_simple_mesh(Camera *camera, SimpleMesh *mesh, Material *material) override;
-        virtual void api_render_simple_mesh(Camera *camera, SimpleMesh *mesh, Material *material, glm::mat4 &parent_model) override;
-        virtual void api_render_simple_mesh(Camera *camera, SimpleMesh *mesh, Material *material, glm::mat4 &parent_model, unsigned int instance_count, Buffer<glm::mat4> *models) override;
+        virtual void api_render_simple_mesh(Camera *camera, SimpleMesh *mesh, Material *material, glm::mat4 parent_model) override;
+        virtual void api_render_simple_mesh(Camera *camera, SimpleMesh *mesh, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models) override;
         virtual void api_bind_mesh_render_state(SimpleMesh *mesh, Material *material) override;
         virtual void api_destroy_mesh_render_states(SimpleMesh *mesh) override;
         virtual void api_push_mesh_geometry_buffer(SimpleMesh *mesh, Scoped<Buffer<float>> geometry_buffer) override;
