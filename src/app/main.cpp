@@ -1,32 +1,28 @@
 // TODO version 1:
 // Document the API
-//  Each class should list every property and method with a description and example of usage
-//  Renderer is special case for discussion, and functions in math, util and Mare.hpp are discussed separatly
-//  gen_shader, gen_framebuffer, gen_texture*, gen_buffer
-//  gen_scoped, gen_ref
-//  assets, components, entities, overlays, widgets, scenes
-//  Examples for GLRenderer spec, scene, overlay, entity, widget, mesh, material, component, graphics program, and compute program
+//  Examples for GLRenderer spec, scene, layer, entity, widget, mesh, material,
+// component, graphics program, and compute program in README
 
 // TODO version 2:
 // Phong material should ahve arrays for spotlight, point light, and directional lights, as well as shadowmaping for directional, point, and spot lights
 // shadowmap should have arrays for each type of light and depth buffers/light views for each
 // Automated ShadowMap camera view creation
 // Add just_released to renderer input
-// swap camera state function to swap a scene's camera with another camera
-// Add Text Thickness to CharMesh
+// Add Text Thickness to CharMesh using quads and circles
 // Font Loader: bitmap fonts, maybe other formats too like vector fonts with ability to extrude text?
 // Text billboards
 // raypicking entities
 // Cylinder, Cone, and Tube meshes should have an option for flat shading normals or smooth shading normals
 // add more widgets (buttons, switches, checkboxes, color picker, text entry, message box)
 // Add more materials (BasicColor, BasicTexture, Depth(Material for a scene in the scene's render component), Phong, Toon, Shadow material): normal maps and other physically based rendering techniques
-// ComputeProgram memory barriers
 
 // TODO version 3:
-// Cloth physics
+// InstancedMeshes have a TransformBuffer not a glm::mat4 Buffer. Transform Component should only contain a single glm::mat4 with functions to get and set things.
+// api_render_mesh should use Transforms to render not glm::mat4
 // MetaComponent for collisions
 // Bezier curves and spline curves / surfaces
 // Add teapot primative mesh with bezier curves and surfaces
+// Cloth physics
 // metaballs (marching cubes? quads with inverse distance shading?)
 // loaders for models?
 // loaders sound? sound implementation
@@ -34,10 +30,9 @@
 // batch rendering, convert composite meshes to meshes that can be rendered with gl multidraw calls
 // Beefed-up Renderer blending to have all the opengl features like custom blend functions
 // Beefed-up Buffer, Texture, and Framebuffer classes to have all of the OpenGL features
-// Organize Examples
 
 #include "mare/GL/GLRenderer.hpp"
-#include "app/Scenes/SampleScene.hpp"
+#include "app/Scenes/SampleShadowScene.hpp"
 #include "app/Scenes/SampleParticleScene.hpp"
 
 class Sandbox : public mare::GLRenderer
@@ -57,8 +52,8 @@ public:
     void startup() override
     {
         using namespace mare;
-        //gen_scene<SampleScene>();
-        gen_scene<SampleParticleScene>();
+        auto layer1 = gen_scene<SampleShadowScene>();
+        auto layer2 = gen_scene<SampleParticleScene>();
         load_scene(0);
     }
     void shutdown() override

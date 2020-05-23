@@ -33,8 +33,8 @@ namespace mare
 
     void Material::upload_camera(Camera *camera, bool suppress_warnings)
     {
-        shader_->upload_mat4("projection", camera->projection(), suppress_warnings);
-        shader_->upload_mat4("view", camera->view(), suppress_warnings);
+        shader_->upload_mat4("projection", camera->get_projection(), suppress_warnings);
+        shader_->upload_mat4("view", camera->get_view(), suppress_warnings);
     }
     void Material::upload_mesh_model_matrix(Mesh *mesh, bool suppress_warnings)
     {

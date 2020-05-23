@@ -14,7 +14,7 @@
 
 namespace mare {
 
-GLenum GLDrawMethod(DrawMethod draw_method) {
+GLenum opengl::GLDrawMethod(DrawMethod draw_method) {
   switch (draw_method) {
   case DrawMethod::POINTS:
     return GL_POINTS;
@@ -186,29 +186,29 @@ void GLRenderer::api_set_window_title(const char *title) {
   glfwSetWindowTitle(window, title);
 }
 
-void GLRenderer::api_set_cursor(CURSOR type) {
+void GLRenderer::api_set_cursor(CursorType type) {
   switch (type) {
-  case CURSOR::ARROW:
+  case CursorType::ARROW:
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     glfwSetCursor(window, arrow_cursor);
     break;
-  case CURSOR::HZ_RESIZE:
+  case CursorType::HZ_RESIZE:
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     glfwSetCursor(window, hz_resize_cursor);
     break;
-  case CURSOR::HAND:
+  case CursorType::HAND:
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     glfwSetCursor(window, hand_cursor);
     break;
-  case CURSOR::CROSSHAIRS:
+  case CursorType::CROSSHAIRS:
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     glfwSetCursor(window, crosshair_cursor);
     break;
-  case CURSOR::DISABLED:
+  case CursorType::DISABLED:
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     info.cursor = false;
     break;
-  case CURSOR::ENABLED:
+  case CursorType::ENABLED:
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     break;
   }
@@ -220,7 +220,7 @@ void GLRenderer::api_clear_color_buffer(glm::vec4 color) {
 
 void GLRenderer::api_clear_depth_buffer() { glClear(GL_DEPTH_BUFFER_BIT); }
 
-void GLRenderer::api_resize_window(int width, int height) {
+void GLRenderer::api_resize_viewport(int width, int height) {
   info.window_width = width;
   info.window_height = height;
   info.window_aspect = float(info.window_width) / float(info.window_height);
@@ -266,7 +266,7 @@ void GLRenderer::api_enable_blending(bool enable) {
 
 glm::vec3 GLRenderer::api_raycast(Camera *camera) {
   glm::mat4 inversed_camera =
-      glm::inverse(camera->projection() * camera->view());
+      glm::inverse(camera->get_projection() * camera->get_view());
   float x = 2.0f * (float)input.mouse_pos.x / (float)(info.window_width) - 1.0f;
   float y =
       -2.0f * (float)input.mouse_pos.y / (float)(info.window_height) + 1.0f;
@@ -282,7 +282,7 @@ glm::vec3 GLRenderer::api_raycast(Camera *camera) {
 
 glm::vec3 GLRenderer::api_raycast(Camera *camera, glm::ivec2 screen_coords) {
   glm::mat4 inversed_camera =
-      glm::inverse(camera->projection() * camera->view());
+      glm::inverse(camera->get_projection() * camera->get_view());
   float x = 2.0f * (float)screen_coords.x / (float)(info.window_width) - 1.0f;
   float y = -2.0f * (float)screen_coords.y / (float)(info.window_height) + 1.0f;
   float z = 0.0f;
@@ -331,11 +331,11 @@ void GLRenderer::api_render_simple_mesh(Camera *camera, SimpleMesh *mesh,
   material->upload_mesh(mesh, true);
   material->render();
   if (mesh->is_indexed()) {
-    glDrawElementsBaseVertex(GLDrawMethod(mesh->get_draw_method()),
+    glDrawElementsBaseVertex(opengl::GLDrawMethod(mesh->get_draw_method()),
                              GLsizei(mesh->render_count()), GL_UNSIGNED_INT,
                              nullptr, mesh->get_render_index());
   } else {
-    glDrawArrays(GLDrawMethod(mesh->get_draw_method()),
+    glDrawArrays(opengl::GLDrawMethod(mesh->get_draw_method()),
                  mesh->get_render_index(), GLsizei(mesh->render_count()));
   }
   mesh->lock_buffers();
@@ -351,11 +351,11 @@ void GLRenderer::api_render_simple_mesh(Camera *camera, SimpleMesh *mesh,
   material->upload_mesh(mesh, parent_model, true);
   material->render();
   if (mesh->is_indexed()) {
-    glDrawElementsBaseVertex(GLDrawMethod(mesh->get_draw_method()),
+    glDrawElementsBaseVertex(opengl::GLDrawMethod(mesh->get_draw_method()),
                              GLsizei(mesh->render_count()), GL_UNSIGNED_INT,
                              nullptr, mesh->get_render_index());
   } else {
-    glDrawArrays(GLDrawMethod(mesh->get_draw_method()),
+    glDrawArrays(opengl::GLDrawMethod(mesh->get_draw_method()),
                  mesh->get_render_index(), GLsizei(mesh->render_count()));
   }
   mesh->lock_buffers();
@@ -374,12 +374,12 @@ void GLRenderer::api_render_simple_mesh(Camera *camera, SimpleMesh *mesh,
   material->render();
   if (mesh->is_indexed()) {
     glDrawElementsInstancedBaseVertex(
-        GLDrawMethod(mesh->get_draw_method()),
+        opengl::GLDrawMethod(mesh->get_draw_method()),
         static_cast<GLsizei>(mesh->render_count()), GL_UNSIGNED_INT, nullptr,
         instance_count, mesh->get_render_index());
   } else {
     glDrawArraysInstanced(
-        GLDrawMethod(mesh->get_draw_method()), mesh->get_render_index(),
+        opengl::GLDrawMethod(mesh->get_draw_method()), mesh->get_render_index(),
         static_cast<GLsizei>(mesh->render_count()), instance_count);
   }
   glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, 0);
@@ -399,10 +399,10 @@ void GLRenderer::api_bind_mesh_render_state(SimpleMesh *mesh,
     mesh->render_states.insert({material->name(), vertex_array_ID});
     for (auto &buffer : mesh->geometry_buffers) {
       for (const auto &attrib : buffer->format()) {
-        if (attrib.type == Attribute::POSITION_2D ||
-            attrib.type == Attribute::POSITON_3D ||
-            attrib.type == Attribute::NORMAL ||
-            attrib.type == Attribute::TEXTURE_MAP) {
+        if (attrib.type == AttributeType::POSITION_2D ||
+            attrib.type == AttributeType::POSITON_3D ||
+            attrib.type == AttributeType::NORMAL ||
+            attrib.type == AttributeType::TEXTURE_MAP) {
           GLint attrib_loc =
               glGetAttribLocation(material->name(), attrib.name.c_str());
           if (attrib_loc != -1) {
@@ -542,7 +542,7 @@ void GLAPIENTRY GLRenderer::debug_message_callback(GLenum source, GLenum type,
 // Renderer callback functions
 void GLRenderer::glfw_onResize(GLFWwindow *window, int w, int h) {
   // callback to the renderer to resize the viewport
-  Renderer::API->resize_window(w, h);
+  Renderer::API->resize_viewport(w, h);
 
   if (info.scene) {
     // reverse iterate through layer callbacks first

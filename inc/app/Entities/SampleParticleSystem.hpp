@@ -2,7 +2,10 @@
 #define SAMPLEPARTICLESYSTEM
 
 // MARE
+#include "mare/Assets/Materials/BasicMaterial.hpp"
+#include "mare/Assets/Meshes/SphereMesh.hpp"
 #include "mare/Buffers.hpp"
+#include "mare/Components/Transform.hpp"
 #include "mare/Entity.hpp"
 #include "mare/Mare.hpp"
 #include "mare/Meshes.hpp"
@@ -10,14 +13,8 @@
 #include "mare/Shader.hpp"
 #include "mare/Systems.hpp"
 
-#include "mare/Assets/Materials/BasicMaterial.hpp"
-#include "mare/Assets/Meshes/SphereMesh.hpp"
-
-#include "mare/Components/Transform.hpp"
-
+// External Libraries
 #include "gtc/random.hpp"
-
-static const int P_COUNT = 128;
 
 namespace mare {
 
@@ -25,8 +22,14 @@ namespace mare {
 class SampleParticleSystemRenderer;
 class SampleParticleSystemPhysics;
 
+/**
+ * @brief An Example of a particle system.
+ */
 class SampleParticleSystem : public Entity, public Transform {
 public:
+  /**
+   * @brief Construct a new SampleParticleSystem Entity.
+   */
   SampleParticleSystem() {
     gen_system<SampleParticleSystemRenderer>();
     gen_system<SampleParticleSystemPhysics>();
@@ -38,7 +41,8 @@ public:
 
     particles = gen_ref<InstancedMesh>(P_COUNT);  // particles
     particle_material = gen_ref<BasicMaterial>(); // particle material
-    compute_program = gen_ref<ComputeProgram>("./inc/app/Assets/Shaders/NBodyGravity");
+    compute_program =
+        gen_ref<ComputeProgram>("./inc/app/Assets/Shaders/NBodyGravity");
 
     particle_material->set_color(glm::vec4(0.33f, 0.12f, 0.7f, 1.0f));
     particles->set_mesh(gen_scoped<SphereMesh>(2, 0.02f));
@@ -56,8 +60,12 @@ public:
   Referenced<InstancedMesh> particles;
   Referenced<ComputeProgram> compute_program;
   float G;
+  static const int P_COUNT = 128;
 };
 
+/**
+ * @brief The RenderSystem for the SampleParticleSystem
+ */
 class SampleParticleSystemRenderer : public RenderSystem<SampleParticleSystem> {
 public:
   void render(float dt, Camera *camera,
@@ -65,13 +73,16 @@ public:
     Renderer::wireframe_mode(true);
     auto mesh = sample_particle_system->particles;
     auto material = sample_particle_system->particle_material;
-    sample_particle_system->compute_program->barrier(
-        BarrierType::STORAGE);
+    sample_particle_system->compute_program->barrier(BarrierType::STORAGE);
     mesh->render(camera, material.get(), sample_particle_system->get_model());
     Renderer::wireframe_mode(false);
   }
 };
 
+/**
+ * @brief The PhysicsSystem for the SampleParticleSystem.
+ *
+ */
 class SampleParticleSystemPhysics : public PhysicsSystem<SampleParticleSystem> {
 public:
   void update(float dt, SampleParticleSystem *sample_particle_system) override {
@@ -89,7 +100,7 @@ public:
     program->upload_storage("model_instances",
                             particles->get_instance_models());
 
-    program->dispatch_compute(P_COUNT);
+    program->dispatch_compute(SampleParticleSystem::P_COUNT);
 
     // swap buffers
     sample_particle_system->models_out =

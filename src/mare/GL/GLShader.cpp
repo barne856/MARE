@@ -286,7 +286,8 @@ void GLShader::upload_image2D(const char *name, Texture2D *texture2D,
     glUniform1i(resource_cache_[name], image_binding_cache_[name]);
   }
   glBindImageTexture(image_binding_cache_[name], texture2D->name(), 0, GL_FALSE,
-                     0, GL_READ_WRITE, gl_sized_tex_format(texture2D->type()));
+                     0, GL_READ_WRITE,
+                     opengl::gl_sized_tex_format(texture2D->type()));
   if (resource_cache_[name] == -1 && suppress_warnings == false) {
     std::cerr << "SHADER WARNING: No uniform image2D '" << name
               << "' exists in the shader" << std::endl;
@@ -314,29 +315,17 @@ void GLShader::barrier(BarrierType type) {
   case BarrierType::COMMAND:
     glMemoryBarrier(GL_COMMAND_BARRIER_BIT);
     break;
-  case BarrierType::PIXEL_BUFFER:
-    glMemoryBarrier(GL_PIXEL_BUFFER_BARRIER_BIT);
-    break;
-  case BarrierType::TEXTURE_UPDATE:
-    glMemoryBarrier(GL_TEXTURE_UPDATE_BARRIER_BIT);
-    break;
   case BarrierType::BUFFER_UPDATE:
     glMemoryBarrier(GL_BUFFER_UPDATE_BARRIER_BIT);
     break;
   case BarrierType::FRAMEBUFFER:
     glMemoryBarrier(GL_FRAMEBUFFER_BARRIER_BIT);
     break;
-  case BarrierType::FEEDBACK:
-    glMemoryBarrier(GL_TRANSFORM_FEEDBACK_BARRIER_BIT);
-    break;
   case BarrierType::ATOMIC_COUNTER:
     glMemoryBarrier(GL_ATOMIC_COUNTER_BARRIER_BIT);
     break;
   case BarrierType::STORAGE:
     glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
-    break;
-  case BarrierType::QUERY:
-    glMemoryBarrier(GL_QUERY_BUFFER_BARRIER_BIT);
     break;
   case BarrierType::ALL:
     glMemoryBarrier(GL_ALL_BARRIER_BITS);
