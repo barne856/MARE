@@ -35,6 +35,10 @@ GLenum opengl::GLDrawMethod(DrawMethod draw_method) {
   }
 }
 
+void GLRenderer::glfw_error_callback(int error_code, const char* description)
+{
+  std::cerr << "GLFW ERROR CODE: [" << error_code << "] " << description << std::endl;
+}
 void GLRenderer::run() {
   init_info();
   info.API = RendererAPI::OpenGL_4_5;
@@ -46,7 +50,9 @@ void GLRenderer::run() {
 void GLRenderer::init_renderer() {
   running = true;
 
-  if (!glfwInit()) {
+  glfwSetErrorCallback(glfw_error_callback);
+
+  if (glfwInit() == GLFW_FALSE) {
     std::cerr << "GLFW Failed to initialize." << std::endl;
     running = false;
     return;
@@ -397,11 +403,13 @@ void GLRenderer::api_bind_mesh_render_state(SimpleMesh *mesh,
     uint32_t vertex_array_ID;
     glCreateVertexArrays(1, &vertex_array_ID);
     mesh->render_states.insert({material->name(), vertex_array_ID});
+    int buffer_binding_index = 0;
     for (auto &buffer : mesh->geometry_buffers) {
       for (const auto &attrib : buffer->format()) {
         if (attrib.type == AttributeType::POSITION_2D ||
             attrib.type == AttributeType::POSITON_3D ||
             attrib.type == AttributeType::NORMAL ||
+            attrib.type == AttributeType::COLOR ||
             attrib.type == AttributeType::TEXTURE_MAP) {
           GLint attrib_loc =
               glGetAttribLocation(material->name(), attrib.name.c_str());
@@ -413,16 +421,17 @@ void GLRenderer::api_bind_mesh_render_state(SimpleMesh *mesh,
                 GL_FALSE, static_cast<GLint>(attrib.offset));
             glVertexArrayAttribBinding(
                 vertex_array_ID, attrib_loc,
-                static_cast<GLuint>(mesh->geometry_buffers.size()));
+                static_cast<GLuint>(buffer_binding_index));
             glVertexArrayVertexBuffer(
                 vertex_array_ID,
-                static_cast<GLuint>(mesh->geometry_buffers.size()),
+                static_cast<GLuint>(buffer_binding_index),
                 static_cast<GLuint>(buffer->name()), 0,
                 static_cast<GLsizei>(buffer->format().stride));
           }
         }
       }
       mesh->vertex_render_count = buffer->count();
+      buffer_binding_index++;
     }
     if (mesh->index_buffer) {
       glVertexArrayElementBuffer(mesh->render_states[material->name()],
@@ -437,14 +446,14 @@ void GLRenderer::api_destroy_mesh_render_states(SimpleMesh *mesh) {
   }
 }
 void GLRenderer::api_push_mesh_geometry_buffer(
-    SimpleMesh *mesh, Scoped<Buffer<float>> geometry_buffer) {
-  mesh->geometry_buffers.push_back(std::move(geometry_buffer));
+    SimpleMesh *mesh, Referenced<Buffer<float>> geometry_buffer) {
+  mesh->geometry_buffers.push_back(geometry_buffer);
   mesh->invalidate_render_state_cache();
 }
 void GLRenderer::api_set_mesh_index_buffer(
-    SimpleMesh *mesh, Scoped<Buffer<uint32_t>> index_buffer) {
+    SimpleMesh *mesh, Referenced<Buffer<uint32_t>> index_buffer) {
   mesh->index_render_count = index_buffer->count();
-  mesh->index_buffer = std::move(index_buffer);
+  mesh->index_buffer = index_buffer;
   mesh->invalidate_render_state_cache();
 }
 

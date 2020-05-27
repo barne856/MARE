@@ -663,7 +663,7 @@ public:
    */
   virtual void
   api_push_mesh_geometry_buffer(SimpleMesh *mesh,
-                                Scoped<Buffer<float>> geometry_buffer) = 0;
+                                Referenced<Buffer<float>> geometry_buffer) = 0;
   /**
    * @brief API implemented function to set the Index Buffer of a SimpleMesh.
    *
@@ -672,7 +672,7 @@ public:
    */
   virtual void
   api_set_mesh_index_buffer(SimpleMesh *mesh,
-                            Scoped<Buffer<uint32_t>> index_buffer) = 0;
+                            Referenced<Buffer<uint32_t>> index_buffer) = 0;
   /**
    * @brief API implemented function to generate a Texture2D from an image
    * filepath.
@@ -905,27 +905,27 @@ public:
   }
   /**
    * @brief Static access to
-   * Renderer::push_mesh_geometry_buffer(SimpleMesh*,Scoped<Buffer<float>>).
+   * Renderer::push_mesh_geometry_buffer(SimpleMesh*,Referenced<Buffer<float>>).
    *
    * @param mesh The SimpleMesh to push the Geometry Buffer to.
    * @param geometry_buffer The Geometry Buffer to push.
-   * @see Renderer::push_mesh_geometry_buffer(SimpleMesh*,Scoped<Buffer<float>>)
+   * @see Renderer::push_mesh_geometry_buffer(SimpleMesh*,Referenced<Buffer<float>>)
    */
   static void push_mesh_geometry_buffer(SimpleMesh *mesh,
-                                        Scoped<Buffer<float>> geometry_buffer) {
-    API->api_push_mesh_geometry_buffer(mesh, std::move(geometry_buffer));
+                                        Referenced<Buffer<float>> geometry_buffer) {
+    API->api_push_mesh_geometry_buffer(mesh, geometry_buffer);
   }
   /**
    * @brief Static access to Renderer::set_mesh_index_buffer(SimpleMesh*,
-   * Scoped<Buffer<uint32_t>>)
+   * Referenced<Buffer<uint32_t>>)
    *
    * @param mesh The SimpleMesh whose Index Buffer will be set.
    * @param index_buffer The Index Buffer to set.
-   * @see Renderer::set_mesh_index_buffer(SimpleMesh*, Scoped<Buffer<uint32_t>>)
+   * @see Renderer::set_mesh_index_buffer(SimpleMesh*, Referenced<Buffer<uint32_t>>)
    */
   static void set_mesh_index_buffer(SimpleMesh *mesh,
-                                    Scoped<Buffer<uint32_t>> index_buffer) {
-    API->api_set_mesh_index_buffer(mesh, std::move(index_buffer));
+                                    Referenced<Buffer<uint32_t>> index_buffer) {
+    API->api_set_mesh_index_buffer(mesh, index_buffer);
   }
   /**
    * @brief Static access to Renderer::gen_texture2D(const char*).

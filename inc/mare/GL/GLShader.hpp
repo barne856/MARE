@@ -39,7 +39,7 @@ public:
    * unbind and previously bound Shader.
    * @see Shader
    */
-  inline void use() const { glUseProgram(shader_ID_); }
+  inline void use() const override { glUseProgram(shader_ID_); }
   /**
    * @brief utility function to decode a OpenGL shader type to a string.
    *

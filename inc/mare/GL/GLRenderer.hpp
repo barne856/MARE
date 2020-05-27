@@ -256,7 +256,7 @@ public:
    */
   virtual void
   api_push_mesh_geometry_buffer(SimpleMesh *mesh,
-                                Scoped<Buffer<float>> geometry_buffer) override;
+                                Referenced<Buffer<float>> geometry_buffer) override;
   /**
    * @brief GLRenderer implemented function to set the Index Buffer of a
    * SimpleMesh.
@@ -266,7 +266,7 @@ public:
    */
   virtual void
   api_set_mesh_index_buffer(SimpleMesh *mesh,
-                            Scoped<Buffer<uint32_t>> index_buffer) override;
+                            Referenced<Buffer<uint32_t>> index_buffer) override;
 
   /**
    * @brief Dispatch a compute operation.
@@ -378,7 +378,7 @@ private:
    */
   static void glfw_onMouseWheel(GLFWwindow *window, double xoffset,
                                 double yoffset);
-
+  static void glfw_error_callback(int error_code, const char* description);
   // Cursors
   GLFWcursor *hz_resize_cursor; /**< A GLFW cursor.*/
   GLFWcursor *arrow_cursor;     /**< A GLFW cursor.*/

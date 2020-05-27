@@ -55,6 +55,9 @@ enum class AttributeType {
   NORMAL,      /**< Represents 3D normal data and is the equivalent of the glsl
                         input attribute `vec3`. Data in buffer will be interpreted as
                         three sequential floating point numbers (x,y,z).*/
+  COLOR, /**< Represents RGBA color data and is the equivalent of the glsl input
+            attribute `vec4`. Data in the buffer will be interpreted as four
+            sequatial floating point numbers (r,g,b,a).*/
   TEXTURE_MAP, /**< Represents 2D texture coordinate data and is the equivalent
                   of the glsl input attribute `vec2`. Data in buffer will be
                   interpreted as two sequential floating point numbers
@@ -95,6 +98,7 @@ public:
    * POSITON_2D     | 2
    * POSITON_3D     | 3
    * NORMAL         | 3
+   * COLOR          | 4
    * TEXTURE_MAP    | 2
    * UNIFORM        | 1
    * STORAGE        | 1
@@ -111,6 +115,9 @@ public:
       break;
     case AttributeType::NORMAL:
       return 3;
+      break;
+    case AttributeType::COLOR:
+      return 4;
       break;
     case AttributeType::TEXTURE_MAP:
       return 2;

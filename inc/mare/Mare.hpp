@@ -2,15 +2,17 @@
 #define MARE
 
 // Standard Library
+#include <algorithm>
 #include <memory>
 #include <variant>
 #include <vector>
+
 // External Libraries
 #include "glm.hpp"
 
 /**
  * @brief The namespace for the engine.
- * 
+ *
  */
 namespace mare {
 /**
@@ -32,7 +34,7 @@ public:
  * - Rendering Systems
  * - Physics Systems
  * - Control Systems
- * 
+ *
  * Each Entity contains a *system stack* which references of all the
  * Systems enabled on that Entity. The ordering of the Systems on the system
  * stack determines the order in which the callbacks are executed. Rendering and
@@ -94,14 +96,8 @@ template <typename T, typename... Args> Referenced<T> gen_ref(Args... args) {
 }
 
 /**
- * @brief The namespace for utility methods and variables in the engine.
- * 
- */
-namespace util {} // namespace util
-
-/**
  * @brief The namespace for math methods and varibles in the engine.
- * 
+ *
  */
 namespace math {
 /**
@@ -140,11 +136,81 @@ void normalized_device_coordinates(int x, int y, float &nx, float &ny);
  * @param[out] y The coressponding y-coordinate in window coordinates.
  */
 void window_coordinates(float nx, float ny, int &x, int &y);
+/**
+ * @brief Return true if \p point is inside \p polygon.
+ * @details \p polygon vertices must be given in counter-clockwise order.
+ * 
+ * @param point The point to test.
+ * @param polygon The polygon to test.
+ * @return true 
+ * @return false 
+ */
+bool is_in_polygon(glm::vec2 point, std::vector<glm::vec2> polygon);
+/**
+ * @brief Returns the closest point on a line segment to the given point \p point.
+ * 
+ * @param point The point to snap
+ * @param p1 First point of line segment to snap to.
+ * @param p2 Second point of line segment to snap to.
+ * @return The snapped point.
+ */
+glm::vec2 snap_to_line(glm::vec2 point, glm::vec2 p1, glm::vec2 p2);
+/**
+ * @brief Return the intersection point of two lines
+ * 
+ * @param p1 point 1 on line 1
+ * @param p2 point 2 on line 1
+ * @param p3 point 1 on line 2
+ * @param p4 point 2 on line 2
+ * @return The intersection point, nan if the lines are parallel or either line is degenerate
+ */
+glm::vec2 intersection(glm::vec2 p1, glm::vec2 p2, glm::vec2 p3, glm::vec2 p4);
+/**
+ * @brief Calculate the closest point that lies inside of a triangle to another
+ * point.
+ * @details The triangle vertices should be provided in counter-clockwise order
+ * starting with \p v1.
+ *
+ * @param v1 Triangle vertex 1.
+ * @param v2 Triangle vertex 2.
+ * @param v3 Triangle vertex 3.
+ * @param point The point to test.
+ * @return The closest point inside the triangle to \p point.
+ */
+glm::vec2 clamp_point_to_triangle(glm::vec2 v1, glm::vec2 v2, glm::vec2 v3,
+                                    glm::vec2 point);
 
 /** The ratio of a circle's circumference to its diameter approximated as a
  * 32-bit floating point number.*/
 const float PI = 3.141592653f;
+/** Two times PI*/
+const float TAU = 2.0f * 3.141592653f;
 } // namespace math
+
+/**
+ * @brief The namespace for utility methods and variables in the engine.
+ *
+ */
+namespace util {
+/**
+ * @brief Convert rgba colors to hsva colors
+ * @details rgba values range from 0 to 1, h value ranges from 0 to 2*pi, s
+ * and v range from 0 to 1.
+ *
+ * @param color The RGBA color
+ * @return The HSVA color
+ */
+glm::vec4 rgba_to_hsva(glm::vec4 color);
+/**
+ * @brief Convert hsva colors to rgba colors
+ * @details rgba values range from 0 to 1, h value ranges from 0 to 2*pi, s
+ * and v range from 0 to 1.
+ *
+ * @param color The HSVA color
+ * @return The RGBA color
+ */
+glm::vec4 hsva_to_rgba(glm::vec4 color);
+} // namespace util
 
 } // namespace mare
 

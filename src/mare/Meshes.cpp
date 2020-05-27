@@ -28,13 +28,17 @@ void SimpleMesh::bind(Material *material)
 {
     Renderer::bind_mesh_render_state(this, material);
 }
-void SimpleMesh::add_geometry_buffer(Scoped<Buffer<float>> geometry_buffer)
+void SimpleMesh::add_geometry_buffer(Referenced<Buffer<float>> geometry_buffer)
 {
-    Renderer::push_mesh_geometry_buffer(this, std::move(geometry_buffer));
+    Renderer::push_mesh_geometry_buffer(this, geometry_buffer);
 }
-void SimpleMesh::set_index_buffer(Scoped<Buffer<uint32_t>> index_buffer)
+std::vector<Referenced<Buffer<float>>> SimpleMesh::get_geometry_buffers()
 {
-    Renderer::set_mesh_index_buffer(this, std::move(index_buffer));
+    return geometry_buffers;
+}
+void SimpleMesh::set_index_buffer(Referenced<Buffer<uint32_t>> index_buffer)
+{
+    Renderer::set_mesh_index_buffer(this, index_buffer);
 }
 size_t SimpleMesh::render_count() const
 {
@@ -106,9 +110,9 @@ void CompositeMesh::render(Camera *camera, Material *material, glm::mat4 parent_
     }
 }
 
-void CompositeMesh::push_mesh(Scoped<Mesh> mesh)
+void CompositeMesh::push_mesh(Referenced<Mesh> mesh)
 {
-    meshes_.push_back(std::move(mesh));
+    meshes_.push_back(mesh);
 }
 
 void CompositeMesh::pop_mesh()

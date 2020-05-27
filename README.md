@@ -1,9 +1,9 @@
 # MARE 1.0.0
 MARE stands for *Minimal Abstraction Rendering Engine*. MARE aims to provide an easy to use and extremely flexible 3D rendering framework using the minimum possible amount of abstractions.
 
- MARE provides the user with access lower level rendering concepts while removing much of the boilerplate code typically needed when using a low level 3D rendering API. This allows the user to easily combine these low level concepts with higher level concepts when needed to implement a specific or novel rendering technique. Ease of use, simplicity, and flexibility of the API are favored over performance but only when neccessary and MARE remains quite fast.
+ MARE provides the user with access to lower level rendering concepts while removing much of the boilerplate code typically needed when using a low level 3D rendering API. This allows the user to easily combine these low level concepts with higher level concepts when needed to implement a specific or novel rendering technique. Ease of use, simplicity, and flexibility of the API are favored over performance but only when neccessary and MARE remains quite fast.
  
- MARE can be used for quickly prototyping real time 3D rendering conepts in C++ or creating complex full-fledged 3D applications that are not performance critical. MARE provides sets of standard Meshes, Materials, Components, and Systems that are useful for getting started, but also allows the user to create their own implementations of these using header files. Currently, MARE implementes the modern OpenGL 4.5 Rendering API using C++17 features.
+ MARE can be used for quickly prototyping real time 3D rendering techniques in C++ or creating complex full-fledged 3D applications that are not performance critical. MARE provides sets of standard Meshes, Materials, Components, and Systems that are useful for getting started, but also allows the user to create their own implementations of these using header files. Currently, MARE implementes the modern OpenGL 4.5 Rendering API using C++17 features.
 
 ![Alt text](/res/Screenshots/ShadowMapping.png)
 
@@ -24,7 +24,7 @@ If you are running GNU/Linux make sure you have the development files for the fo
 * pthread
 * dl
 
-MARE itself it licensed under the MIT license. Assuming your system meets the above requirements you should only need to clone the project with its submodules to get everything you need to use MARE. This can be accomplished with the following git command:
+MARE itself is licensed under the MIT license. Assuming your system meets the above requirements you should only need to clone the project with its submodules to get everything you need to use MARE. This can be accomplished with the following git command:
 
     git clone --recurse-submodules -j8 https://github.com/barne856/MARE.git
 
@@ -64,7 +64,7 @@ Systems provide callbacks that operate on the Components of the Entity that they
 * RenderSystems
 * PhysicsSystems
 
-ControlsSystems provide callbacks to input events that are called whenever an input event is recorded by the Engine. The parameters to the callbacks are a reference to the input data, and a variable number of pointers to all of the Components that the System operates on. This is accomplished through tempaltes.
+ControlsSystems provide callbacks to input events that are called whenever an input event is recorded by the Engine. The parameters to the callbacks are a reference to the input data, and a variable number of pointers to all of the Components that the System operates on. This is accomplished through templates.
 
     on_key(RendererInput& input, Component* comps...)
     on_mouse_button(RendererInput& input, Component* comps...)
@@ -76,7 +76,7 @@ Render Systems provide a render callback function that is called on each frame, 
 
     render(float dt, Camera* camera, Component* comps...)
 
-Physics Systems provide an update callback function that is called on each frame, it takes as input the time in seconds since the previous frame and a variable number of pointers to all of the Components that the System operates on. This is accomplished though tempaltes.
+Physics Systems provide an update callback function that is called on each frame, it takes as input the time in seconds since the previous frame and a variable number of pointers to all of the Components that the System operates on. This is accomplished though templates.
 
     update(float dt, Component* comps...)
 
@@ -294,7 +294,7 @@ public:
 ```
 
 #### Cameras
-Cameras are a special type of Entity. All Layers and Scenes inherit from a Camera Entity. This is the active Camera no additional Camera Entity is necessary to render a Layer or Scene. Multiple Camera Entities can be attached to a Scene and swaped with the active Camera using the `Layer::swap_camera(Referenced<Camera> camera)` function.
+Cameras are a special type of Entity. All Layers and Scenes inherit from a Camera Entity. This is the active Camera and no additional Camera Entity is necessary to render a Layer or Scene. Multiple Camera Entities can be attached to a Scene and swaped with the active Camera using the `Layer::swap_camera(Referenced<Camera> camera)` function.
 
 ### Components & Systems
 Components add functionality to Entities and are operated on by Systems. An Entity is created by inheriting from Components and pushing Systems that operate on those Comonents onto the Entity's System stack. The types of Systems must match the types of Components the Entity inherits from. Below is an example of a EulerMethod PhysicsSystem that is used to update a Rigidbody Component:

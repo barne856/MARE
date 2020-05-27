@@ -26,18 +26,18 @@ public:
    */
   ArrowMesh(float body_length, float body_width, float head_length,
             float head_width, unsigned int sides) {
-    head = gen_scoped<ConeMesh>(0.5f, sides);
-    body = gen_scoped<CylinderMesh>(0.0f, 2.0f * 3.141592653f, sides);
+    head = gen_ref<ConeMesh>(0.5f, sides);
+    body = gen_ref<CylinderMesh>(0.0f, 2.0f * 3.141592653f, sides);
     body->set_scale({body_width, body_width, body_length});
     head->set_scale({head_width, head_width, head_length});
     head->set_position({0.0f, 0.0f, body_length});
-    push_mesh(std::move(body));
-    push_mesh(std::move(head));
+    push_mesh(body);
+    push_mesh(head);
   }
 
 private:
-  Scoped<ConeMesh> head;     /**< The head of the arrow.*/
-  Scoped<CylinderMesh> body; /**< The tail of the arrow. */
+  Referenced<ConeMesh> head;     /**< The head of the arrow.*/
+  Referenced<CylinderMesh> body; /**< The tail of the arrow. */
 };
 } // namespace mare
 

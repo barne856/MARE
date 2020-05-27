@@ -4,6 +4,7 @@
 // MARE
 #include "app/Entities/SampleEntity.hpp"
 #include "app/Layers/SampleUI.hpp"
+#include "app/Layers/SampleWidgetsLayer.hpp"
 #include "mare/Assets/Materials/PhongMaterial.hpp"
 #include "mare/Assets/Meshes/TorusMesh.hpp"
 #include "mare/Components/Rigidbody.hpp"

@@ -184,7 +184,13 @@ public:
    * @see BufferFormat
    * @see Material
    */
-  virtual void add_geometry_buffer(Scoped<Buffer<float>> geometry_buffer);
+  virtual void add_geometry_buffer(Referenced<Buffer<float>> geometry_buffer);
+  /**
+   * @brief Get the geometry buffers fo the Mesh.
+   *
+   * @return The geometry buffers.
+   */
+  virtual std::vector<Referenced<Buffer<float>>> get_geometry_buffers();
   /**
    * @brief Set the Index Buffer of the Mesh
    * @details A SimpleMesh can only have a single Index Buffer. The Index Buffer
@@ -194,7 +200,7 @@ public:
    *
    * @param index_buffer The Index Buffer to set.
    */
-  virtual void set_index_buffer(Scoped<Buffer<uint32_t>> index_buffer);
+  virtual void set_index_buffer(Referenced<Buffer<uint32_t>> index_buffer);
   /**
    * @brief If Indexed, returns the number of indices in the Index Buffer. Else,
    * returns the number of vertices in the Geometry Buffer.
@@ -259,10 +265,10 @@ public:
                      // render state ID value. The render state ID contains the
                      // information to link data in the Geomerty Buffer to the
                      // shader inputs/*/
-  std::vector<Scoped<Buffer<float>>>
+  std::vector<Referenced<Buffer<float>>>
       geometry_buffers; /**< A vector of the Geometry Buffer attached to the
                            Mesh.*/
-  Scoped<Buffer<uint32_t>>
+  Referenced<Buffer<uint32_t>>
       index_buffer; /**< The Index Buffer attached to the Mesh if any.*/
   size_t geometry_buffer_count; /**< The number of Geometry Buffers attached to
                                    the Mesh.*/
@@ -327,7 +333,7 @@ public:
    *
    * @param mesh The Mesh to push onto the stack.
    */
-  void push_mesh(Scoped<Mesh> mesh);
+  void push_mesh(Referenced<Mesh> mesh);
   /**
    * @brief Remove the last Mesh on the Mesh stack.
    */
@@ -336,9 +342,23 @@ public:
    * @brief Delete all Meshes on the Mesh stack.
    */
   void clear();
+  /**
+   * @brief Get the meshes of type <T> in the CompositeMesh.
+   *
+   * @return The Meshes.
+   */
+  template <typename T> std::vector<T*> get_meshes() {
+    std::vector<T *> meshes{};
+    for (auto mesh : meshes_) {
+      if (auto m = std::dynamic_pointer_cast<T>(mesh)) {
+        meshes.push_back(m.get());
+      }
+    }
+    return meshes;
+  }
 
 protected:
-  std::vector<Scoped<Mesh>> meshes_{}; /**< The Mesh stack.*/
+  std::vector<Referenced<Mesh>> meshes_{}; /**< The Mesh stack.*/
 };
 
 /**
