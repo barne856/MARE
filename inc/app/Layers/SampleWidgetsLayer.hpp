@@ -17,9 +17,9 @@ class SampleWidgetsLayer : public Layer {
 public:
   SampleWidgetsLayer() : Layer(ProjectionType::ORTHOGRAPHIC) {
     // Create Widgets
-    auto picker = gen_entity<ColorPicker>(this);
-    //picker->set_scale(glm::vec3(0.4f));
-    //picker->set_position(glm::vec3(-16.0f/9.0f+0.4f*0.6f, 1.0f-0.4f*0.6f, 0.0f));
+    auto picker = gen_entity<ColorPicker>(this, true);
+    picker->set_scale(glm::vec3(0.4f));
+    picker->set_position(glm::vec3(-16.0f/9.0f+0.4f*0.6f, 1.0f-0.4f*0.6f, 0.0f));
   }
 
   void on_enter() override {}

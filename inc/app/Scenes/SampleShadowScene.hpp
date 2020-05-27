@@ -121,7 +121,7 @@ public:
       Renderer::set_cursor(CursorType::ENABLED);
       scene->fly_controls = scene->pull_system<FlyControls>();
       scene->linear_velocity = glm::vec3(0.0f, 0.0f, 0.0f);
-    } else if (input.LEFT_CONTROL_RELEASED) {
+    } else if (input.LEFT_CONTROL_JUST_RELEASED) {
       if (!scene->get_system<FlyControls>()) {
         Renderer::set_cursor(CursorType::DISABLED);
         scene->push_system(scene->fly_controls);

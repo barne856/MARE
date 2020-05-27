@@ -20,7 +20,7 @@ class OrbitControls : public ControlsSystem<Transform> {
   float distance_to_center = 1.0f;
   bool on_mouse_move(const RendererInput &input,
                      Transform *transform) override {
-    if (input.mouse_button == 1) {
+    if (input.LEFT_MOUSE_PRESSED) {
       // orbit around center and adjust inclination
       float sensitivity = 300.0f;
       float dtheta = -float(input.mouse_vel.y) / sensitivity;

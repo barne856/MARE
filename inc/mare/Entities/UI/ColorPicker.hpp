@@ -19,8 +19,10 @@ namespace mare {
 // Mesh
 class ColorPickerMesh : public CompositeMesh {
 public:
-  ColorPickerMesh() {
+  ColorPickerMesh(bool transparency_slider) {
+    transparency = transparency_slider;
     DrawMethod method = DrawMethod::TRIANGLES;
+    color_hsva = glm::vec4(0.0f, 0.5f, 2.0f / 3.0f, 1.0f);
     // Hue Ring---------------------------------------------
     std::vector<float> ring_verts;
     std::vector<float> ring_colors;
@@ -167,19 +169,179 @@ public:
     push_mesh(ring_mesh);
     push_mesh(tri_mesh);
     push_mesh(picker_mesh);
-    color_rgba = glm::vec4(2.0f / 3.0f, 1.0f / 3.0f, 1.0f / 3.0f, 1.0f);
+
+    // transparency_slider
+    if (transparency_slider) {
+      std::vector<float> t_slider_verts;
+      std::vector<float> t_slider_colors;
+      std::vector<uint32_t> t_slider_indes;
+      glm::vec4 color_rgba = util::hsva_to_rgba(color_hsva);
+      t_slider_verts.push_back(0.7f);
+      t_slider_verts.push_back(-0.5f);
+      t_slider_colors.push_back(color_rgba[0]);
+      t_slider_colors.push_back(color_rgba[1]);
+      t_slider_colors.push_back(color_rgba[2]);
+      t_slider_colors.push_back(0.0f);
+      t_slider_verts.push_back(0.8f);
+      t_slider_verts.push_back(-0.5f);
+      t_slider_colors.push_back(color_rgba[0]);
+      t_slider_colors.push_back(color_rgba[1]);
+      t_slider_colors.push_back(color_rgba[2]);
+      t_slider_colors.push_back(0.0f);
+      t_slider_verts.push_back(0.8f);
+      t_slider_verts.push_back(0.5f);
+      t_slider_colors.push_back(color_rgba[0]);
+      t_slider_colors.push_back(color_rgba[1]);
+      t_slider_colors.push_back(color_rgba[2]);
+      t_slider_colors.push_back(1.0f);
+      t_slider_verts.push_back(0.7f);
+      t_slider_verts.push_back(0.5f);
+      t_slider_colors.push_back(color_rgba[0]);
+      t_slider_colors.push_back(color_rgba[1]);
+      t_slider_colors.push_back(color_rgba[2]);
+      t_slider_colors.push_back(1.0f);
+      t_slider_indes.push_back(0);
+      t_slider_indes.push_back(1);
+      t_slider_indes.push_back(2);
+      t_slider_indes.push_back(2);
+      t_slider_indes.push_back(3);
+      t_slider_indes.push_back(0);
+
+      Referenced<Buffer<float>> slider_vert_buffer =
+          Renderer::gen_buffer<float>(&t_slider_verts[0],
+                                      sizeof(float) * t_slider_verts.size());
+      Referenced<Buffer<float>> slider_color_buffer =
+          Renderer::gen_buffer<float>(&t_slider_colors[0],
+                                      sizeof(float) * t_slider_colors.size(),
+                                      BufferType::WRITE_ONLY);
+      Referenced<Buffer<uint32_t>> slider_index_buffer =
+          Renderer::gen_buffer<uint32_t>(&t_slider_indes[0],
+                                         sizeof(float) * t_slider_indes.size());
+      slider_vert_buffer->set_format(
+          {{AttributeType::POSITION_2D, "position"}});
+      slider_color_buffer->set_format({{AttributeType::COLOR, "color"}});
+      std::vector<Referenced<Buffer<float>>> slider_vertex_buffers;
+      slider_vertex_buffers.push_back(slider_vert_buffer);
+      slider_vertex_buffers.push_back(slider_color_buffer);
+      Referenced<SimpleMesh> slider_mesh = gen_ref<ArrayMesh>(
+          method, slider_vertex_buffers, slider_index_buffer);
+      push_mesh(slider_mesh);
+
+      // slider knob
+      std::vector<float> t_knob_verts;
+      std::vector<float> t_knob_colors;
+      std::vector<uint32_t> t_knob_indes;
+      // outer box
+      t_knob_verts.push_back(-0.0675f);
+      t_knob_verts.push_back(-0.0175f);
+      t_knob_verts.push_back(0.0675f);
+      t_knob_verts.push_back(-0.0175f);
+      t_knob_verts.push_back(0.0675f);
+      t_knob_verts.push_back(0.0175f);
+      t_knob_verts.push_back(-0.0675f);
+      t_knob_verts.push_back(0.0175f);
+      // inner box
+      t_knob_verts.push_back(-0.0625f);
+      t_knob_verts.push_back(-0.0125f);
+      t_knob_verts.push_back(0.0625f);
+      t_knob_verts.push_back(-0.0125f);
+      t_knob_verts.push_back(0.0625f);
+      t_knob_verts.push_back(0.0125f);
+      t_knob_verts.push_back(-0.0625f);
+      t_knob_verts.push_back(0.0125f);
+      // colors
+      t_knob_colors.push_back(0.0f);
+      t_knob_colors.push_back(0.0f);
+      t_knob_colors.push_back(0.0f);
+      t_knob_colors.push_back(1.0f);
+      t_knob_colors.push_back(0.0f);
+      t_knob_colors.push_back(0.0f);
+      t_knob_colors.push_back(0.0f);
+      t_knob_colors.push_back(1.0f);
+      t_knob_colors.push_back(0.0f);
+      t_knob_colors.push_back(0.0f);
+      t_knob_colors.push_back(0.0f);
+      t_knob_colors.push_back(1.0f);
+      t_knob_colors.push_back(0.0f);
+      t_knob_colors.push_back(0.0f);
+      t_knob_colors.push_back(0.0f);
+      t_knob_colors.push_back(1.0f);
+      t_knob_colors.push_back(0.0f);
+      t_knob_colors.push_back(0.0f);
+      t_knob_colors.push_back(0.0f);
+      t_knob_colors.push_back(1.0f);
+      t_knob_colors.push_back(0.0f);
+      t_knob_colors.push_back(0.0f);
+      t_knob_colors.push_back(0.0f);
+      t_knob_colors.push_back(1.0f);
+      t_knob_colors.push_back(0.0f);
+      t_knob_colors.push_back(0.0f);
+      t_knob_colors.push_back(0.0f);
+      t_knob_colors.push_back(1.0f);
+      t_knob_colors.push_back(0.0f);
+      t_knob_colors.push_back(0.0f);
+      t_knob_colors.push_back(0.0f);
+      t_knob_colors.push_back(1.0f);
+      // indices
+      t_knob_indes.push_back(0);
+      t_knob_indes.push_back(1);
+      t_knob_indes.push_back(4);
+      t_knob_indes.push_back(1);
+      t_knob_indes.push_back(5);
+      t_knob_indes.push_back(4);
+      t_knob_indes.push_back(1);
+      t_knob_indes.push_back(2);
+      t_knob_indes.push_back(5);
+      t_knob_indes.push_back(2);
+      t_knob_indes.push_back(6);
+      t_knob_indes.push_back(5);
+      t_knob_indes.push_back(2);
+      t_knob_indes.push_back(3);
+      t_knob_indes.push_back(6);
+      t_knob_indes.push_back(3);
+      t_knob_indes.push_back(7);
+      t_knob_indes.push_back(6);
+      t_knob_indes.push_back(3);
+      t_knob_indes.push_back(0);
+      t_knob_indes.push_back(7);
+      t_knob_indes.push_back(0);
+      t_knob_indes.push_back(4);
+      t_knob_indes.push_back(7);
+
+      Referenced<Buffer<float>> knob_vert_buffer = Renderer::gen_buffer<float>(
+          &t_knob_verts[0], sizeof(float) * t_knob_verts.size());
+      Referenced<Buffer<float>> knob_color_buffer = Renderer::gen_buffer<float>(
+          &t_knob_colors[0], sizeof(float) * t_knob_colors.size());
+      Referenced<Buffer<uint32_t>> knob_index_buffer =
+          Renderer::gen_buffer<uint32_t>(&t_knob_indes[0],
+                                         sizeof(float) * t_knob_indes.size());
+      knob_vert_buffer->set_format({{AttributeType::POSITION_2D, "position"}});
+      knob_color_buffer->set_format({{AttributeType::COLOR, "color"}});
+      std::vector<Referenced<Buffer<float>>> knob_vertex_buffers;
+      knob_vertex_buffers.push_back(knob_vert_buffer);
+      knob_vertex_buffers.push_back(knob_color_buffer);
+      Referenced<SimpleMesh> knob_mesh =
+          gen_ref<ArrayMesh>(method, knob_vertex_buffers, knob_index_buffer);
+      knob_mesh->set_position({0.75f, 0.5f, 0.0f});
+      push_mesh(knob_mesh);
+    }
   }
   void set_hue(float hue) {
-    glm::vec4 color_hsva = util::rgba_to_hsva(color_rgba);
     color_hsva[0] = hue;
-    color_rgba = util::hsva_to_rgba(color_hsva);
     // rotate triangle and picker
     get_meshes<Mesh>()[1]->set_rotation({0.0f, 0.0f, 1.0f}, hue);
-    set_picker_rgba_color(color_rgba);
+    set_picker_hsva_color(color_hsva);
     // set color of hue vertex
-    glm::vec4 vertex_color = util::hsva_to_rgba({hue,1.0f,1.0f,1.0f});
+    glm::vec4 vertex_color = util::hsva_to_rgba({hue, 1.0f, 1.0f, 1.0f});
     get_meshes<SimpleMesh>()[1]->get_geometry_buffers()[1]->flush(
         &vertex_color[0], 0, sizeof(glm::vec4));
+    set_alpha_slider_hsva_color(color_hsva);
+  }
+  void set_alpha(float alpha) {
+    if (transparency) {
+      get_meshes<Mesh>()[4]->set_position({0.75f, alpha - 0.5f, 0.0f});
+    }
+    color_hsva[3] = alpha;
   }
   void set_picker_coords(glm::vec2 widget_coords) {
     glm::vec4 v1 = glm::vec4(0.5f, 0.0f, 0.0f, 1.0f);
@@ -193,27 +355,50 @@ public:
     glm::vec2 picker_pos =
         math::clamp_point_to_triangle(v1, v2, v3, widget_coords);
     get_meshes<Mesh>()[2]->set_position(glm::vec3(picker_pos, 0.0f));
-    color_rgba = get_picker_rgba_color();
+    color_hsva = get_picker_hsva_color();
+    set_alpha_slider_hsva_color(color_hsva);
   }
-  void set_picker_rgba_color(glm::vec4 rgba) {
-    color_rgba = rgba;
-    glm::vec4 hsva = util::rgba_to_hsva(rgba);
+  void set_picker_hsva_color(glm::vec4 hsva) {
+    color_hsva = hsva;
     float hue = hsva[0];
     // set position from hsva
     glm::vec2 s2 = hsva[2] * (v1 - v3) + v3;
     float b = s2.y - m * s2.x;
     glm::vec2 p2 = glm::vec2(s2.x + 1.0f, m * (s2.x + 1.0f) + b);
     glm::vec2 s1 = math::intersection(s2, p2, v3, v2);
-    glm::vec2 local_pos = hsva[1]*(s2-s1) + s1;
+    glm::vec2 local_pos = hsva[1] * (s2 - s1) + s1;
     // set rotation about center from hue
     glm::vec2 position =
         glm::vec2(local_pos.x * cosf(hue) - local_pos.y * sinf(hue),
                   local_pos.x * sinf(hue) + local_pos.y * cosf(hue));
     set_picker_coords(position);
   }
-  glm::vec4 get_picker_rgba_color() {
+  void set_alpha_slider_hsva_color(glm::vec4 hsva) {
+    if (transparency) {
+      glm::vec4 color_rgba = util::hsva_to_rgba(hsva);
+      std::vector<float> new_colors;
+      new_colors.push_back(color_rgba[0]);
+      new_colors.push_back(color_rgba[1]);
+      new_colors.push_back(color_rgba[2]);
+      new_colors.push_back(0.0f);
+      new_colors.push_back(color_rgba[0]);
+      new_colors.push_back(color_rgba[1]);
+      new_colors.push_back(color_rgba[2]);
+      new_colors.push_back(0.0f);
+      new_colors.push_back(color_rgba[0]);
+      new_colors.push_back(color_rgba[1]);
+      new_colors.push_back(color_rgba[2]);
+      new_colors.push_back(1.0f);
+      new_colors.push_back(color_rgba[0]);
+      new_colors.push_back(color_rgba[1]);
+      new_colors.push_back(color_rgba[2]);
+      new_colors.push_back(1.0f);
+      get_meshes<SimpleMesh>()[3]->get_geometry_buffers()[1]->flush(
+          &new_colors[0], 0, sizeof(float)*new_colors.size());
+    }
+  }
+  glm::vec4 get_picker_hsva_color() {
     glm::vec3 position = get_meshes<Mesh>()[2]->get_position();
-    glm::vec4 color_hsva = util::rgba_to_hsva(color_rgba);
     float hue = color_hsva[0];
     // rotate picker position to zero hue
     float x = position[0] * cosf(-hue) - position[1] * sinf(-hue);
@@ -231,14 +416,12 @@ public:
       V = glm::length(s2 - v3) / s;
       S = glm::length(p1 - s1) / glm::length(s2 - s1);
     }
-    return util::hsva_to_rgba({hue, S, V, color_rgba[3]});
+    return {hue, S, V, color_hsva[3]};
   }
 
 private:
-  Referenced<Buffer<float>> vertex_buffer;
-  Referenced<Buffer<float>> color_buffer;
-  Referenced<Buffer<uint32_t>> index_buffer;
-  glm::vec4 color_rgba;
+  glm::vec4 color_hsva;
+  bool transparency;
   const glm::vec2 v1 = glm::vec2(0.5f, 0.0f);
   const glm::vec2 v2 =
       glm::vec2(0.5f * cos(math::TAU / 3.0f), 0.5f * sin(math::TAU / 3.0f));
@@ -258,25 +441,32 @@ class ColorPickerControls;
  */
 class ColorPicker : public Entity, public Widget<glm::vec4>, public RenderPack {
 public:
-  ColorPicker(Layer *base_layer) : Widget(base_layer) {
-    mesh = gen_ref<ColorPickerMesh>();
+  ColorPicker(Layer *base_layer, bool transparency_slider = false)
+      : Widget(base_layer), transparency(transparency_slider) {
+    mesh = gen_ref<ColorPickerMesh>(transparency_slider);
     mat = gen_ref<VertexColorMaterial>();
     push_packet({mesh, mat});
     gen_system<PacketRenderer>();
     gen_system<ColorPickerControls>();
     bounds.left() = -0.6f;
-    bounds.right() = 0.6f;
+    if (transparency_slider) {
+      bounds.right() = 0.8f;
+    } else {
+      bounds.right() = 0.6f;
+    }
     bounds.top() = 0.6f;
     bounds.bottom() = -0.6f;
-    value = mesh->get_picker_rgba_color();
+    value = util::hsva_to_rgba(mesh->get_picker_hsva_color());
   }
   void set_hue(float hue) { mesh->set_hue(hue); }
   void set_picker_coords(glm::vec2 widget_coords) {
     mesh->set_picker_coords(widget_coords);
   }
+  void set_alpha(float alpha) { mesh->set_alpha(alpha); }
 
   Referenced<ColorPickerMesh> mesh;
   Referenced<VertexColorMaterial> mat;
+  bool transparency;
 };
 // Controls
 class ColorPickerControls : public ControlsSystem<ColorPicker> {
@@ -291,7 +481,7 @@ public:
    * @return false pass on event.
    */
   bool on_mouse_button(const RendererInput &input, ColorPicker *picker) {
-    if (input.mouse_button == 1 && picker->is_in_bounds()) {
+    if (input.LEFT_MOUSE_JUST_PRESSED && picker->is_in_bounds()) {
       Renderer::get_info().focus = picker->get_layer();
       glm::vec2 widget_coords = picker->get_widget_coords();
       glm::vec4 v1 = glm::vec4(0.5f, 0.0f, 0.0f, 1.0f);
@@ -305,9 +495,18 @@ public:
       if (math::is_in_polygon(widget_coords,
                               {glm::vec2(v1), glm::vec2(v2), glm::vec2(v3)})) {
         focused_mesh = picker->mesh->get_meshes<Mesh>()[1];
+      } else if (picker->transparency &&
+                 math::is_in_polygon(widget_coords, {{0.7f, -0.5f},
+                                                     {0.8f, -0.5f},
+                                                     {0.8f, 0.5f},
+                                                     {0.7f, 0.5f}})) {
+        focused_mesh = picker->mesh->get_meshes<Mesh>()[3];
+      } else if (glm::length(widget_coords) <= 0.6f) {
+        focused_mesh = picker->mesh->get_meshes<Mesh>()[0];
       } else {
         focused_mesh = nullptr;
       }
+
       return on_mouse_move(input, picker);
     }
     Renderer::get_info().focus = nullptr;
@@ -330,11 +529,14 @@ public:
       // clamp to triangle
       if (focused_mesh == picker->mesh->get_meshes<Mesh>()[1]) {
         picker->set_picker_coords(widget_coords);
-      } else {
+      } else if (focused_mesh == picker->mesh->get_meshes<Mesh>()[3]) {
+        picker->set_alpha(glm::clamp(widget_coords.y + 0.5f, 0.0f, 1.0f));
+      } else if (focused_mesh == picker->mesh->get_meshes<Mesh>()[0]) {
         float hue = atan2f(widget_coords.y, widget_coords.x);
         picker->set_hue(hue);
       }
-      picker->set_value(picker->mesh->get_picker_rgba_color());
+      picker->set_value(
+          util::hsva_to_rgba(picker->mesh->get_picker_hsva_color()));
       // event is handled
       return true;
     }

@@ -111,7 +111,7 @@ public:
    * @return false pass on event.
    */
   bool on_mouse_button(const RendererInput &input, SliderUI *slider_ui) {
-    if (input.mouse_button == 1 && slider_ui->is_in_bounds()) {
+    if (input.LEFT_MOUSE_JUST_PRESSED && slider_ui->is_in_bounds()) {
       Renderer::get_info().focus = slider_ui->get_layer();
       return on_mouse_move(input, slider_ui);
     }

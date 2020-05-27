@@ -363,17 +363,16 @@ Mare allows the user to create general purpose compute programs from glsl Shader
 
 ## TODO List
 ### Version 2.0.0
+* More Widget to be added (Buttons, Switches, Checkboxes, Color Pickers, Text Entry Box)
 * PhongMaterial to have arrays for spotlight, point light, and directional lights, as well as shadowmaping for directional, point, and spot lights.
 * ShadowMap Component to have arrays for each type of light and depth buffers/light views for each
 * ShadowMap Camera view creation to be automated.
-* A key input enum for `JUST_RELEASED` to be added to RendererInput
 * CharMesh to have a *thickness* parameter that uses quads and circles to render text with a thickness.
 * A font loader to be added to enable the use of bitmap fonts.
 * Text billboards for CharMesh and bitmap fonts.
 * Raypicking of Entities in a Scene.
 * Cylinder, Cone, and Tube Meshes to have an option for flat shading normals or smooth shading normals.
-* More Widget to be added (Buttons, Switches, Checkboxes, Color Pickers, Text Entry Box)
-* More Materials to be added (BasicColor, BasicTexture, Depth, Phong, Toon, Shadow.
+* More Materials to be added (BasicColor, BasicTexture, Depth, Phong, Toon, Shadow).
 
 ### Version 3.0.0
 * InstancedMeshes to have a Transform Buffer not a glm::mat4 Buffer and Transform Component to only contain a single glm::mat4 with functions to get and set parts of it.

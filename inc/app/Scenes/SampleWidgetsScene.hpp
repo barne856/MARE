@@ -36,7 +36,7 @@ public:
     // Clear color and depth buffer
     Renderer::clear_color_buffer(bg_color);
     Renderer::clear_depth_buffer();
-    bg_color = get_layer<SampleWidgetsLayer>()->get_entity<ColorPicker>()->get_value();
+    //bg_color = get_layer<SampleWidgetsLayer>()->get_entity<ColorPicker>()->get_value();
   }
 
   void on_exit() override {}
