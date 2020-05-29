@@ -16,9 +16,18 @@
 
 namespace mare {
 
-// Mesh
+/**
+ * @brief The Mesh used for the Color Picker UI Element
+ *
+ */
 class ColorPickerMesh : public CompositeMesh {
 public:
+  /**
+   * @brief Construct a new Color Picker Mesh object
+   *
+   * @param transparency_slider If true, the an alpha slider bar will be
+   * generated next to the color picker.
+   */
   ColorPickerMesh(bool transparency_slider) {
     transparency = transparency_slider;
     DrawMethod method = DrawMethod::TRIANGLES;
@@ -117,7 +126,7 @@ public:
     std::vector<float> picker_verts;
     std::vector<float> picker_colors;
     std::vector<uint32_t> picker_indes;
-    thickness = 0.01f;
+    thickness = 0.02f;
     angle = 0.0f;
     dtheta = 2.0f * math::PI / 6.0f;
     float r = 0.025;
@@ -231,40 +240,41 @@ public:
       std::vector<float> t_knob_verts;
       std::vector<float> t_knob_colors;
       std::vector<uint32_t> t_knob_indes;
+      float line_thickness = 0.01f;
       // outer box
-      t_knob_verts.push_back(-0.0675f);
-      t_knob_verts.push_back(-0.0175f);
-      t_knob_verts.push_back(0.0675f);
-      t_knob_verts.push_back(-0.0175f);
-      t_knob_verts.push_back(0.0675f);
-      t_knob_verts.push_back(0.0175f);
-      t_knob_verts.push_back(-0.0675f);
-      t_knob_verts.push_back(0.0175f);
+      t_knob_verts.push_back(-0.0675f - line_thickness);
+      t_knob_verts.push_back(-0.0175f - line_thickness);
+      t_knob_verts.push_back(0.0675f + line_thickness);
+      t_knob_verts.push_back(-0.0175f - line_thickness);
+      t_knob_verts.push_back(0.0675f + line_thickness);
+      t_knob_verts.push_back(0.0175f + line_thickness);
+      t_knob_verts.push_back(-0.0675f - line_thickness);
+      t_knob_verts.push_back(0.0175f + line_thickness);
       // inner box
-      t_knob_verts.push_back(-0.0625f);
-      t_knob_verts.push_back(-0.0125f);
-      t_knob_verts.push_back(0.0625f);
-      t_knob_verts.push_back(-0.0125f);
-      t_knob_verts.push_back(0.0625f);
-      t_knob_verts.push_back(0.0125f);
-      t_knob_verts.push_back(-0.0625f);
-      t_knob_verts.push_back(0.0125f);
+      t_knob_verts.push_back(-0.0675f);
+      t_knob_verts.push_back(-0.0175f);
+      t_knob_verts.push_back(0.0675f);
+      t_knob_verts.push_back(-0.0175f);
+      t_knob_verts.push_back(0.0675f);
+      t_knob_verts.push_back(0.0175f);
+      t_knob_verts.push_back(-0.0675f);
+      t_knob_verts.push_back(0.0175f);
       // colors
-      t_knob_colors.push_back(0.0f);
-      t_knob_colors.push_back(0.0f);
-      t_knob_colors.push_back(0.0f);
       t_knob_colors.push_back(1.0f);
-      t_knob_colors.push_back(0.0f);
-      t_knob_colors.push_back(0.0f);
-      t_knob_colors.push_back(0.0f);
       t_knob_colors.push_back(1.0f);
-      t_knob_colors.push_back(0.0f);
-      t_knob_colors.push_back(0.0f);
-      t_knob_colors.push_back(0.0f);
       t_knob_colors.push_back(1.0f);
-      t_knob_colors.push_back(0.0f);
-      t_knob_colors.push_back(0.0f);
-      t_knob_colors.push_back(0.0f);
+      t_knob_colors.push_back(1.0f);
+      t_knob_colors.push_back(1.0f);
+      t_knob_colors.push_back(1.0f);
+      t_knob_colors.push_back(1.0f);
+      t_knob_colors.push_back(1.0f);
+      t_knob_colors.push_back(1.0f);
+      t_knob_colors.push_back(1.0f);
+      t_knob_colors.push_back(1.0f);
+      t_knob_colors.push_back(1.0f);
+      t_knob_colors.push_back(1.0f);
+      t_knob_colors.push_back(1.0f);
+      t_knob_colors.push_back(1.0f);
       t_knob_colors.push_back(1.0f);
       t_knob_colors.push_back(0.0f);
       t_knob_colors.push_back(0.0f);
@@ -326,6 +336,13 @@ public:
       push_mesh(knob_mesh);
     }
   }
+  /**
+   * @brief Set the hue of the ColorPickerMesh
+   * @details This will rotate the center triangle to match to hue and roatate
+   * the picker about the center by the hue.
+   *
+   * @param hue The hue to set.
+   */
   void set_hue(float hue) {
     color_hsva[0] = hue;
     // rotate triangle and picker
@@ -337,12 +354,24 @@ public:
         &vertex_color[0], 0, sizeof(glm::vec4));
     set_alpha_slider_hsva_color(color_hsva);
   }
+  /**
+   * @brief Set the alpha of the ColorPickerMesh
+   * @details This will position the knob on the alpha slider if it exists and
+   * update the color.
+   * @param alpha The alpha to set.
+   */
   void set_alpha(float alpha) {
     if (transparency) {
       get_meshes<Mesh>()[4]->set_position({0.75f, alpha - 0.5f, 0.0f});
     }
     color_hsva[3] = alpha;
   }
+  /**
+   * @brief Set the location of the picker on the color picker
+   * @details The picker location will be clamped to the saturation/value
+   * triangle.
+   * @param widget_coords The local space coorinates to set the picker to.
+   */
   void set_picker_coords(glm::vec2 widget_coords) {
     glm::vec4 v1 = glm::vec4(0.5f, 0.0f, 0.0f, 1.0f);
     glm::vec4 v2 = glm::vec4(0.5f * cos(math::TAU / 3.0f),
@@ -358,6 +387,11 @@ public:
     color_hsva = get_picker_hsva_color();
     set_alpha_slider_hsva_color(color_hsva);
   }
+  /**
+   * @brief Set the picker hsva color of the ColorPickerMesh
+   * @details This will update the picker location as well.
+   * @param hsva The hsva color to set.
+   */
   void set_picker_hsva_color(glm::vec4 hsva) {
     color_hsva = hsva;
     float hue = hsva[0];
@@ -373,6 +407,12 @@ public:
                   local_pos.x * sinf(hue) + local_pos.y * cosf(hue));
     set_picker_coords(position);
   }
+  /**
+   * @brief Set the alpha slider hsva color if it exists.
+   * @details this is the color that will be interpolated from 100% opacity to
+   * 0% opacity on the slider bar.
+   * @param hsva The hsva color to set.
+   */
   void set_alpha_slider_hsva_color(glm::vec4 hsva) {
     if (transparency) {
       glm::vec4 color_rgba = util::hsva_to_rgba(hsva);
@@ -394,9 +434,14 @@ public:
       new_colors.push_back(color_rgba[2]);
       new_colors.push_back(1.0f);
       get_meshes<SimpleMesh>()[3]->get_geometry_buffers()[1]->flush(
-          &new_colors[0], 0, sizeof(float)*new_colors.size());
+          &new_colors[0], 0, sizeof(float) * new_colors.size());
     }
   }
+  /**
+   * @brief Get the picker hsva color from the current position of the picker.
+   *
+   * @return the hsva color.
+   */
   glm::vec4 get_picker_hsva_color() {
     glm::vec3 position = get_meshes<Mesh>()[2]->get_position();
     float hue = color_hsva[0];
@@ -458,10 +503,27 @@ public:
     bounds.bottom() = -0.6f;
     value = util::hsva_to_rgba(mesh->get_picker_hsva_color());
   }
+  /**
+   * @brief Set the hue of the ColorPicker.
+   *
+   * @param hue The hue to set.
+   */
   void set_hue(float hue) { mesh->set_hue(hue); }
+  /**
+   * @brief Directly set to position of the picker on the color triangle.
+   * @details uses local mesh coordiantes. The picker will be clamped to the
+   * inside of the color triangle.
+   *
+   * @param widget_coords The position to set the picker.
+   */
   void set_picker_coords(glm::vec2 widget_coords) {
     mesh->set_picker_coords(widget_coords);
   }
+  /**
+   * @brief Set the alpha of the ColorPicker.
+   * 
+   * @param alpha The alpha to set.
+   */
   void set_alpha(float alpha) { mesh->set_alpha(alpha); }
 
   Referenced<ColorPickerMesh> mesh;

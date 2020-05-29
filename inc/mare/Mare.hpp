@@ -139,16 +139,17 @@ void window_coordinates(float nx, float ny, int &x, int &y);
 /**
  * @brief Return true if \p point is inside \p polygon.
  * @details \p polygon vertices must be given in counter-clockwise order.
- * 
+ *
  * @param point The point to test.
  * @param polygon The polygon to test.
- * @return true 
- * @return false 
+ * @return true
+ * @return false
  */
 bool is_in_polygon(glm::vec2 point, std::vector<glm::vec2> polygon);
 /**
- * @brief Returns the closest point on a line segment to the given point \p point.
- * 
+ * @brief Returns the closest point on a line segment to the given point \p
+ * point.
+ *
  * @param point The point to snap
  * @param p1 First point of line segment to snap to.
  * @param p2 Second point of line segment to snap to.
@@ -157,12 +158,13 @@ bool is_in_polygon(glm::vec2 point, std::vector<glm::vec2> polygon);
 glm::vec2 snap_to_line(glm::vec2 point, glm::vec2 p1, glm::vec2 p2);
 /**
  * @brief Return the intersection point of two lines
- * 
+ *
  * @param p1 point 1 on line 1
  * @param p2 point 2 on line 1
  * @param p3 point 1 on line 2
  * @param p4 point 2 on line 2
- * @return The intersection point, nan if the lines are parallel or either line is degenerate
+ * @return The intersection point, nan if the lines are parallel or either line
+ * is degenerate
  */
 glm::vec2 intersection(glm::vec2 p1, glm::vec2 p2, glm::vec2 p3, glm::vec2 p4);
 /**
@@ -178,7 +180,7 @@ glm::vec2 intersection(glm::vec2 p1, glm::vec2 p2, glm::vec2 p3, glm::vec2 p4);
  * @return The closest point inside the triangle to \p point.
  */
 glm::vec2 clamp_point_to_triangle(glm::vec2 v1, glm::vec2 v2, glm::vec2 v3,
-                                    glm::vec2 point);
+                                  glm::vec2 point);
 
 /** The ratio of a circle's circumference to its diameter approximated as a
  * 32-bit floating point number.*/
@@ -210,6 +212,23 @@ glm::vec4 rgba_to_hsva(glm::vec4 color);
  * @return The RGBA color
  */
 glm::vec4 hsva_to_rgba(glm::vec4 color);
+/**
+ * @brief Convert an rgb color to a hex string.
+ *
+ * @param color The rgb color
+ * @param with_head Return a string with the "#" in front.
+ * @return The hex string
+ */
+std::string rgb_to_hex(glm::vec3 color, bool with_head = false);
+/**
+ * @brief Convert an rgb color to a string
+ * @details Returns a comma separated string with r,g,b values ranging from
+ * 0-255.
+ *
+ * @param color The RGB color
+ * @return The formatted string
+ */
+std::string rgb_to_string(glm::vec3 color);
 } // namespace util
 
 } // namespace mare

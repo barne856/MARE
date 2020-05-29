@@ -50,13 +50,13 @@ void GLRenderer::run() {
 void GLRenderer::init_renderer() {
   running = true;
 
-  glfwSetErrorCallback(glfw_error_callback);
 
   if (glfwInit() == GLFW_FALSE) {
     std::cerr << "GLFW Failed to initialize." << std::endl;
     running = false;
     return;
   }
+  glfwSetErrorCallback(glfw_error_callback);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
   if (info.debug_mode.any()) {
@@ -65,7 +65,7 @@ void GLRenderer::init_renderer() {
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
   glfwWindowHint(GLFW_SAMPLES, info.samples);
-  //glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_TRUE);
+  // glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_TRUE);
   window =
       glfwCreateWindow(info.window_width, info.window_height, "Untitled",
                        info.fullscreen ? glfwGetPrimaryMonitor() : NULL, NULL);
@@ -80,6 +80,7 @@ void GLRenderer::init_renderer() {
   glfwSetMouseButtonCallback(window, glfw_onMouseButton);
   glfwSetCursorPosCallback(window, glfw_onMouseMove);
   glfwSetScrollCallback(window, glfw_onMouseWheel);
+  glfwSetCharCallback(window, glfw_onChar);
   if (!info.cursor) {
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
   }
@@ -3024,6 +3025,64 @@ void GLRenderer::glfw_onMouseWheel(GLFWwindow *window, double xoffset,
   }
   // mouse scroll is always 0 outside of mouse scroll callbacks
   input.mouse_scroll = 0;
+}
+
+void GLRenderer::glfw_onChar(GLFWwindow *window, unsigned int code_point) {
+  if (info.scene) {
+    // reverse iterate through layer callbacks first
+    bool handled = false;
+    for (auto layr_it = info.scene->layer_rbegin();
+         layr_it != info.scene->layer_rend(); layr_it++) {
+      Layer *layer = layr_it->get();
+      // reverse iterate through layer entities
+      for (auto ent_it = layer->entity_rbegin(); ent_it != layer->entity_rend();
+           ent_it++) {
+        Entity *entity = ent_it->get();
+        auto controls_systems = layer->get_systems<IControlsSystem>();
+        // reverse iterate through widget controls callbacks
+        for (auto controls_it = controls_systems.rbegin();
+             controls_it != controls_systems.rend(); controls_it++) {
+          handled = (*controls_it)->on_char(static_cast<unsigned char>(code_point), entity);
+          if (handled) {
+            return;
+          }
+        }
+      }
+      auto controls_systems = layer->get_systems<IControlsSystem>();
+      // reverse iterate through overlay controls callbacks
+      for (auto controls_it = controls_systems.rbegin();
+           controls_it != controls_systems.rend(); controls_it++) {
+        handled = (*controls_it)->on_char(static_cast<unsigned char>(code_point), layer);
+        if (handled) {
+          return;
+        }
+      }
+    }
+    // if event is not handled by overlays, callback to the scene
+    // reverse iterate through scene entities
+    for (auto entity_it = info.scene->entity_rbegin();
+         entity_it != info.scene->entity_rend(); entity_it++) {
+      Entity *entity = entity_it->get();
+      auto controls_systems = entity->get_systems<IControlsSystem>();
+      // reverse iterate through entity controls callbacks
+      for (auto controls_it = controls_systems.rbegin();
+           controls_it != controls_systems.rend(); controls_it++) {
+        handled = (*controls_it)->on_char(static_cast<unsigned char>(code_point), entity);
+        if (handled) {
+          return;
+        }
+      }
+    }
+    auto controls_systems = info.scene->get_systems<IControlsSystem>();
+    // reverse iterate through scene controls callbacks
+    for (auto controls_it = controls_systems.rbegin();
+         controls_it != controls_systems.rend(); controls_it++) {
+      handled = (*controls_it)->on_char(static_cast<unsigned char>(code_point), info.scene);
+      if (handled) {
+        return;
+      }
+    }
+  }
 }
 
 // Initialize static variable for the window

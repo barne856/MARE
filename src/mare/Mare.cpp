@@ -5,6 +5,9 @@
 // Standard Library
 #include <cmath>
 #include <limits>
+#include <math.h>
+#include <sstream>
+#include <string>
 
 namespace mare {
 Component::~Component() {}
@@ -95,24 +98,18 @@ glm::vec2 intersection(glm::vec2 p1, glm::vec2 p2, glm::vec2 p3, glm::vec2 p4) {
     b2 = p3.y - p3.x * m2;
   }
   // check if lines are parallel
-  if(m1 == m2)
-  {
+  if (m1 == m2) {
     return glm::vec2(std::nanf(""));
   }
   // calculate intersection point
-  if(line1_vert)
-  {
-    return glm::vec2(p1.x, m2*p1.x+b2);
-  }
-  else if(line2_vert)
-  {
-    return glm::vec2(p3.x, m1*p3.x+b1);
-  }
-  else
-  {
-    float x = (b1-b2)/(m2-m1);
-    float y = m1*x+b1;
-    return glm::vec2(x,y);
+  if (line1_vert) {
+    return glm::vec2(p1.x, m2 * p1.x + b2);
+  } else if (line2_vert) {
+    return glm::vec2(p3.x, m1 * p3.x + b1);
+  } else {
+    float x = (b1 - b2) / (m2 - m1);
+    float y = m1 * x + b1;
+    return glm::vec2(x, y);
   }
 }
 glm::vec2 clamp_point_to_triangle(glm::vec2 v1, glm::vec2 v2, glm::vec2 v3,
@@ -197,6 +194,52 @@ glm::vec4 hsva_to_rgba(glm::vec4 color) {
   rgba_color += m;
   rgba_color.a = color.a;
   return rgba_color;
+}
+std::string rgb_to_hex(glm::vec3 color, bool with_head) {
+  std::stringstream ss;
+  int r, g, b;
+  if (color.r < 0.5f) {
+    r = glm::clamp(static_cast<int>(floor(color.r * 255.0f)), 0, 255);
+  } else {
+    r = glm::clamp(static_cast<int>(ceil(color.r * 255.0f)), 0, 255);
+  }
+  if (color.g < 0.5f) {
+    g = glm::clamp(static_cast<int>(floor(color.g * 255.0f)), 0, 255);
+  } else {
+    g = glm::clamp(static_cast<int>(ceil(color.g * 255.0f)), 0, 255);
+  }
+  if (color.b < 0.5f) {
+    b = glm::clamp(static_cast<int>(floor(color.b * 255.0f)), 0, 255);
+  } else {
+    b = glm::clamp(static_cast<int>(ceil(color.b * 255.0f)), 0, 255);
+  }
+  if (with_head)
+    ss << "#";
+  ss << std::hex << (r << 16 | g << 8 | b);
+  std::string temp = ss.str();
+  return ss.str();
+}
+std::string rgb_to_string(glm::vec3 color) {
+  int r, g, b;
+  if (color.r < 0.5f) {
+    r = glm::clamp(static_cast<int>(floor(color.r * 255.0f)), 0, 255);
+  } else {
+    r = glm::clamp(static_cast<int>(ceil(color.r * 255.0f)), 0, 255);
+  }
+  if (color.g < 0.5f) {
+    g = glm::clamp(static_cast<int>(floor(color.g * 255.0f)), 0, 255);
+  } else {
+    g = glm::clamp(static_cast<int>(ceil(color.g * 255.0f)), 0, 255);
+  }
+  if (color.b < 0.5f) {
+    b = glm::clamp(static_cast<int>(floor(color.b * 255.0f)), 0, 255);
+  } else {
+    b = glm::clamp(static_cast<int>(ceil(color.b * 255.0f)), 0, 255);
+  }
+  std::string str{};
+  str +=
+      std::to_string(r) + ", " + std::to_string(g) + ", " + std::to_string(b);
+  return str;
 }
 } // namespace util
 

@@ -58,27 +58,32 @@ namespace mare {
  */
 class CharMesh : public SimpleMesh {
 public:
-  CharMesh(std::string str,
-           float keying = 1.0f) //, bool dynamic, size_t size_in_bytes)
-  {
+  CharMesh(std::string str, uint32_t size_in_bytes = 0) {
     // Set defaults
-    this->keying = keying;
-    this->dynamic = dynamic;
     this->size_in_bytes = size_in_bytes;
     this->str = str;
-    this->color = glm::vec4(1.0f);
     std::vector<float> verts = string_to_verts(str);
     set_draw_method(DrawMethod::LINES);
 
     // if dynamic, create extra space to hold resized strings
-    Scoped<Buffer<float>> vb =
-        Renderer::gen_buffer<float>(&verts[0], verts.size() * sizeof(float));
-    vb->set_format({{AttributeType::POSITION_2D, "position"}});
+    if (size_in_bytes && str.empty()) {
+      vertex_buffer = Renderer::gen_buffer<float>(nullptr, size_in_bytes,
+                                                  BufferType::READ_WRITE);
+      vertex_buffer->set_format({{AttributeType::POSITION_2D, "position"}});
+    } else if (size_in_bytes) {
+      vertex_buffer = Renderer::gen_buffer<float>(&verts[0], size_in_bytes,
+                                                  BufferType::READ_WRITE);
+      vertex_buffer->set_format({{AttributeType::POSITION_2D, "position"}});
+    } else {
+      vertex_buffer =
+          Renderer::gen_buffer<float>(&verts[0], verts.size() * sizeof(float));
+      vertex_buffer->set_format({{AttributeType::POSITION_2D, "position"}});
+    }
 
-    add_geometry_buffer(std::move(vb));
+    add_geometry_buffer(vertex_buffer);
   }
   glm::vec2 get_center() const {
-    glm::vec2 label_center = {max_width / 2.0f, lines / 2.0f};
+    glm::vec2 label_center = {max_width / 2.0f, (lines + 1) / 2.0f};
     glm::vec3 label_scale = get_scale();
     glm::vec2 true_label_center = {
         get_position().x + 2.0f * label_scale.x * label_center.x,
@@ -87,22 +92,28 @@ public:
   }
   // must set the scale first to know where to center
   void set_center(glm::vec3 center) {
-    glm::vec2 label_center = {max_width / 2.0f, lines / 2.0f};
+    glm::vec2 label_center = {max_width / 2.0f, (lines + 1) / 2.0f};
     glm::vec3 label_scale = get_scale();
     glm::vec2 label_top_left =
         glm::vec2(center.x - label_scale.x * label_center.x,
                   center.y + label_scale.y * (label_center.y + 1.0f));
     set_position(glm::vec3(label_top_left, 0.0f));
   }
+  void set_text(std::string text) {
+    str = text;
+    lines = 0;
+    std::vector<float> verts = string_to_verts(str);
+    vertex_buffer->clear(0.0f);
+    vertex_buffer->flush(&verts[0], 0, sizeof(float) * verts.size());
+  }
 
 private:
-  int lines = 1;
+  Referenced<Buffer<float>> vertex_buffer;
+  int lines = 0;
   int max_width = 0;
   float keying = 1.0f;
-  bool dynamic = false;
   size_t size_in_bytes;
   std::string str;
-  glm::vec4 color;
   float grid_points[17] = {0.0f,   0.0625f, 0.125f, 0.1875f, 0.25f,  0.3125f,
                            0.375f, 0.4375f, 0.5f,   0.5625f, 0.625f, 0.6875f,
                            0.75f,  0.8125f, 0.875f, 0.9375f, 1.0f};

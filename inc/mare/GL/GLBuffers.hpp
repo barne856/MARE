@@ -174,7 +174,7 @@ public:
     // wait for OpenGL to finish reading from the buffer
     wait_buffer();
     // write into back buffer
-    std::memcpy(static_cast<void *>(&buffer_pointer_[write_offset]), data,
+    std::memcpy(&buffer_pointer_[offset_index], data,
                 size_in_bytes);
   }
   /**

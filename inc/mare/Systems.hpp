@@ -141,6 +141,9 @@ public:
  *    - This callback is executed whenever the mouse wheel moves.
  *  - on_resize(const RendererInput&, Entity*)
  *    - This callback is executed whenever the window is resized.
+ *  - on_char(unsigned char character, Entity*)
+ *    - This callback is executed whenever the operating system's text input
+ *      system produces a character.
  *
  * RendererInput is provided by the implemented Rendering API. This type of
  * System will have its callbacks executed whenever there is user input if the
@@ -242,6 +245,22 @@ public:
   virtual bool on_resize(const RendererInput &input, Entity *entity) {
     return false;
   }
+  /**
+   * @brief A callback function to be implemented by the derived System.
+   *
+   * @param character The character produced by the operating system's text
+   * input system.
+   * @param entity A pointer to the Entity with this System attached.
+   * @return false will propogate the event down the active Scene's Layer stack
+   * and those Layer's System stacks and finally the Scene's System stack until
+   * a System returns true or the end of the stacks are reached.
+   * @return true will signal the event is handeled and stop the propogation of
+   * the event.
+   * @see IControlsSystem
+   */
+  virtual bool on_char(unsigned char character, Entity *entity) {
+    return false;
+  }
 };
 /**
  * @brief A template base class used to implement a ControlsSystem which
@@ -326,6 +345,19 @@ public:
     return false;
   }
   /**
+   * @brief A virtual function implemented by the ControlsSystem to respond to
+   * events by operating on some number of Components and/or Entities.
+   *
+   * @param character
+   * @param derived_entities The Entities or Components to operate on.
+   * @return true signals event should propogate.
+   * @return false signals event is handled.
+   * @see IControlsSystem
+   */
+  virtual bool on_char(unsigned char character, Ts *... derived_entities) {
+    return false;
+  }
+  /**
    * @brief The overriden function from IRenderSystem that will forward its
    * callbacks to the templated render method.
    *
@@ -401,6 +433,9 @@ public:
    */
   virtual bool on_resize(const RendererInput &input, Entity *entity) final {
     return on_resize(input, dynamic_cast<Ts *>(entity)...);
+  }
+  virtual bool on_char(unsigned char character, Entity *entity) final {
+    return on_char(character, dynamic_cast<Ts *>(entity)...);
   }
 };
 
