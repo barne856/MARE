@@ -20,17 +20,12 @@ public:
     picker->set_scale(glm::vec3(0.5f));
     picker->set_position(
         glm::vec3(-16.0f / 9.0f + 0.5f * 0.6f, 1.0f - 0.5f * 0.6f, 0.0f));
-    util::Rect bounds, margins;
-    float margin = 0.05f;
-    bounds.left() = -0.25f;
-    bounds.right() = 0.25f;
-    bounds.bottom() = -0.038f;
-    bounds.top() = 0.038f;
-    margins.left() = bounds.left() - margin;
-    margins.right() = bounds.right() + margin;
-    margins.bottom() = bounds.bottom() - margin;
-    margins.top() = bounds.top() + margin;
-    texbox = gen_entity<TextBox>(this, bounds, margins, 1, 2048);
+    util::Rect bounds;
+    bounds.left() = -0.30f;
+    bounds.right() = 0.30f;
+    bounds.bottom() = -0.05f;
+    bounds.top() = 0.05f;
+    texbox = gen_entity<TextBox>(this, bounds, 2, 0.01f, 0.005f, 4048);
     texbox->pin_top_left_corner({-16.0f / 9.0f + 0.05f, 1.0f - 0.65f});
   }
 
@@ -40,7 +35,6 @@ public:
     // Renderer properties
     Renderer::enable_depth_testing(false);
     Renderer::enable_face_culling(true);
-    texbox->set_text(util::rgb_to_string(picker->get_value()));
   }
 
   void on_exit() override {}

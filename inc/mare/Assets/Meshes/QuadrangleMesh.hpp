@@ -21,51 +21,27 @@ public:
    * with length 1 and width 1. Faces towards positive z.
    */
   QuadrangleMesh() {
-    std::vector<float> data;
+    std::vector<float> verts;
     set_draw_method(DrawMethod::TRIANGLES);
 
-    data.push_back(-0.5f);
-    data.push_back(-0.5f);
+    verts.push_back(-0.5f);
+    verts.push_back(-0.5f);
+    verts.push_back(0.5f);
+    verts.push_back(-0.5f);
+    verts.push_back(0.5f);
+    verts.push_back(0.5f);
+    verts.push_back(0.5f);
+    verts.push_back(0.5f);
+    verts.push_back(-0.5f);
+    verts.push_back(0.5f);
+    verts.push_back(-0.5f);
+    verts.push_back(-0.5f);
 
-    data.push_back(0.0f);
-    data.push_back(0.0f);
+    Referenced<Buffer<float>> vertex_buffer =
+        Renderer::gen_buffer<float>(&verts[0], verts.size() * sizeof(float));
+    vertex_buffer->set_format({{AttributeType::POSITION_2D, "position"}});
 
-    data.push_back(0.5f);
-    data.push_back(-0.5f);
-
-    data.push_back(1.0f);
-    data.push_back(0.0f);
-
-    data.push_back(0.5f);
-    data.push_back(0.5f);
-
-    data.push_back(1.0f);
-    data.push_back(1.0f);
-
-    data.push_back(0.5f);
-    data.push_back(0.5f);
-
-    data.push_back(1.0f);
-    data.push_back(1.0f);
-
-    data.push_back(-0.5f);
-    data.push_back(0.5f);
-
-    data.push_back(0.0f);
-    data.push_back(1.0f);
-
-    data.push_back(-0.5f);
-    data.push_back(-0.5f);
-
-    data.push_back(0.0f);
-    data.push_back(0.0f);
-
-    Referenced<Buffer<float>> geometry_buffer =
-        Renderer::gen_buffer<float>(&data[0], data.size() * sizeof(float));
-    geometry_buffer->set_format({{AttributeType::POSITION_2D, "position"},
-                                 {AttributeType::TEXTURE_MAP, "texcoords"}});
-
-    add_geometry_buffer(geometry_buffer);
+    add_geometry_buffer(vertex_buffer);
   }
   /**
    * @brief Construct a new QuadrangleMesh.

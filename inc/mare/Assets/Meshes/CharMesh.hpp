@@ -90,22 +90,33 @@ public:
         get_position().y - 2.0f * label_scale.y * label_center.y};
     return true_label_center;
   }
-  // must set the scale first to know where to center
-  void set_center(glm::vec3 center) {
+  void set_center(glm::vec2 center) {
     glm::vec2 label_center = {max_width / 2.0f, (lines + 1) / 2.0f};
     glm::vec3 label_scale = get_scale();
     glm::vec2 label_top_left =
         glm::vec2(center.x - label_scale.x * label_center.x,
-                  center.y + label_scale.y * (label_center.y + 1.0f));
+                  center.y + label_scale.y * label_center.y);
     set_position(glm::vec3(label_top_left, 0.0f));
   }
   void set_text(std::string text) {
+    std::string old_string = str;
     str = text;
     lines = 0;
-    std::vector<float> verts = string_to_verts(str);
-    vertex_buffer->clear(0.0f);
-    vertex_buffer->flush(&verts[0], 0, sizeof(float) * verts.size());
+    max_width = 0;
+    if (text.empty()) {
+      vertex_buffer->clear(0.0f);
+      lines = 1;
+    } else {
+      std::vector<float> verts = string_to_verts(str);
+      if (verts.size() * sizeof(float) <= size_in_bytes) {
+        vertex_buffer->clear(0.0f);
+        vertex_buffer->flush(&verts[0], 0, sizeof(float) * verts.size());
+      } else {
+        str = old_string;
+      }
+    }
   }
+  std::string get_text() { return str; }
 
 private:
   Referenced<Buffer<float>> vertex_buffer;

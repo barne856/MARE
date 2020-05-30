@@ -49,7 +49,21 @@ public:
    * @details Called by Renderer::run()
    */
   void start_renderer() final;
-
+  /**
+   * @brief OpenGL implementation to set the operating system's clipboad to a
+   * string.
+   *
+   * @param str The string to set the clipboard to.
+   */
+  virtual void api_set_clipboard_string(std::string str) override;
+  /**
+   * @brief OpenGL implementation to get a string from the operating system's
+   * clipboard if it can be converted to a string.
+   *
+   * @return The string on the clipboard, empty if the clipbaord cannot be
+   * converted to a string or if an error occured.
+   */
+  virtual std::string api_get_clipboard_string() override;
   /**
    * @brief GLRenderer implementation to set the window title.
    *

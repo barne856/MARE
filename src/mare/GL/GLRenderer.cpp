@@ -50,7 +50,6 @@ void GLRenderer::run() {
 void GLRenderer::init_renderer() {
   running = true;
 
-
   if (glfwInit() == GLFW_FALSE) {
     std::cerr << "GLFW Failed to initialize." << std::endl;
     running = false;
@@ -298,6 +297,15 @@ void GLRenderer::start_renderer() {
   glfwDestroyCursor(crosshair_cursor);
   glfwDestroyWindow(window);
   glfwTerminate();
+}
+
+void GLRenderer::api_set_clipboard_string(std::string str)
+{
+  glfwSetClipboardString(window, str.c_str());
+}
+std::string GLRenderer::api_get_clipboard_string()
+{
+  return std::string(glfwGetClipboardString(window));
 }
 
 void GLRenderer::api_set_window_title(const char *title) {
@@ -2970,7 +2978,7 @@ void GLRenderer::glfw_onMouseWheel(GLFWwindow *window, double xoffset,
       for (auto ent_it = layer->entity_rbegin(); ent_it != layer->entity_rend();
            ent_it++) {
         Entity *entity = ent_it->get();
-        auto controls_systems = layer->get_systems<IControlsSystem>();
+        auto controls_systems = entity->get_systems<IControlsSystem>();
         // reverse iterate through widget controls callbacks
         for (auto controls_it = controls_systems.rbegin();
              controls_it != controls_systems.rend(); controls_it++) {
@@ -3038,27 +3046,28 @@ void GLRenderer::glfw_onChar(GLFWwindow *window, unsigned int code_point) {
       for (auto ent_it = layer->entity_rbegin(); ent_it != layer->entity_rend();
            ent_it++) {
         Entity *entity = ent_it->get();
-        auto controls_systems = layer->get_systems<IControlsSystem>();
+        auto controls_systems = entity->get_systems<IControlsSystem>();
         // reverse iterate through widget controls callbacks
         for (auto controls_it = controls_systems.rbegin();
              controls_it != controls_systems.rend(); controls_it++) {
-          handled = (*controls_it)->on_char(static_cast<unsigned char>(code_point), entity);
+          handled =
+              (*controls_it)->on_char(static_cast<char>(code_point), entity);
           if (handled) {
             return;
           }
         }
       }
       auto controls_systems = layer->get_systems<IControlsSystem>();
-      // reverse iterate through overlay controls callbacks
+      // reverse iterate through layer controls callbacks
       for (auto controls_it = controls_systems.rbegin();
            controls_it != controls_systems.rend(); controls_it++) {
-        handled = (*controls_it)->on_char(static_cast<unsigned char>(code_point), layer);
+        handled = (*controls_it)->on_char(static_cast<char>(code_point), layer);
         if (handled) {
           return;
         }
       }
     }
-    // if event is not handled by overlays, callback to the scene
+    // if event is not handled by layers, callback to the scene
     // reverse iterate through scene entities
     for (auto entity_it = info.scene->entity_rbegin();
          entity_it != info.scene->entity_rend(); entity_it++) {
@@ -3067,7 +3076,8 @@ void GLRenderer::glfw_onChar(GLFWwindow *window, unsigned int code_point) {
       // reverse iterate through entity controls callbacks
       for (auto controls_it = controls_systems.rbegin();
            controls_it != controls_systems.rend(); controls_it++) {
-        handled = (*controls_it)->on_char(static_cast<unsigned char>(code_point), entity);
+        handled =
+            (*controls_it)->on_char(static_cast<char>(code_point), entity);
         if (handled) {
           return;
         }
@@ -3077,7 +3087,8 @@ void GLRenderer::glfw_onChar(GLFWwindow *window, unsigned int code_point) {
     // reverse iterate through scene controls callbacks
     for (auto controls_it = controls_systems.rbegin();
          controls_it != controls_systems.rend(); controls_it++) {
-      handled = (*controls_it)->on_char(static_cast<unsigned char>(code_point), info.scene);
+      handled =
+          (*controls_it)->on_char(static_cast<char>(code_point), info.scene);
       if (handled) {
         return;
       }

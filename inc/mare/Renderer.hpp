@@ -495,7 +495,20 @@ public:
    * @param index The index into the Scene stack to load.
    */
   static void load_scene(int index);
-
+  /**
+   * @brief Set the operating system's clipboad to a string.
+   *
+   * @param str The string to set the clipboard to.
+   */
+  virtual void api_set_clipboard_string(std::string str) = 0;
+  /**
+   * @brief Get a string from the operating system's clipboard if it can be
+   * converted to a string.
+   *
+   * @return The string on the clipboard, empty if the clipbaord cannot be
+   * converted to a string or if an error occured.
+   */
+  virtual std::string api_get_clipboard_string() = 0;
   /**
    * @brief Interface for setting the window title implemented by the Rendering
    * API.
@@ -731,6 +744,25 @@ public:
    */
   static void set_window_title(const char *title) {
     API->api_set_window_title(title);
+  }
+    /**
+   * @brief Static access to Renderer::api_set_clipboard_string(std::string).
+   *
+   * @param str The string to set the clipboard to.
+   */
+  static void set_clipboard_string(std::string str)
+  {
+    return API->api_set_clipboard_string(str);
+  }
+  /**
+   * @brief Static access to Renderer::api_get_clipboard_string().
+   *
+   * @return The string on the clipboard, empty if the clipbaord cannot be
+   * converted to a string or if an error occured.
+   */
+  static std::string get_clipboard_string()
+  {
+    return API->api_get_clipboard_string();
   }
   /**
    * @brief Static access to Renderer::api_set_cursor(CursorType).

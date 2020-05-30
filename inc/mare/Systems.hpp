@@ -258,7 +258,7 @@ public:
    * the event.
    * @see IControlsSystem
    */
-  virtual bool on_char(unsigned char character, Entity *entity) {
+  virtual bool on_char(char character, Entity *entity) {
     return false;
   }
 };
@@ -354,7 +354,7 @@ public:
    * @return false signals event is handled.
    * @see IControlsSystem
    */
-  virtual bool on_char(unsigned char character, Ts *... derived_entities) {
+  virtual bool on_char(char character, Ts *... derived_entities) {
     return false;
   }
   /**
@@ -434,7 +434,7 @@ public:
   virtual bool on_resize(const RendererInput &input, Entity *entity) final {
     return on_resize(input, dynamic_cast<Ts *>(entity)...);
   }
-  virtual bool on_char(unsigned char character, Entity *entity) final {
+  virtual bool on_char(char character, Entity *entity) final {
     return on_char(character, dynamic_cast<Ts *>(entity)...);
   }
 };
