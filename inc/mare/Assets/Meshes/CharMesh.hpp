@@ -58,6 +58,13 @@ namespace mare {
  */
 class CharMesh : public SimpleMesh {
 public:
+  /**
+   * @brief Construct a new CharMesh.
+   * @details 208 Bytes is the largest a single character takes up in memory.
+   * This is the "@" character.
+   * @param str The string to initialize the Mesh with.
+   * @param size_in_bytes The size in bytes to allocate for the Mesh.
+   */
   CharMesh(std::string str, uint32_t size_in_bytes = 0) {
     // Set defaults
     this->size_in_bytes = size_in_bytes;

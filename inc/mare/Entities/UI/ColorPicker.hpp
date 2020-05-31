@@ -543,9 +543,9 @@ public:
    * @return false pass on event.
    */
   bool on_mouse_button(const RendererInput &input, ColorPicker *picker) {
-    if (input.LEFT_MOUSE_JUST_PRESSED && picker->is_in_bounds()) {
-      Renderer::get_info().focus = picker->get_layer();
-      glm::vec2 widget_coords = picker->get_widget_coords();
+    if (input.LEFT_MOUSE_JUST_PRESSED && picker->is_cursor_in_bounds()) {
+      UIElement::focus(picker);
+      glm::vec2 widget_coords = picker->get_model_coords();
       glm::vec4 v1 = glm::vec4(0.5f, 0.0f, 0.0f, 1.0f);
       glm::vec4 v2 = glm::vec4(0.5f * cos(math::TAU / 3.0f),
                                0.5f * sin(math::TAU / 3.0f), 0.0f, 1.0f);
@@ -571,7 +571,7 @@ public:
 
       return on_mouse_move(input, picker);
     }
-    Renderer::get_info().focus = nullptr;
+    focused_mesh = nullptr;
     return false;
   }
   /**
@@ -584,9 +584,9 @@ public:
    * @return false pass on event.
    */
   bool on_mouse_move(const RendererInput &input, ColorPicker *picker) {
-    if (Renderer::get_info().focus == picker->get_layer()) {
+    if (picker->is_focused() && focused_mesh != nullptr) {
       // model space coords of the widget
-      glm::vec2 widget_coords = picker->get_widget_coords();
+      glm::vec2 widget_coords = picker->get_model_coords();
       // if focused mesh is triangle, move the picker to mouse position but
       // clamp to triangle
       if (focused_mesh == picker->mesh->get_meshes<Mesh>()[1]) {

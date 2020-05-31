@@ -363,7 +363,7 @@ Mare allows the user to create general purpose compute programs from glsl Shader
 
 ## TODO List
 ### Version 2.0.0
-* More Widget to be added (Buttons, Switches, Checkboxes, Color Pickers, Text Entry Box)
+* More Widget to be added (Buttons, Switches).
 * PhongMaterial to have arrays for spotlight, point light, and directional lights, as well as shadowmaping for directional, point, and spot lights.
 * ShadowMap Component to have arrays for each type of light and depth buffers/light views for each
 * ShadowMap Camera view creation to be automated.

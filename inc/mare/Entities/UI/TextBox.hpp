@@ -191,6 +191,13 @@ public:
     text->set_position({bounds.left() + margin_thickness,
                         bounds.top() - margin_thickness, 0.0f});
   }
+  void on_focus() override {
+    highlight_material->set_color(
+        {255.0f / 255.0f, 190.0f / 255.0f, 50.0f / 255.0f, 1.0f});
+  }
+  void on_unfocus() override {
+    highlight_material->set_color({1.0f, 1.0f, 1.0f, 1.0f});
+  }
   Referenced<QuadrangleMesh> box;
   Referenced<QuadrangleMesh> boarder;
   Referenced<QuadrangleMesh> highlight;
@@ -265,19 +272,11 @@ public:
    * @return false Pass on
    */
   bool on_mouse_button(const RendererInput &input, TextBox *text_box) override {
-    if (input.LEFT_MOUSE_JUST_PRESSED) {
-      if (text_box->is_in_bounds()) {
-        Renderer::get_info().focus = text_box->get_layer();
-        text_box->highlight_material->set_color(
-            {255.0f / 255.0f, 190.0f / 255.0f, 50.0f / 255.0f, 1.0f});
-        focused_mesh = text_box;
-        return on_mouse_move(input, text_box);
-      } else {
-        Renderer::get_info().focus = nullptr;
-        text_box->highlight_material->set_color({1.0f, 1.0f, 1.0f, 1.0f});
-        focused_mesh = nullptr;
-        return false;
+    if (text_box->is_cursor_in_bounds()) {
+      if (input.LEFT_MOUSE_JUST_PRESSED) {
+        UIElement::focus(text_box);
       }
+      return true;
     }
     return false;
   }
@@ -286,14 +285,14 @@ public:
   }
   /**
    * @brief Implementes copy/paste, backspace, and newline
-   * 
+   *
    * @param input The RendererInput
    * @param text_box The TextBox
    * @return true Handled
    * @return false Pass on
    */
   bool on_key(const RendererInput &input, TextBox *text_box) override {
-    if (focused_mesh) {
+    if (text_box->is_focused()) {
       // Control Characters
       if (input.BACKSPACE_PRESSED) {
         text_box->delete_char(-1);
@@ -313,20 +312,19 @@ public:
   }
   /**
    * @brief Appends characters to the TextBox
-   * 
+   *
    * @param character The character to append.
    * @param text_box The TextBox
    * @return true Handled
    * @return false Pass on
    */
   bool on_char(char character, TextBox *text_box) override {
-    if (focused_mesh) {
+    if (text_box->is_focused()) {
       text_box->append_char(character);
       return true;
     }
     return false;
   }
-  TextBox *focused_mesh = nullptr;
 };
 } // namespace mare
 

@@ -241,6 +241,11 @@ std::string rgb_to_string(glm::vec3 color) {
       std::to_string(r) + ", " + std::to_string(g) + ", " + std::to_string(b);
   return str;
 }
+glm::vec2 get_rect_center(Rect rect) {
+  float x = (rect.right() + rect.left()) / 2.0f;
+  float y = (rect.top() + rect.bottom()) / 2.0f;
+  return {x, y};
+}
 } // namespace util
 
 } // namespace mare

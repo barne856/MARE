@@ -47,13 +47,6 @@ public:
     bounds.right() = 0.55f;
     bounds.top() = 0.05f;
     bounds.bottom() = -0.05f;
-
-    // set initial position
-    glm::ivec2 screen_size = glm::ivec2(Renderer::get_info().window_width,
-                                        Renderer::get_info().window_height);
-    glm::vec3 world_size = Renderer::raycast(get_layer(), screen_size);
-    set_position({-world_size.x + 0.6f, -0.9f, 0.0f});
-
     // push components
     gen_system<SliderUIRenderer>();
     gen_system<SliderUIControls>();
@@ -64,17 +57,6 @@ public:
    * @param color The color to set.
    */
   void set_color(glm::vec4 color) { solid_material->set_color(color); }
-  /**
-   * @brief Set the value of the slider.
-   *
-   * @param value The value to set. Must be between 0 and 1.
-   */
-  void set_value(float value) override {
-    this->value = value;
-    (*slider_mesh)[0] =
-        glm::translate(glm::mat4(1.0f), {value - 0.5f, 0.0f, 0.0f}) *
-        glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
-  }
   Scoped<QuadrangleMesh> quad_mesh; /**< The base mesh for the instanced mesh.*/
   Referenced<InstancedMesh> slider_mesh; /**< The slider mesh.*/
   Referenced<BasicMaterial>
@@ -111,11 +93,10 @@ public:
    * @return false pass on event.
    */
   bool on_mouse_button(const RendererInput &input, SliderUI *slider_ui) {
-    if (input.LEFT_MOUSE_JUST_PRESSED && slider_ui->is_in_bounds()) {
-      Renderer::get_info().focus = slider_ui->get_layer();
+    if (input.LEFT_MOUSE_JUST_PRESSED && slider_ui->is_cursor_in_bounds()) {
+      UIElement::focus(slider_ui);
       return on_mouse_move(input, slider_ui);
     }
-    Renderer::get_info().focus = nullptr;
     return false;
   }
   /**
@@ -128,53 +109,16 @@ public:
    * @return false pass on event.
    */
   bool on_mouse_move(const RendererInput &input, SliderUI *slider_ui) {
-    if (Renderer::get_info().focus == slider_ui->get_layer()) {
-      glm::vec2 relative_position = slider_ui->get_widget_coords();
+    if (slider_ui->is_focused()) {
+      glm::vec2 relative_position = slider_ui->get_model_coords();
       float x = glm::clamp(relative_position.x, -0.5f, 0.5f);
       (*(slider_ui->slider_mesh))[0] =
-          glm::translate(glm::mat4(1.0f), {x, 0.0f, 0.0f}) *
-          glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
+        glm::translate(glm::mat4(1.0f), {x, 0.0f, 0.0f}) *
+        glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
       slider_ui->set_value(x + 0.5f);
       // event is handled
       return true;
     }
-    return false;
-  }
-  /**
-   * @brief Reposition the SliderUI when the window is resized.
-   *
-   * @param input The RendererInput from the Engine.
-   * @param slider_ui The SliderUI.
-   * @return true event is handeled.
-   * @return false pass on event.
-   */
-  bool on_resize(const RendererInput &input, SliderUI *slider_ui) {
-    // position widgets on the screen
-    glm::ivec2 screen_size = glm::ivec2(Renderer::get_info().window_width,
-                                        Renderer::get_info().window_height);
-    glm::vec3 world_size =
-        Renderer::raycast(slider_ui->get_layer(), screen_size);
-    slider_ui->set_position({-world_size.x + 0.6f, -0.9f, 0.0f});
-    return false;
-  }
-  /**
-   * @brief No on_key events
-   *
-   * @param input The RendererInput from the Engine.
-   * @param slider_ui The SliderUI.
-   * @return true event is handeled.
-   * @return false pass on event.
-   */
-  bool on_key(const RendererInput &input, SliderUI *slider_ui) { return false; }
-  /**
-   * @brief No on_mouse_wheel events
-   *
-   * @param input The RendererInput from the Engine.
-   * @param slider_ui The SliderUI.
-   * @return true event is handeled.
-   * @return false pass on event.
-   */
-  bool on_mouse_wheel(const RendererInput &input, SliderUI *slider_ui) {
     return false;
   }
 };

@@ -229,6 +229,32 @@ std::string rgb_to_hex(glm::vec3 color, bool with_head = false);
  * @return The formatted string
  */
 std::string rgb_to_string(glm::vec3 color);
+/**
+ * @brief A simple struct to define a bounding box of a UI element.
+ */
+struct Rect {
+  float &left() { return m_values[0]; }
+  float &bottom() { return m_values[1]; }
+  float &right() { return m_values[2]; }
+  float &top() { return m_values[3]; }
+
+  void set_rect(glm::vec2 bottom_left, glm::vec2 top_right) {
+    m_values = glm::vec4(bottom_left, top_right);
+  }
+
+  float operator[](unsigned i) const { return m_values[i]; }
+  float &operator[](unsigned i) { return m_values[i]; }
+
+private:
+  glm::vec4 m_values{};
+};
+/**
+ * @brief Get the center of a Rect
+ * 
+ * @param rect The Rect
+ * @return The center of the Rect
+ */
+glm::vec2 get_rect_center(Rect rect);
 } // namespace util
 
 } // namespace mare

@@ -17,6 +17,7 @@
 namespace mare {
 // Forward Declarations
 class SimpleMesh;
+class UIElement;
 class Layer;
 class Camera;
 class Scene;
@@ -49,20 +50,21 @@ enum class RendererAPI {
  * renderer begins the render loop.
  */
 struct RendererInfo {
-  Scene *scene{};                    /**< Active Scene*/
-  Layer *focus{};                    /**< Focused Layer*/
-  const char *window_title{};        /**< Window title*/
-  int window_width{1280};            /**< Window width in pixels*/
-  int window_height{720};            /**< Window height in pixels*/
-  float window_aspect{16.0f / 9.0f}; /**< Window aspect ratio*/
-  double current_time{};             /**< Elapsed time in seconds*/
-  int samples{};                     /**< Antialiasing samples*/
-  bool wireframe{false};             /**< Render in wireframe mode?*/
-  bool fullscreen{false};            /**< Render in fullscreen mode?*/
-  bool vsync{false};           /**< Render in double buffered vsync mode?*/
-  bool cursor{true};           /**< Render cursor?*/
-  std::bitset<4> debug_mode{}; /**< 0000 == off, 0001 == high, 0010 == med, 0100
-                                  == low, 1000 == notification*/
+  Scene *scene{nullptr};               /**< Active Scene*/
+  UIElement *focused_element{nullptr}; /**< Focused UIElement*/
+  const char *window_title{nullptr};   /**< Window title*/
+  int window_width{1280};              /**< Window width in pixels*/
+  int window_height{720};              /**< Window height in pixels*/
+  float window_aspect{16.0f / 9.0f};   /**< Window aspect ratio*/
+  double current_time{0.0f};           /**< Elapsed time in seconds*/
+  int samples{0};                      /**< Antialiasing samples*/
+  bool wireframe{false};               /**< Render in wireframe mode?*/
+  bool fullscreen{false};              /**< Render in fullscreen mode?*/
+  bool vsync{false}; /**< Render in double buffered vsync mode?*/
+  bool cursor{true}; /**< Render cursor?*/
+  std::bitset<4> debug_mode{
+      1}; /**< 0000 == off, 0001 == high, 0010 == med, 0100
+            == low, 1000 == notification*/
   RendererAPI API{RendererAPI::NONE}; /**< The Rendering API.*/
 };
 
@@ -745,13 +747,12 @@ public:
   static void set_window_title(const char *title) {
     API->api_set_window_title(title);
   }
-    /**
+  /**
    * @brief Static access to Renderer::api_set_clipboard_string(std::string).
    *
    * @param str The string to set the clipboard to.
    */
-  static void set_clipboard_string(std::string str)
-  {
+  static void set_clipboard_string(std::string str) {
     return API->api_set_clipboard_string(str);
   }
   /**
@@ -760,8 +761,7 @@ public:
    * @return The string on the clipboard, empty if the clipbaord cannot be
    * converted to a string or if an error occured.
    */
-  static std::string get_clipboard_string()
-  {
+  static std::string get_clipboard_string() {
     return API->api_get_clipboard_string();
   }
   /**

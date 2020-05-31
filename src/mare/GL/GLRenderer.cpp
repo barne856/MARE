@@ -8,6 +8,7 @@
 #include "mare/Layer.hpp"
 #include "mare/Meshes.hpp"
 #include "mare/Scene.hpp"
+#include "mare/Components/Widget.hpp"
 
 // Standard Library
 #include <iostream>
@@ -299,12 +300,10 @@ void GLRenderer::start_renderer() {
   glfwTerminate();
 }
 
-void GLRenderer::api_set_clipboard_string(std::string str)
-{
+void GLRenderer::api_set_clipboard_string(std::string str) {
   glfwSetClipboardString(window, str.c_str());
 }
-std::string GLRenderer::api_get_clipboard_string()
-{
+std::string GLRenderer::api_get_clipboard_string() {
   return std::string(glfwGetClipboardString(window));
 }
 
@@ -2858,8 +2857,9 @@ void GLRenderer::glfw_onMouseButton(GLFWwindow *window, int button, int action,
         }
       }
     }
-    // if event is not handled by layers, callback to the scene
-    // reverse iterate through scene entities
+    // if event is not handled by layers, unfocus UIElements and callback to the
+    // scene reverse iterate through scene entities
+    UIElement::focus(nullptr);
     for (auto entity_it = info.scene->entity_rbegin();
          entity_it != info.scene->entity_rend(); entity_it++) {
       Entity *entity = entity_it->get();
