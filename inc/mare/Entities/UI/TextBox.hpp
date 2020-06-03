@@ -56,7 +56,7 @@ public:
     box = gen_ref<QuadrangleMesh>();
     boarder = gen_ref<QuadrangleMesh>();
     highlight = gen_ref<QuadrangleMesh>();
-    text = gen_ref<CharMesh>("", 1.0f / 17.0f, max_strokes);
+    text = gen_ref<CharMesh>("", 1.0f / 17.0f, 0.0f, max_strokes);
 
     text_material = gen_ref<BasicMaterial>();
     box_material = gen_ref<BasicMaterial>();

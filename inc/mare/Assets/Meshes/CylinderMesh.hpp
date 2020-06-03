@@ -110,16 +110,16 @@ public:
       indices.push_back(3 * (sides + 1) + i + 3);
     }
 
-    Scoped<Buffer<float>> vertex_buffer =
+    Referenced<Buffer<float>> vertex_buffer =
         Renderer::gen_buffer<float>(&data[0], data.size() * sizeof(float));
     vertex_buffer->set_format({{AttributeType::POSITON_3D, "position"},
                                {AttributeType::NORMAL, "normal"}});
 
-    Scoped<Buffer<unsigned int>> index_buffer = Renderer::gen_buffer<uint32_t>(
+    Referenced<Buffer<unsigned int>> index_buffer = Renderer::gen_buffer<uint32_t>(
         &indices[0], indices.size() * sizeof(uint32_t));
 
-    add_geometry_buffer(std::move(vertex_buffer));
-    set_index_buffer(std::move(index_buffer));
+    add_geometry_buffer(vertex_buffer);
+    set_index_buffer(index_buffer);
   }
 };
 } // namespace mare

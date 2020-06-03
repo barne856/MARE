@@ -3,6 +3,8 @@
 
 // MARE
 #include "mare/Assets/Meshes/CircleMesh.hpp"
+#include "mare/Assets/Meshes/CubeMesh.hpp"
+#include "mare/Assets/Meshes/CylinderMesh.hpp"
 #include "mare/Assets/Meshes/LineMesh.hpp"
 #include "mare/Meshes.hpp"
 #include "mare/Renderer.hpp"
@@ -70,17 +72,19 @@ public:
    * @param str The string to initialize the Mesh with.
    * @param thickness The thickness of the text in model space. If this value is
    * zero, lines will be drawn that take up a single pixel in width. The maximum
-   * thickness that should be used to maintain readability is 2/17. The default is zero.
+   * thickness that should be used to maintain readability is 2/17. The default
+   * is zero.
    * @param max_strokes The maximum strokes to allocate for the buffer. If zero,
    * the buffer will be initialized with enough space for the string used to
    * initialize the Mesh with, this will also disallow updating the text of the
    * Mesh. The default is zero and the text will not be able to change.
    */
-  CharMesh(std::string str, float text_thickness = 0.0f,
-           unsigned int max_strokes = 0) {
+  CharMesh(std::string str, float stroke_thickness = 0.0f,
+           float extrusion_depth = 0.0f, unsigned int max_strokes = 0) {
     // Set defaults
     text = str;
-    thickness = text_thickness;
+    thickness = stroke_thickness;
+    extrusion = extrusion_depth;
     if (max_strokes == 0) {
       is_static = true;
       max_strokes = count_strokes(str);
@@ -88,9 +92,22 @@ public:
     this->max_strokes = max_strokes;
     // generate meshes
     nodes = gen_ref<InstancedMesh>(2 * max_strokes);
-    nodes->set_mesh(gen_ref<CircleMesh>(4, 0.5f * thickness));
     links = gen_ref<InstancedMesh>(max_strokes);
-    links->set_mesh(gen_ref<LineMesh>(thickness));
+    if (extrusion == 0.0f) {
+      nodes->set_mesh(gen_ref<CircleMesh>(4, 0.5f * thickness));
+      links->set_mesh(gen_ref<LineMesh>(thickness));
+    } else {
+      auto cyl = gen_ref<CylinderMesh>(0.0f, math::TAU, 4);
+      // cyl->set_scale({thickness, thickness, extrusion});
+      // cyl->set_position({0.0f, 0.0f, -extrusion/2.0f});
+      nodes->set_mesh(cyl);
+      // nodes->set_mesh(gen_ref<CircleMesh>(4, 0.5f * thickness));
+      auto cube = gen_ref<CubeMesh>(1.0f);
+      // cube->set_scale({1.0f, thickness, extrusion});
+      links->set_mesh(cube);
+      // links->set_mesh(gen_ref<LineMesh>(thickness));
+    }
+
     push_mesh(nodes);
     push_mesh(links);
     if (push_instances(str)) {
@@ -140,6 +157,7 @@ private:
   int max_width = 0;
   std::string text;
   float thickness;
+  float extrusion;
   unsigned int stroke_count = 0;
   unsigned int max_strokes;
   bool is_static = false;
@@ -337,17 +355,41 @@ private:
       p1 += offset;
       p2 += offset;
       glm::vec3 p3 = 0.5f * (p1 + p2);
-      if (thickness != 0.0f) {
+      // push node instances
+      if (thickness != 0.0f && extrusion == 0.0f) {
         nodes->push_instance(glm::translate(glm::mat4(1.0f), p1));
         nodes->push_instance(glm::translate(glm::mat4(1.0f), p2));
+      } else {
+        glm::mat4 node1_instance =
+            glm::translate(glm::mat4(1.0f),
+                           p1 - glm::vec3(0.0f, 0.0f, 0.5f * extrusion)) *
+            glm::scale(glm::mat4(1.0f),
+                       glm::vec3(thickness, thickness, extrusion));
+        glm::mat4 node2_instance =
+            glm::translate(glm::mat4(1.0f),
+                           p2 - glm::vec3(0.0f, 0.0f, 0.5f * extrusion)) *
+            glm::scale(glm::mat4(1.0f),
+                       glm::vec3(thickness, thickness, extrusion));
+        nodes->push_instance(node1_instance);
+        nodes->push_instance(node2_instance);
       }
+      // push link instance
       float angle = atan2f(p2.y - p1.y, p2.x - p1.x);
       float length = glm::length(p2 - p1);
-      glm::mat4 link_instance =
-          glm::translate(glm::mat4(1.0f), p3) *
-          glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0.0f, 0.0f, 1.0f)) *
-          glm::scale(glm::mat4(1.0f), glm::vec3(length, 1.0f, 1.0f));
-      links->push_instance(link_instance);
+      if (extrusion == 0.0f) {
+        glm::mat4 link_instance =
+            glm::translate(glm::mat4(1.0f), p3) *
+            glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0.0f, 0.0f, 1.0f)) *
+            glm::scale(glm::mat4(1.0f), glm::vec3(length, 1.0f, 1.0f));
+        links->push_instance(link_instance);
+      } else {
+        glm::mat4 link_instance =
+            glm::translate(glm::mat4(1.0f), p3) *
+            glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0.0f, 0.0f, 1.0f)) *
+            glm::scale(glm::mat4(1.0f), glm::vec3(length, thickness, extrusion));
+        links->push_instance(link_instance);
+      }
+
       stroke_count++;
     }
   }

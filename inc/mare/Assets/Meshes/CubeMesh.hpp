@@ -10,7 +10,7 @@
 
 namespace mare {
 /**
- * @brief A SimpleMesh of a 3D Cube.
+ * @brief A SimpleMesh of a 3D Cube. Contains normals and vertices.
  */
 class CubeMesh : public SimpleMesh {
 public:

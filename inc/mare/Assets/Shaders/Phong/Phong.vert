@@ -35,6 +35,6 @@ void main()
         N = normalize(mat3(transpose(inverse(model * models[gl_InstanceID]))) * normal);
         P = view * model * models[gl_InstanceID] * position;
         shadow_coord = shadow_matrix * model * models[gl_InstanceID] * position;
-        gl_Position = projection * view * P;
+        gl_Position = projection * P;
     }
 }
