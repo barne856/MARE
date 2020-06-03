@@ -15,7 +15,7 @@ namespace mare {
 // forward declare controls
 class ButtonControls;
 // typedef callback
-typedef void (*on_click_callback)(Layer*);
+typedef void (*on_click_callback)(Layer *);
 
 /**
  * @brief A Button UI element for executing a process or toggling a setting when
@@ -25,11 +25,11 @@ typedef void (*on_click_callback)(Layer*);
 class Button : public Entity, public Widget<bool>, public RenderPack {
 public:
   Button(Layer *layer, util::Rect widget_bounds, std::string label)
-      : Widget(layer) {
-    bounds = widget_bounds;
+      : Widget(layer, widget_bounds) {
+    value = false;
     button_box = gen_ref<QuadrangleMesh>();
     button_boarder = gen_ref<QuadrangleMesh>();
-    label_mesh = gen_ref<CharMesh>(label);
+    label_mesh = gen_ref<CharMesh>(label, 1.0f / 17.0f);
     box_material = gen_ref<BasicMaterial>();
     boarder_material = gen_ref<BasicMaterial>();
     label_material = gen_ref<BasicMaterial>();
@@ -46,9 +46,9 @@ public:
     gen_system<PacketRenderer>();
     gen_system<ButtonControls>();
   }
-  void rescale() {
+  void rescale() override {
     float text_scale = (bounds.top() - bounds.bottom()) / 1.5f;
-    label_mesh->set_scale(glm::vec3(text_scale * 0.5f, text_scale, 1.0f));
+    label_mesh->set_scale(glm::vec3(text_scale, text_scale, 1.0f));
     label_mesh->set_center(util::get_rect_center(bounds));
     float boarder_thickness = 0.01f * (bounds.right() - bounds.left());
     float box_scale_x = bounds.right() - bounds.left();
@@ -61,11 +61,25 @@ public:
     button_boarder->set_position({rect_center.x, rect_center.y, 1.0f});
     button_box->set_position({rect_center.x, rect_center.y, 1.0f});
   }
+  /**
+   * @brief Set the on click callback of the Button.
+   * @details The on click callback will be executed each time the button is
+   * pressed.
+   *
+   * @param callback_func The function to set as a callback for the Button.
+   */
   void set_on_click_callback(on_click_callback callback_func) {
     on_click_func = callback_func;
   }
+  /**
+   * @brief Executes a user defined function when the Button is clicked. The
+   * boolean value of the Button Widget is also negated when the Button is
+   * pressed.
+   *
+   */
   void on_click() {
     if (on_click_func) {
+      value = !value;
       on_click_func(get_layer());
     }
   }
@@ -76,8 +90,8 @@ public:
   Referenced<BasicMaterial> boarder_material;
   Referenced<BasicMaterial> label_material;
   glm::vec4 boarder_color{0.0f, 0.0f, 0.0f, 1.0f};
-  glm::vec4 box_color{0.85f, 0.85f, 0.85f, 1.0f};
-  glm::vec4 box_pushed_color{0.5f, 0.5f, 0.5f, 1.0f};
+  glm::vec4 box_color{1.0f, 1.0f, 1.0f, 1.0f};
+  glm::vec4 box_pushed_color{0.8f, 0.8f, 0.9f, 1.0f};
   glm::vec4 label_color{0.0f, 0.0f, 0.0f, 1.0f};
 
 private:

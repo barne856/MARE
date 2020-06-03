@@ -421,7 +421,7 @@ public:
    *
    * @param mesh The Mesh to be instanced.
    */
-  void set_mesh(Scoped<Mesh> mesh);
+  void set_mesh(Referenced<Mesh> mesh);
   /**
    * @brief Push an instance transform onto the Transform Buffer.
    *
@@ -490,7 +490,7 @@ protected:
   unsigned int instance_count_; /**< The current number of instances.*/
   Referenced<Buffer<glm::mat4>>
       instance_transforms_;    /**< The Transform Buffer.*/
-  Scoped<Mesh> mesh_;          /**< The Mesh that is instanced.*/
+  Referenced<Mesh> mesh_;          /**< The Mesh that is instanced.*/
   unsigned int max_instances_; /**< The maximum number of instances allowed.*/
 };
 

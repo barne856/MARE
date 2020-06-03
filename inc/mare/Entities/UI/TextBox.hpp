@@ -47,16 +47,16 @@ public:
    */
   TextBox(Layer *layer, util::Rect widget_bounds, unsigned int line_count,
           float margin_thickness, float boarder_thickness,
-          uint32_t size_in_bytes)
-      : Widget(layer), max_lines(line_count),
+          unsigned int max_strokes)
+      : Widget(layer, widget_bounds), max_lines(line_count),
         margin_thickness(margin_thickness),
         boarder_thickness(boarder_thickness) {
-    this->bounds = widget_bounds;
+    value = "";
 
     box = gen_ref<QuadrangleMesh>();
     boarder = gen_ref<QuadrangleMesh>();
     highlight = gen_ref<QuadrangleMesh>();
-    text = gen_ref<CharMesh>("", size_in_bytes);
+    text = gen_ref<CharMesh>("", 1.0f / 17.0f, max_strokes);
 
     text_material = gen_ref<BasicMaterial>();
     box_material = gen_ref<BasicMaterial>();
@@ -65,7 +65,7 @@ public:
 
     text_material->set_color(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
     box_material->set_color(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
-    boarder_material->set_color(glm::vec4(0.5f, 0.5f, 0.5f, 1.0f));
+    boarder_material->set_color(glm::vec4(0.0f, 0.0, 0.0f, 1.0f));
     highlight_material->set_color(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
 
     rescale();
@@ -84,7 +84,11 @@ public:
    *
    * @param str The text to set.
    */
-  void set_text(std::string str) { text->set_text(wrap_string(str)); }
+  void set_text(std::string str) {
+    std::string wrapped_str = wrap_string(str);
+    text->set_text(wrapped_str);
+    value = wrapped_str;
+  }
   /**
    * @brief Get the text of the text box as a string.
    *
@@ -110,9 +114,12 @@ public:
       if (index == -1) {
         str.pop_back();
         text->set_text(str);
+        value = str;
       } else {
         str.erase(index, 1);
-        text->set_text(wrap_string(str));
+        std::string wrapped_string = wrap_string(str);
+        text->set_text(wrapped_string);
+        value = wrapped_string;
       }
     }
   }
@@ -141,7 +148,9 @@ public:
         return;
       }
       str.push_back(character);
-      text->set_text(wrap_string(str));
+      std::string wrapped_str = wrap_string(str);
+      text->set_text(wrapped_str);
+      value = wrapped_str;
     }
   }
   /**
@@ -162,7 +171,7 @@ public:
    * functions of the text box.
    *
    */
-  void rescale() {
+  void rescale() override {
     float text_scale =
         (bounds.top() - bounds.bottom() - 2.0f * margin_thickness) /
         static_cast<float>(max_lines);
@@ -184,16 +193,15 @@ public:
     box->set_scale({box_width, box_height, 1.0f});
     boarder->set_scale({boarder_width, boarder_height, 1.0f});
     highlight->set_scale({highlight_width, highlight_height, 1.0f});
-    text->set_scale({text_scale / 2.0f, text_scale, 1.0f});
+    text->set_scale({text_scale, text_scale, 1.0f});
     box->set_position({box_center.x, box_center.y, 0.0f});
     boarder->set_position({box_center.x, box_center.y, 0.0f});
     highlight->set_position({box_center.x, box_center.y, 0.0f});
-    text->set_position({bounds.left() + margin_thickness,
+    text->set_position({bounds.left() + 2.0f * margin_thickness,
                         bounds.top() - margin_thickness, 0.0f});
   }
   void on_focus() override {
-    highlight_material->set_color(
-        {255.0f / 255.0f, 190.0f / 255.0f, 50.0f / 255.0f, 1.0f});
+    highlight_material->set_color({0.25f, 0.3f, 0.9f, 1.0f});
   }
   void on_unfocus() override {
     highlight_material->set_color({1.0f, 1.0f, 1.0f, 1.0f});

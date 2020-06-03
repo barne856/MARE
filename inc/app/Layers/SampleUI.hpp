@@ -2,7 +2,7 @@
 #define SAMPLEUI
 
 // MARE
-#include "mare/Entities/UI/SliderUI.hpp"
+#include "mare/Entities/UI/Slider.hpp"
 #include "mare/Layer.hpp"
 #include "mare/Renderer.hpp"
 
@@ -15,9 +15,13 @@ class SampleUI : public Layer {
 public:
   SampleUI() : Layer(ProjectionType::ORTHOGRAPHIC) {
     // Create Widgets
-    gen_entity<SliderUI>(this);
-    get_entity<SliderUI>()->set_color(glm::vec4(0.1f, 0.1f, 0.1f, 1.0f));
-    get_entity<SliderUI>()->set_value(0.5f);
+    util::Rect bounds;
+    bounds.left() = -0.5f;
+    bounds.right() = 0.5f;
+    bounds.top() = 0.5f;
+    bounds.bottom() = -0.5f;
+    gen_entity<Slider>(this, bounds);
+    get_entity<Slider>()->set_value(0.5f);
   }
 
   void on_enter() override {}

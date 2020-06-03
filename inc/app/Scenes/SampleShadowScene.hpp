@@ -76,7 +76,7 @@ public:
     Renderer::clear_depth_buffer();
 
     // update light position
-    float angle = get_layer<SampleUI>()->get_entity<SliderUI>()->get_value();
+    float angle = get_layer<SampleUI>()->get_entity<Slider>()->get_value();
     // time += delta_time;
     light_pos = glm::vec3(5.0f * cos(5.0f * angle), 5.0f * sin(time), 1.0f);
     light->set_position(light_pos);

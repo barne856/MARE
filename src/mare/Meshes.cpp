@@ -131,9 +131,9 @@ InstancedMesh::InstancedMesh(unsigned int max_instances)
     instance_transforms_ = Renderer::gen_buffer<glm::mat4>(nullptr, max_instances * sizeof(glm::mat4), BufferType::READ_WRITE);
 }
 
-void InstancedMesh::set_mesh(Scoped<Mesh> mesh)
+void InstancedMesh::set_mesh(Referenced<Mesh> mesh)
 {
-    mesh_ = std::move(mesh);
+    mesh_ = mesh;
 }
 
 void InstancedMesh::push_instance(glm::mat4 model)

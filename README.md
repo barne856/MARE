@@ -359,17 +359,15 @@ Mare includes the following Materials:
 All Materials are documented using doxygen.
 
 ### Compute Programs
-Mare allows the user to create general purpose compute programs from glsl Shaders. See the example `SampleParticleSystem.hpp` for an implementation of a particle system using a compute program.
+Mare allows the user to use general purpose compute programs created from glsl Shaders. See the example `SampleParticleSystem.hpp` for an implementation of a particle system using a compute program.
 
 ## TODO List
 ### Version 2.0.0
-* More Widget to be added (Buttons, Switches).
+* A font loader to be added to enable the use of bitmap fonts.
+* Text billboards for CharMesh and bitmap fonts.
 * PhongMaterial to have arrays for spotlight, point light, and directional lights, as well as shadowmaping for directional, point, and spot lights.
 * ShadowMap Component to have arrays for each type of light and depth buffers/light views for each
 * ShadowMap Camera view creation to be automated.
-* CharMesh to have a *thickness* parameter that uses quads and circles to render text with a thickness.
-* A font loader to be added to enable the use of bitmap fonts.
-* Text billboards for CharMesh and bitmap fonts.
 * Raypicking of Entities in a Scene.
 * Cylinder, Cone, and Tube Meshes to have an option for flat shading normals or smooth shading normals.
 * More Materials to be added (BasicColor, BasicTexture, Depth, Phong, Toon, Shadow).

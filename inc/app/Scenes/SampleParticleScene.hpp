@@ -33,8 +33,7 @@ public:
     look_at(glm::vec3(0.0f));
 
     gen_layer<SampleUI>();
-    get_layer<SampleUI>()->get_entity<SliderUI>()->set_value(0.0f);
-    get_layer<SampleUI>()->get_entity<SliderUI>()->set_color(glm::vec4(1.0f));
+    get_layer<SampleUI>()->get_entity<Slider>()->set_value(0.0f);
   }
 
   void on_enter() override {
@@ -61,7 +60,7 @@ public:
 
     // Set G
     get_entity<SampleParticleSystem>()->G =
-        0.001f * get_layer<SampleUI>()->get_entity<SliderUI>()->get_value();
+        0.001f * get_layer<SampleUI>()->get_entity<Slider>()->get_value();
   }
 
   void on_exit() override {

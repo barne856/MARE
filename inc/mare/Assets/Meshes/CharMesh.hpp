@@ -2,6 +2,8 @@
 #define CHARMESH
 
 // MARE
+#include "mare/Assets/Meshes/CircleMesh.hpp"
+#include "mare/Assets/Meshes/LineMesh.hpp"
 #include "mare/Meshes.hpp"
 #include "mare/Renderer.hpp"
 
@@ -16,8 +18,7 @@ namespace mare {
  * @details The CharMesh will create renderable text from
  * a string consisting of ASCII characters (excluding control characters
  * that are not the new line character). If a new line character is
- * encountered, the text will be arranged as expected. The 'Keying' variable
- * is the spacing between letters (default is 1.0).
+ * encountered, the text will be arranged as expected.
  *
  * Each of the ASCII characters excluding the control characters have
  * been constructed out of lines on a 17 x 17 grid. The ASCII_font is
@@ -55,42 +56,52 @@ namespace mare {
  * (4,10)--(12,10) so it's index list is [2,14,8,2,8,2,14,14,4,10,12,10]
  * and will be drawn in the bottom right quadrant of the screen in model
  * space.
+ *
+ * After the construction of the characters on the grid, the width of the
+ * characters are scaled by 1/2 the make the font look prettier. Any further
+ * transformations are done using the Mesh's Transform after creation.
  */
-class CharMesh : public SimpleMesh {
+class CharMesh : public CompositeMesh {
 public:
   /**
    * @brief Construct a new CharMesh.
-   * @details 208 Bytes is the largest a single character takes up in memory.
-   * This is the "@" character.
+   * @details 13 strokes is the largest size a single character takes up in
+   * memory. This is the "@" character.
    * @param str The string to initialize the Mesh with.
-   * @param size_in_bytes The size in bytes to allocate for the Mesh.
+   * @param thickness The thickness of the text in model space. If this value is
+   * zero, lines will be drawn that take up a single pixel in width. The maximum
+   * thickness that should be used to maintain readability is 2/17. The default is zero.
+   * @param max_strokes The maximum strokes to allocate for the buffer. If zero,
+   * the buffer will be initialized with enough space for the string used to
+   * initialize the Mesh with, this will also disallow updating the text of the
+   * Mesh. The default is zero and the text will not be able to change.
    */
-  CharMesh(std::string str, uint32_t size_in_bytes = 0) {
+  CharMesh(std::string str, float text_thickness = 0.0f,
+           unsigned int max_strokes = 0) {
     // Set defaults
-    this->size_in_bytes = size_in_bytes;
-    this->str = str;
-    std::vector<float> verts = string_to_verts(str);
-    set_draw_method(DrawMethod::LINES);
-
-    // if dynamic, create extra space to hold resized strings
-    if (size_in_bytes && str.empty()) {
-      vertex_buffer = Renderer::gen_buffer<float>(nullptr, size_in_bytes,
-                                                  BufferType::READ_WRITE);
-      vertex_buffer->set_format({{AttributeType::POSITION_2D, "position"}});
-    } else if (size_in_bytes) {
-      vertex_buffer = Renderer::gen_buffer<float>(&verts[0], size_in_bytes,
-                                                  BufferType::READ_WRITE);
-      vertex_buffer->set_format({{AttributeType::POSITION_2D, "position"}});
-    } else {
-      vertex_buffer =
-          Renderer::gen_buffer<float>(&verts[0], verts.size() * sizeof(float));
-      vertex_buffer->set_format({{AttributeType::POSITION_2D, "position"}});
+    text = str;
+    thickness = text_thickness;
+    if (max_strokes == 0) {
+      is_static = true;
+      max_strokes = count_strokes(str);
     }
-
-    add_geometry_buffer(vertex_buffer);
+    this->max_strokes = max_strokes;
+    // generate meshes
+    nodes = gen_ref<InstancedMesh>(2 * max_strokes);
+    nodes->set_mesh(gen_ref<CircleMesh>(4, 0.5f * thickness));
+    links = gen_ref<InstancedMesh>(max_strokes);
+    links->set_mesh(gen_ref<LineMesh>(thickness));
+    push_mesh(nodes);
+    push_mesh(links);
+    if (push_instances(str)) {
+      return;
+    }
+    text = "";
+    nodes->clear_instances();
+    links->clear_instances();
   }
   glm::vec2 get_center() const {
-    glm::vec2 label_center = {max_width / 2.0f, (lines + 1) / 2.0f};
+    glm::vec2 label_center = {max_width / 4.0f, lines / 2.0f};
     glm::vec3 label_scale = get_scale();
     glm::vec2 true_label_center = {
         get_position().x + 2.0f * label_scale.x * label_center.x,
@@ -98,40 +109,42 @@ public:
     return true_label_center;
   }
   void set_center(glm::vec2 center) {
-    glm::vec2 label_center = {max_width / 2.0f, (lines + 1) / 2.0f};
+    glm::vec2 label_center = {max_width / 4.0f, lines / 2.0f};
     glm::vec3 label_scale = get_scale();
     glm::vec2 label_top_left =
         glm::vec2(center.x - label_scale.x * label_center.x,
                   center.y + label_scale.y * label_center.y);
     set_position(glm::vec3(label_top_left, 0.0f));
   }
-  void set_text(std::string text) {
-    std::string old_string = str;
-    str = text;
-    lines = 0;
-    max_width = 0;
-    if (text.empty()) {
-      vertex_buffer->clear(0.0f);
-      lines = 1;
-    } else {
-      std::vector<float> verts = string_to_verts(str);
-      if (verts.size() * sizeof(float) <= size_in_bytes) {
-        vertex_buffer->clear(0.0f);
-        vertex_buffer->flush(&verts[0], 0, sizeof(float) * verts.size());
-      } else {
-        str = old_string;
+  void set_text(std::string str) {
+    if (!is_static) {
+      std::string old_string = text;
+      text = str;
+      lines = 0;
+      max_width = 0;
+      stroke_count = 0;
+      nodes->clear_instances();
+      links->clear_instances();
+      if (push_instances(str)) {
+        return;
       }
+      push_instances(old_string);
+      text = old_string;
     }
   }
-  std::string get_text() { return str; }
+  std::string get_text() { return text; }
 
 private:
   Referenced<Buffer<float>> vertex_buffer;
   int lines = 0;
   int max_width = 0;
-  float keying = 1.0f;
-  size_t size_in_bytes;
-  std::string str;
+  std::string text;
+  float thickness;
+  unsigned int stroke_count = 0;
+  unsigned int max_strokes;
+  bool is_static = false;
+  Referenced<InstancedMesh> nodes;
+  Referenced<InstancedMesh> links;
   float grid_points[17] = {0.0f,   0.0625f, 0.125f, 0.1875f, 0.25f,  0.3125f,
                            0.375f, 0.4375f, 0.5f,   0.5625f, 0.625f, 0.6875f,
                            0.75f,  0.8125f, 0.875f, 0.9375f, 1.0f};
@@ -301,76 +314,64 @@ private:
       {'~', std::vector<unsigned int>{2,  10, 2,  8, 2,  8,  4,  6,  4,  6,
                                       6,  6,  6,  6, 10, 10, 10, 10, 12, 10,
                                       12, 10, 14, 8, 14, 8,  14, 6}}};
-
-  // Get X, Y points from letter grid indices
-  std::vector<float> indices_to_points(std::vector<unsigned int> indices) {
-    size_t n = indices.size();
-    std::vector<float> points;
-    for (size_t i = 0; i < n; i++) {
-      if (i % 2 == 0) {
-        points.push_back(grid_points[indices[i]]);
-      } else {
-        points.push_back(-grid_points[indices[i]]);
+  unsigned int count_strokes(std::string str) {
+    std::vector<unsigned int> indices{};
+    for (auto &c : str) {
+      for (auto i : ASCII_font[c]) {
+        indices.push_back(i);
       }
     }
-    return points;
+    return indices.size() / 4;
   }
-  // Return a letter made of X, Y points on the letter grid from an ASCII
-  // character
-  std::vector<float> char_to_lines(char letter) {
-    return indices_to_points(ASCII_font[letter]);
-  }
-  // Move letter right by keying amount
-  std::vector<float> move_right(std::vector<float> letter,
-                                unsigned int spaces) {
-    for (int i = 0; i < letter.size() / 2; i++) {
-      letter[2 * i] += float(spaces);
-    }
-    return letter;
-  }
-  // Move letter down by text height
-  std::vector<float> move_down(std::vector<float> letter, unsigned int spaces) {
-    for (int i = 0; i < letter.size() / 2; i++) {
-      letter[2 * i + 1] -= float(spaces);
-    }
-    return letter;
-  }
+  void push_char(unsigned int column, unsigned int row, char letter) {
+    std::vector<glm::mat4> transforms{};
+    glm::vec3 offset = glm::vec3(0.5f * static_cast<float>(column),
+                                 static_cast<float>(row), 0.0f);
+    std::vector<unsigned int> indices = ASCII_font[letter];
+    for (int i = 0; i < indices.size() / 4; i++) {
 
-  // Create letter List
-  std::vector<std::vector<float>> create_letter_list(std::string str) {
-    // Create list of letters for the vertex array
-    std::vector<std::vector<float>> letter_list;
-    int line_width = 0;
-    int caret_pos = 0;
-    for (int i = 0; i < str.length(); i++) {
-      if (str[i] == '\n') {
-        lines += 1;
-        caret_pos = -1;
-        line_width = 0;
+      glm::vec3 p1 = {0.5f * grid_points[indices[4 * i]],
+                      -grid_points[indices[4 * i + 1]], 0.0f};
+      glm::vec3 p2 = {0.5f * grid_points[indices[4 * i + 2]],
+                      -grid_points[indices[4 * i + 3]], 0.0f};
+      p1 += offset;
+      p2 += offset;
+      glm::vec3 p3 = 0.5f * (p1 + p2);
+      if (thickness != 0.0f) {
+        nodes->push_instance(glm::translate(glm::mat4(1.0f), p1));
+        nodes->push_instance(glm::translate(glm::mat4(1.0f), p2));
       }
-
-      letter_list.push_back(move_down(
-          move_right(char_to_lines(str[i]),
-                     static_cast<unsigned int>(float(caret_pos) * keying)),
-          lines));
-      caret_pos += 1;
-      line_width += 1;
-      if (line_width >= max_width) {
-        max_width = line_width;
-      }
+      float angle = atan2f(p2.y - p1.y, p2.x - p1.x);
+      float length = glm::length(p2 - p1);
+      glm::mat4 link_instance =
+          glm::translate(glm::mat4(1.0f), p3) *
+          glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0.0f, 0.0f, 1.0f)) *
+          glm::scale(glm::mat4(1.0f), glm::vec3(length, 1.0f, 1.0f));
+      links->push_instance(link_instance);
+      stroke_count++;
     }
-    return letter_list;
   }
-
-  std::vector<float> string_to_verts(std::string str) {
-    std::vector<std::vector<float>> letter_list = create_letter_list(str);
-    std::vector<float> vertices;
-    for (int i = 0; i < letter_list.size(); i++) {
-      for (int j = 0; j < letter_list[i].size(); j++) {
-        vertices.push_back(letter_list[i][j]);
+  bool push_instances(std::string str) {
+    if (max_strokes >= count_strokes(str)) {
+      unsigned int column = 0;
+      unsigned int row = 0;
+      for (auto &c : str) {
+        if (c == '\n') {
+          column = 0;
+          row++;
+          continue;
+        } else {
+          push_char(column, row, c);
+          if (column + 1 > max_width) {
+            max_width = column + 1;
+          }
+          column++;
+        }
       }
+      lines = row + 1;
+      return true;
     }
-    return vertices;
+    return false;
   }
 };
 } // namespace mare

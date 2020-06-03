@@ -36,13 +36,12 @@ public:
     // Clear color and depth buffer
     Renderer::clear_color_buffer(bg_color);
     Renderer::clear_depth_buffer();
-    //bg_color = get_layer<SampleWidgetsLayer>()->get_entity<ColorPicker>()->get_value();
   }
 
   void on_exit() override {}
 
 private:
-  glm::vec4 bg_color{0.8f, 0.9f, 0.9f, 1.0f};
+  glm::vec4 bg_color{0.12f, 0.12f, 0.12f, 1.0f};
 };
 
 } // namespace mare

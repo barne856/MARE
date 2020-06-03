@@ -486,29 +486,91 @@ class ColorPickerControls;
  */
 class ColorPicker : public Entity, public Widget<glm::vec4>, public RenderPack {
 public:
-  ColorPicker(Layer *base_layer, bool transparency_slider = false)
-      : Widget(base_layer), transparency(transparency_slider) {
+  ColorPicker(Layer *base_layer, util::Rect bounds,
+              bool transparency_slider = false)
+      : Widget(base_layer, bounds), transparency(transparency_slider) {
     mesh = gen_ref<ColorPickerMesh>(transparency_slider);
     mat = gen_ref<VertexColorMaterial>();
     push_packet({mesh, mat});
     gen_system<PacketRenderer>();
     gen_system<ColorPickerControls>();
-    bounds.left() = -0.6f;
-    if (transparency_slider) {
-      bounds.right() = 0.8f;
-    } else {
-      bounds.right() = 0.6f;
-    }
-    bounds.top() = 0.6f;
-    bounds.bottom() = -0.6f;
+
+    rescale();
+
     value = util::hsva_to_rgba(mesh->get_picker_hsva_color());
+  }
+  void rescale() override {
+    float height = bounds.top() - bounds.bottom();
+    float width = bounds.right() - bounds.left();
+    float mesh_width = transparency ? 1.4f : 1.2f;
+    float mesh_height = 1.2f;
+    if (height >= width * mesh_height / mesh_width) {
+      scale = width / mesh_width;
+    } else {
+      scale = height / mesh_height;
+    }
+    x_offset = 0.5f * (mesh_height - mesh_width) * scale;
+    mesh->set_scale(glm::vec3(scale));
+    center = util::get_rect_center(bounds);
+    mesh->set_position(glm::vec3(center.x + x_offset, center.y, 0.0f));
+  }
+  bool is_in_color_triangle() {
+    glm::vec2 widget_coords = get_model_coords();
+    glm::vec4 v1 = scale * glm::vec4(0.5f, 0.0f, 0.0f, 1.0f / scale);
+    glm::vec4 v2 =
+        scale * glm::vec4(0.5f * cos(math::TAU / 3.0f),
+                          0.5f * sin(math::TAU / 3.0f), 0.0f, 1.0f / scale);
+    glm::vec4 v3 = scale * glm::vec4(0.5f * cos(2.0f * math::TAU / 3.0f),
+                                     0.5f * sin(2.0f * math::TAU / 3.0f), 0.0f,
+                                     1.0f / scale);
+    v1 = mesh->get_meshes<Mesh>()[1]->get_rotation() * v1;
+    v2 = mesh->get_meshes<Mesh>()[1]->get_rotation() * v2;
+    v3 = mesh->get_meshes<Mesh>()[1]->get_rotation() * v3;
+    return math::is_in_polygon(
+        widget_coords,
+        {glm::vec2(v1.x + x_offset + center.x, v1.y + center.y),
+         glm::vec2(v2.x + x_offset + center.x, v2.y + center.y),
+         glm::vec2(v3.x + x_offset + center.x, v3.y + center.y)});
+  }
+  bool is_in_transparency_slider() {
+    if (transparency) {
+      glm::vec2 widget_coords = get_model_coords();
+      glm::vec2 v1 = scale * glm::vec2(0.7f, -0.5f);
+      glm::vec2 v2 = scale * glm::vec2(0.8f, -0.5f);
+      glm::vec2 v3 = scale * glm::vec2(0.8f, 0.5f);
+      glm::vec2 v4 = scale * glm::vec2(0.7f, 0.5f);
+      v1.x += x_offset + center.x;
+      v1.y += center.y;
+      v2.x += x_offset + center.x;
+      v2.y += center.y;
+      v3.x += x_offset + center.x;
+      v3.y += center.y;
+      v4.x += x_offset + center.x;
+      v4.y += center.y;
+      return math::is_in_polygon(widget_coords, {v1, v2, v3, v4});
+    }
+    return false;
+  }
+  bool is_in_color_wheel() {
+    glm::vec2 widget_coords = get_model_coords();
+    widget_coords.x -= (x_offset + center.x);
+    widget_coords.y -= center.y;
+    if (glm::length(widget_coords) <=
+        scale * 0.6f) {
+      return true;
+    }
+    return false;
   }
   /**
    * @brief Set the hue of the ColorPicker.
    *
    * @param hue The hue to set.
    */
-  void set_hue(float hue) { mesh->set_hue(hue); }
+  void set_hue(glm::vec2 widget_coords)
+  { 
+    float hue = atan2f(widget_coords.y - center.y, widget_coords.x - (x_offset + center.x));
+    mesh->set_hue(hue);
+  }
   /**
    * @brief Directly set to position of the picker on the color triangle.
    * @details uses local mesh coordiantes. The picker will be clamped to the
@@ -516,19 +578,30 @@ public:
    *
    * @param widget_coords The position to set the picker.
    */
-  void set_picker_coords(glm::vec2 widget_coords) {
-    mesh->set_picker_coords(widget_coords);
+  void set_picker_color(glm::vec2 widget_coords) {
+    widget_coords.x -= (center.x + x_offset);
+    widget_coords.y -= center.y;
+    mesh->set_picker_coords(widget_coords/scale);
   }
   /**
    * @brief Set the alpha of the ColorPicker.
-   * 
+   *
    * @param alpha The alpha to set.
    */
-  void set_alpha(float alpha) { mesh->set_alpha(alpha); }
+  void set_alpha(glm::vec2 widget_coords)
+  { 
+    float alpha = glm::clamp((widget_coords.y - center.y)/scale + 0.5f, 0.0f, 1.0f);
+    mesh->set_alpha(alpha);
+  }
 
   Referenced<ColorPickerMesh> mesh;
   Referenced<VertexColorMaterial> mat;
   bool transparency;
+
+private:
+  float scale = 0.0f;
+  float x_offset = 0.0f;
+  glm::vec2 center{};
 };
 // Controls
 class ColorPickerControls : public ControlsSystem<ColorPicker> {
@@ -546,24 +619,11 @@ public:
     if (input.LEFT_MOUSE_JUST_PRESSED && picker->is_cursor_in_bounds()) {
       UIElement::focus(picker);
       glm::vec2 widget_coords = picker->get_model_coords();
-      glm::vec4 v1 = glm::vec4(0.5f, 0.0f, 0.0f, 1.0f);
-      glm::vec4 v2 = glm::vec4(0.5f * cos(math::TAU / 3.0f),
-                               0.5f * sin(math::TAU / 3.0f), 0.0f, 1.0f);
-      glm::vec4 v3 = glm::vec4(0.5f * cos(2.0f * math::TAU / 3.0f),
-                               0.5f * sin(2.0f * math::TAU / 3.0f), 0.0f, 1.0f);
-      v1 = picker->mesh->get_meshes<Mesh>()[1]->get_rotation() * v1;
-      v2 = picker->mesh->get_meshes<Mesh>()[1]->get_rotation() * v2;
-      v3 = picker->mesh->get_meshes<Mesh>()[1]->get_rotation() * v3;
-      if (math::is_in_polygon(widget_coords,
-                              {glm::vec2(v1), glm::vec2(v2), glm::vec2(v3)})) {
+      if (picker->is_in_color_triangle()) {
         focused_mesh = picker->mesh->get_meshes<Mesh>()[1];
-      } else if (picker->transparency &&
-                 math::is_in_polygon(widget_coords, {{0.7f, -0.5f},
-                                                     {0.8f, -0.5f},
-                                                     {0.8f, 0.5f},
-                                                     {0.7f, 0.5f}})) {
+      } else if (picker->is_in_transparency_slider()) {
         focused_mesh = picker->mesh->get_meshes<Mesh>()[3];
-      } else if (glm::length(widget_coords) <= 0.6f) {
+      } else if (picker->is_in_color_wheel()) {
         focused_mesh = picker->mesh->get_meshes<Mesh>()[0];
       } else {
         focused_mesh = nullptr;
@@ -590,12 +650,11 @@ public:
       // if focused mesh is triangle, move the picker to mouse position but
       // clamp to triangle
       if (focused_mesh == picker->mesh->get_meshes<Mesh>()[1]) {
-        picker->set_picker_coords(widget_coords);
-      } else if (focused_mesh == picker->mesh->get_meshes<Mesh>()[3]) {
-        picker->set_alpha(glm::clamp(widget_coords.y + 0.5f, 0.0f, 1.0f));
+        picker->set_picker_color(widget_coords);
+      } else if (picker->transparency && focused_mesh == picker->mesh->get_meshes<Mesh>()[3]) {
+        picker->set_alpha(widget_coords);
       } else if (focused_mesh == picker->mesh->get_meshes<Mesh>()[0]) {
-        float hue = atan2f(widget_coords.y, widget_coords.x);
-        picker->set_hue(hue);
+        picker->set_hue(widget_coords);
       }
       picker->set_value(
           util::hsva_to_rgba(picker->mesh->get_picker_hsva_color()));

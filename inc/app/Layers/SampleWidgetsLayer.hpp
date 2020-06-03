@@ -4,6 +4,8 @@
 // MARE
 #include "mare/Entities/UI/Button.hpp"
 #include "mare/Entities/UI/ColorPicker.hpp"
+#include "mare/Entities/UI/Slider.hpp"
+#include "mare/Entities/UI/Switch.hpp"
 #include "mare/Entities/UI/TextBox.hpp"
 #include "mare/Layer.hpp"
 #include "mare/Renderer.hpp"
@@ -16,29 +18,44 @@ namespace mare {
 class SampleWidgetsLayer : public Layer {
 public:
   SampleWidgetsLayer() : Layer(ProjectionType::ORTHOGRAPHIC) {
+    util::Rect bounds;
     // Color Picker
-    picker = gen_entity<ColorPicker>(this, true);
+    bounds.left() = -0.6f;
+    bounds.right() = 0.8f;
+    bounds.bottom() = -0.6;
+    bounds.top() = 0.6f;
+    picker = gen_entity<ColorPicker>(this, bounds, true);
     picker->set_scale(glm::vec3(0.5f));
     picker->set_position(
         glm::vec3(-16.0f / 9.0f + 0.5f * 0.6f, 1.0f - 0.5f * 0.6f, 0.0f));
-    
+
     // Text box
-    util::Rect bounds;
     bounds.left() = -0.30f;
     bounds.right() = 0.30f;
     bounds.bottom() = -0.05f;
     bounds.top() = 0.05f;
-    // allocate 16kB for the text in the box
-    texbox = gen_entity<TextBox>(this, bounds, 2, 0.01f, 0.005f, 16000);
+    texbox = gen_entity<TextBox>(this, bounds, 1, 0.01f, 0.005f, 182);
     texbox->pin_top_left_corner({-16.0f / 9.0f + 0.05f, 1.0f - 0.65f});
 
     // Button
-    button = gen_entity<Button>(this, bounds, "Clear Text");
+    button = gen_entity<Button>(this, bounds, "CLEAR TEXT");
+    button->set_position(glm::vec3(-16.0f / 9.0f + 0.585f * 0.6f, 0.15f, 0.0f));
     button->set_on_click_callback(clear_text);
+
+    // Slider Bar
+    slider = gen_entity<Slider>(this, bounds);
+    slider->set_position(
+        glm::vec3(-16.0f / 9.0f + 0.585f * 0.6f, -0.15f, 0.0f));
+
+    // Switch
+    bounds.left() = -0.1f;
+    bounds.right() = 0.1f;
+    switch_toggle = gen_entity<Switch>(this, bounds);
+    switch_toggle->set_position(
+        glm::vec3(-16.0f / 9.0f + 0.585f * 0.6f, 0.0f, 0.0f));
   }
 
-  static void clear_text(Layer* layer)
-  {
+  static void clear_text(Layer *layer) {
     auto texbox = layer->get_entity<TextBox>();
     texbox->clear_text();
   }
@@ -52,6 +69,8 @@ public:
   }
 
   void on_exit() override {}
+  Referenced<Slider> slider;
+  Referenced<Switch> switch_toggle;
   Referenced<TextBox> texbox;
   Referenced<Button> button;
   Referenced<ColorPicker> picker;

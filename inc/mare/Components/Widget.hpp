@@ -16,7 +16,16 @@ using namespace util;
 
 class UIElement : virtual public Transform {
 public:
-  UIElement(Layer *layer) : bounds{}, base_layer(layer) {}
+  /**
+   * @brief Abstract interface for a UIElement.
+   *
+   * @param layer The base Layer where the UIElement is attached.
+   * @param bounds The bounds of the UIElement use to scale and position the
+   * UIElement on the Layer and test for user input. This applies a
+   * transformation to the element in addition to any transformation defined by
+   * the Transform of the UIElement.
+   */
+  UIElement(Layer *layer, Rect bounds) : bounds{bounds}, base_layer(layer) {}
   virtual ~UIElement() {}
   /**
    * @brief Test if the cursor is inside the bounds of the UIElement.
@@ -68,10 +77,7 @@ public:
     }
     return glm::vec2(0.0f, 0.0f);
   }
-  bool is_focused()
-  {
-    return (Renderer::get_info().focused_element == this);
-  }
+  bool is_focused() { return (Renderer::get_info().focused_element == this); }
   virtual void on_focus() {}
   virtual void on_unfocus() {}
   static void focus(UIElement *element) {
@@ -84,9 +90,33 @@ public:
     }
   }
   Layer *get_layer() { return base_layer; }
+  /**
+   * @brief Used to rescale the UIElement based on the bounds.
+   *
+   */
+  virtual void rescale() = 0;
+  void set_left(float value) {
+    bounds.left() = value;
+    rescale();
+  }
+  void set_bottom(float value) {
+    bounds.bottom() = value;
+    rescale();
+  }
+  void set_right(float value) {
+    bounds.right() = value;
+    rescale();
+  }
+  void set_top(float value) {
+    bounds.top() = value;
+    rescale();
+  }
 
+protected:
   Rect bounds; /**< The bounds of the UIElement in the base UIElement's model
-                  space. Used to test if the mouse position is in bounds.*/
+space. Used to test if the mouse position is in bounds. The bounds is used as a
+position an scale in addition to the Transform of the UIElement.*/
+
 private:
   Layer *base_layer; /**< A pointer to the Layer which the UIElement is attached
                         to.*/
@@ -108,7 +138,7 @@ public:
    *
    * @param layer The Layer the Widget will be rendered on.
    */
-  Widget(Layer *layer) : UIElement(layer), value{} {}
+  Widget(Layer *layer, Rect bounds) : UIElement(layer, bounds), value{} {}
   virtual ~Widget() {}
   /**
    * @brief Get the value of the Widget.
