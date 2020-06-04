@@ -94,10 +94,10 @@ public:
     nodes = gen_ref<InstancedMesh>(2 * max_strokes);
     links = gen_ref<InstancedMesh>(max_strokes);
     if (extrusion == 0.0f) {
-      nodes->set_mesh(gen_ref<CircleMesh>(4, 0.5f * thickness));
+      nodes->set_mesh(gen_ref<CircleMesh>(16, 0.5f * thickness));
       links->set_mesh(gen_ref<LineMesh>(thickness));
     } else {
-      auto cyl = gen_ref<CylinderMesh>(0.0f, math::TAU, 4);
+      auto cyl = gen_ref<CylinderMesh>(0.0f, math::TAU, 16);
       // cyl->set_scale({thickness, thickness, extrusion});
       // cyl->set_position({0.0f, 0.0f, -extrusion/2.0f});
       nodes->set_mesh(cyl);
@@ -299,7 +299,7 @@ private:
       {'j', std::vector<unsigned int>{8, 5, 8, 16, 8, 16, 2, 16, 8, 2, 8, 3}},
       {'k',
        std::vector<unsigned int>{2, 2, 2, 14, 2, 11, 14, 8, 2, 11, 14, 14}},
-      {'l', std::vector<unsigned int>{8, 2, 8, 14}},
+      {'l', std::vector<unsigned int>{8, 2, 8, 14, 8, 14, 10, 14, 8, 2, 6, 2}},
       {'m', std::vector<unsigned int>{2, 8, 2, 14, 8, 8, 8, 14, 14, 8, 14, 14,
                                       2, 8, 14, 8}},
       {'n', std::vector<unsigned int>{2, 8, 2, 14, 14, 8, 14, 14, 2, 8, 14, 8}},
@@ -312,7 +312,7 @@ private:
       {'r', std::vector<unsigned int>{2, 8, 2, 14, 14, 8, 14, 11, 2, 8, 14, 8}},
       {'s', std::vector<unsigned int>{2,  8, 2, 11, 14, 11, 14, 14, 2,  8,
                                       14, 8, 2, 14, 14, 14, 2,  11, 14, 11}},
-      {'t', std::vector<unsigned int>{8, 2, 8, 14, 2, 5, 14, 5}},
+      {'t', std::vector<unsigned int>{8, 2, 8, 14, 2, 5, 14, 5, 8, 14, 14, 14}},
       {'u',
        std::vector<unsigned int>{2, 8, 2, 14, 14, 8, 14, 14, 2, 14, 14, 14}},
       {'v', std::vector<unsigned int>{2, 8, 8, 14, 8, 14, 14, 8}},

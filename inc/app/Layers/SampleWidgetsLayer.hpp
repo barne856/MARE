@@ -9,6 +9,7 @@
 #include "mare/Entities/UI/TextBox.hpp"
 #include "mare/Layer.hpp"
 #include "mare/Renderer.hpp"
+#include "mare/Entities/Billboard.hpp"
 
 namespace mare {
 /**
@@ -38,14 +39,16 @@ public:
     texbox->pin_top_left_corner({-16.0f / 9.0f + 0.05f, 1.0f - 0.65f});
 
     // Button
-    button = gen_entity<Button>(this, bounds, "CLEAR TEXT");
+    button = gen_entity<Button>(this, bounds, "SET TEXT");
     button->set_position(glm::vec3(-16.0f / 9.0f + 0.585f * 0.6f, 0.15f, 0.0f));
-    button->set_on_click_callback(clear_text);
+    button->set_on_click_callback(set_text);
 
     // Slider Bar
     slider = gen_entity<Slider>(this, bounds);
     slider->set_position(
         glm::vec3(-16.0f / 9.0f + 0.585f * 0.6f, -0.15f, 0.0f));
+    slider->set_value(0.5f);
+    slider->rescale();
 
     // Switch
     bounds.left() = -0.1f;
@@ -55,9 +58,12 @@ public:
         glm::vec3(-16.0f / 9.0f + 0.585f * 0.6f, 0.0f, 0.0f));
   }
 
-  static void clear_text(Layer *layer) {
+  static void set_text(Layer *layer) {
     auto texbox = layer->get_entity<TextBox>();
-    texbox->clear_text();
+    auto scene = Renderer::get_info().scene;
+    auto billboard = scene->get_entity<Billboard>();
+    std::string str = texbox->get_value();
+    billboard->set_text(str);
   }
 
   void on_enter() override {}
@@ -66,6 +72,7 @@ public:
     // Renderer properties
     Renderer::enable_depth_testing(false);
     Renderer::enable_face_culling(true);
+    Renderer::wireframe_mode(false);
   }
 
   void on_exit() override {}

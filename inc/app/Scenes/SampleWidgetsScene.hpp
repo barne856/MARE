@@ -4,12 +4,9 @@
 // MARE
 #include "app/Entities/SampleEntity.hpp"
 #include "app/Layers/SampleWidgetsLayer.hpp"
+#include "mare/Entities/Billboard.hpp"
 #include "mare/Renderer.hpp"
 #include "mare/Scene.hpp"
-
-#include "mare/Assets/Materials/BasicMaterial.hpp"
-#include "mare/Assets/Materials/PhongMaterial.hpp"
-#include "mare/Assets/Meshes/CharMesh.hpp"
 
 namespace mare {
 
@@ -24,25 +21,9 @@ public:
     // generate and push layers onto the stack
     gen_layer<SampleWidgetsLayer>();
 
-    // Orient Camera
-    set_position(glm::vec3(2.0f, 2.0f, 2.0f));
-    // face_towards(glm::vec3(0.0f, -1.0f, 0.0f));
-    // set_up_vector({0.0f, 0.0f, 1.0f});
-    look_at(glm::vec3(0.0f));
-
     // Extruded Text
     sample_text =
-        gen_ref<CharMesh>("HELLO, WORLD!", 1.0f / 17.0f, 3.0f / 17.0f);
-    sample_text->set_scale(glm::vec3(0.3f));
-    sample_text->set_center(glm::vec3(0.0f));
-    sample_text_material = gen_ref<PhongMaterial>();
-    // sample_text_material->set_color(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
-    auto light = gen_entity<Spotlight>();
-    auto light_pos = glm::vec3(5.0f, 0.0f, 5.0f);
-    auto light_center = glm::vec3(0.0f);
-    light->set_position(light_pos);
-    light->look_at(light_center);
-    sample_text_material->set_light(light);
+        gen_entity<Billboard>("Hello, World!", 1.0f / 17.0f, 3.0f / 17.0f, 182);
   }
 
   void on_enter() override {}
@@ -56,7 +37,15 @@ public:
     Renderer::clear_color_buffer(bg_color);
     Renderer::clear_depth_buffer();
 
-    //Renderer::wireframe_mode(true);
+    if (get_layer<SampleWidgetsLayer>()->get_entity<Switch>()->get_value()) {
+      Renderer::wireframe_mode(true);
+    } else {
+      Renderer::wireframe_mode(false);
+    }
+
+    float scale =
+        get_layer<SampleWidgetsLayer>()->get_entity<Slider>()->get_value();
+    sample_text->set_scale(glm::vec3(scale));
 
     t += delta_time / 10.0f;
     float x = r * cos(t);
@@ -66,7 +55,9 @@ public:
     look_at(glm::vec3(0.0f));
 
     // render sample text
-    sample_text->render(this, sample_text_material.get());
+    glm::vec4 ambient_color =
+        get_layer<SampleWidgetsLayer>()->get_entity<ColorPicker>()->get_value();
+    sample_text->set_color(ambient_color);
   }
 
   void on_exit() override {}
@@ -74,8 +65,7 @@ public:
 private:
   glm::vec4 bg_color{0.12f, 0.12f, 0.12f, 1.0f};
   // testing
-  Referenced<CharMesh> sample_text;
-  Referenced<PhongMaterial> sample_text_material;
+  Referenced<Billboard> sample_text;
   float t = 0.0f;
   float r = 2.0f;
 };

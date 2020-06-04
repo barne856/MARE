@@ -6,9 +6,9 @@
 
 // MARE
 #include "mare/Buffers.hpp"
+#include "mare/Entities/Spotlight.hpp"
 #include "mare/Renderer.hpp"
 #include "mare/Shader.hpp"
-#include "mare/Entities/Spotlight.hpp"
 
 namespace mare {
 
@@ -36,7 +36,7 @@ public:
    */
   PhongMaterial() : Material("./inc/mare/Assets/Shaders/Phong") {
     phong_properties props = {glm::vec4(0.0f, 0.0f, 0.0f, 1.0f),
-                              glm::vec4(0.1f, 0.1f, 0.5f, 1.0f),
+                              glm::vec4(0.5f, 0.5f, 0.5f, 1.0f),
                               glm::vec4(1.0f), 32.0f};
     properties = Renderer::gen_buffer<phong_properties>(
         &props, sizeof(phong_properties), BufferType::READ_WRITE);
@@ -56,6 +56,17 @@ public:
     upload_uniform("material_properties", properties.get());
     upload_uniform("light_properties", light_props.get());
     upload_vec3("light_position", spotlight->get_position());
+  }
+  /**
+   * @brief Set the ambient color of the material.
+   *
+   * @param color The color to set.
+   */
+  void set_ambient_color(glm::vec4 color) {
+    phong_properties props = {color,
+                              glm::vec4(0.5f, 0.5f, 0.5f, 1.0f),
+                              glm::vec4(1.0f), 32.0f};
+    (*properties.get())[0] = props;
   }
   /**
    * @brief Set the Texture2D of the Material.
