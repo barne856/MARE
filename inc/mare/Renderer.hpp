@@ -605,7 +605,8 @@ public:
    * @brief Set a Framebuffer that is different from the default Framebuffer.
    * Implemented by the Rendering API.
    * @details Can be used to render into instead of the default Framebuffer.
-   * @param framebuffer The Framebuffer to set.
+   * @param framebuffer The Framebuffer to set. If nullptr, the default
+   * Framebuffer is set.
    */
   virtual void api_set_framebuffer(Framebuffer *framebuffer) = 0;
   /**

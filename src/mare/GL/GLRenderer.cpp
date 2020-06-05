@@ -4,11 +4,11 @@
 #include "mare/GL/GLShader.hpp"
 
 // MARE
+#include "mare/Components/Widget.hpp"
 #include "mare/Entity.hpp"
 #include "mare/Layer.hpp"
 #include "mare/Meshes.hpp"
 #include "mare/Scene.hpp"
-#include "mare/Components/Widget.hpp"
 
 // Standard Library
 #include <iostream>
@@ -177,117 +177,6 @@ void GLRenderer::start_renderer() {
     }
     info.current_time = time;
     glfwPollEvents();
-    // reset just released to false after callbacks
-    input.LEFT_MOUSE_JUST_RELEASED = false;
-    input.MIDDLE_MOUSE_JUST_RELEASED = false;
-    input.RIGHT_MOUSE_JUST_RELEASED = false;
-    input.LEFT_MOUSE_JUST_PRESSED = false;
-    input.MIDDLE_MOUSE_JUST_PRESSED = false;
-    input.RIGHT_MOUSE_JUST_PRESSED = false;
-    input.SPACE_JUST_RELEASED = false;
-    input.APOSTROPHE_JUST_RELEASED = false;
-    input.COMMA_JUST_RELEASED = false;
-    input.MINUS_JUST_RELEASED = false;
-    input.PERIOD_JUST_RELEASED = false;
-    input.FORWARD_SLASH_JUST_RELEASED = false;
-    input.ZERO_JUST_RELEASED = false;
-    input.ONE_JUST_RELEASED = false;
-    input.TWO_JUST_RELEASED = false;
-    input.THREE_JUST_RELEASED = false;
-    input.FOUR_JUST_RELEASED = false;
-    input.FIVE_JUST_RELEASED = false;
-    input.SIX_JUST_RELEASED = false;
-    input.SEVEN_JUST_RELEASED = false;
-    input.EIGHT_JUST_RELEASED = false;
-    input.NINE_JUST_RELEASED = false;
-    input.SEMICOLON_JUST_RELEASED = false;
-    input.EQUAL_JUST_RELEASED = false;
-    input.A_JUST_RELEASED = false;
-    input.B_JUST_RELEASED = false;
-    input.C_JUST_RELEASED = false;
-    input.D_JUST_RELEASED = false;
-    input.E_JUST_RELEASED = false;
-    input.F_JUST_RELEASED = false;
-    input.G_JUST_RELEASED = false;
-    input.H_JUST_RELEASED = false;
-    input.I_JUST_RELEASED = false;
-    input.J_JUST_RELEASED = false;
-    input.K_JUST_RELEASED = false;
-    input.L_JUST_RELEASED = false;
-    input.M_JUST_RELEASED = false;
-    input.N_JUST_RELEASED = false;
-    input.O_JUST_RELEASED = false;
-    input.P_JUST_RELEASED = false;
-    input.Q_JUST_RELEASED = false;
-    input.R_JUST_RELEASED = false;
-    input.S_JUST_RELEASED = false;
-    input.T_JUST_RELEASED = false;
-    input.U_JUST_RELEASED = false;
-    input.V_JUST_RELEASED = false;
-    input.W_JUST_RELEASED = false;
-    input.X_JUST_RELEASED = false;
-    input.Y_JUST_RELEASED = false;
-    input.Z_JUST_RELEASED = false;
-    input.LEFT_BRACKET_JUST_RELEASED = false;
-    input.RIGHT_BRACKET_JUST_RELEASED = false;
-    input.GRAVE_ACCENT_JUST_RELEASED = false;
-    input.ESCAPE_JUST_RELEASED = false;
-    input.ENTER_JUST_RELEASED = false;
-    input.TAB_JUST_RELEASED = false;
-    input.BACKSPACE_JUST_RELEASED = false;
-    input.INSERT_JUST_RELEASED = false;
-    input.DELETE_JUST_RELEASED = false;
-    input.RIGHT_JUST_RELEASED = false;
-    input.LEFT_JUST_RELEASED = false;
-    input.UP_JUST_RELEASED = false;
-    input.DOWN_JUST_RELEASED = false;
-    input.PAGE_UP_JUST_RELEASED = false;
-    input.PAGE_DOWN_JUST_RELEASED = false;
-    input.HOME_JUST_RELEASED = false;
-    input.END_JUST_RELEASED = false;
-    input.CAPS_LOCK_JUST_RELEASED = false;
-    input.SCROLL_LOCK_JUST_RELEASED = false;
-    input.NUM_LOCK_JUST_RELEASED = false;
-    input.PRINT_SCREEN_JUST_RELEASED = false;
-    input.PAUSE_JUST_RELEASED = false;
-    input.F1_JUST_RELEASED = false;
-    input.F2_JUST_RELEASED = false;
-    input.F3_JUST_RELEASED = false;
-    input.F4_JUST_RELEASED = false;
-    input.F5_JUST_RELEASED = false;
-    input.F6_JUST_RELEASED = false;
-    input.F7_JUST_RELEASED = false;
-    input.F8_JUST_RELEASED = false;
-    input.F9_JUST_RELEASED = false;
-    input.F10_JUST_RELEASED = false;
-    input.F11_JUST_RELEASED = false;
-    input.F12_JUST_RELEASED = false;
-    input.KEY_PAD_0_JUST_RELEASED = false;
-    input.KEY_PAD_1_JUST_RELEASED = false;
-    input.KEY_PAD_2_JUST_RELEASED = false;
-    input.KEY_PAD_3_JUST_RELEASED = false;
-    input.KEY_PAD_4_JUST_RELEASED = false;
-    input.KEY_PAD_5_JUST_RELEASED = false;
-    input.KEY_PAD_6_JUST_RELEASED = false;
-    input.KEY_PAD_7_JUST_RELEASED = false;
-    input.KEY_PAD_8_JUST_RELEASED = false;
-    input.KEY_PAD_9_JUST_RELEASED = false;
-    input.KEY_PAD_DECIMAL_JUST_RELEASED = false;
-    input.KEY_PAD_DIVIDE_JUST_RELEASED = false;
-    input.KEY_PAD_MULTIPLY_JUST_RELEASED = false;
-    input.KEY_PAD_SUBTRACT_JUST_RELEASED = false;
-    input.KEY_PAD_ADD_JUST_RELEASED = false;
-    input.KEY_PAD_ENTER_JUST_RELEASED = false;
-    input.KEY_PAD_EQUAL_JUST_RELEASED = false;
-    input.LEFT_SHIFT_JUST_RELEASED = false;
-    input.LEFT_CONTROL_JUST_RELEASED = false;
-    input.LEFT_ALT_JUST_RELEASED = false;
-    input.LEFT_SUPER_JUST_RELEASED = false;
-    input.RIGHT_SHIFT_JUST_RELEASED = false;
-    input.RIGHT_CONTROL_JUST_RELEASED = false;
-    input.RIGHT_ALT_JUST_RELEASED = false;
-    input.RIGHT_SUPER_JUST_RELEASED = false;
-    input.MENU_JUST_RELEASED = false;
     glfwSwapBuffers(window);
   } while (running && !glfwWindowShouldClose(window));
   shutdown();
@@ -2725,7 +2614,7 @@ void GLRenderer::glfw_onKey(GLFWwindow *window, int key, int scancode,
              controls_it != controls_systems.rend(); controls_it++) {
           handled = (*controls_it)->on_key(input, entity);
           if (handled) {
-            return;
+            goto end;
           }
         }
       }
@@ -2735,7 +2624,7 @@ void GLRenderer::glfw_onKey(GLFWwindow *window, int key, int scancode,
            controls_it != controls_systems.rend(); controls_it++) {
         handled = (*controls_it)->on_key(input, layer);
         if (handled) {
-          return;
+          goto end;
         }
       }
     }
@@ -2750,7 +2639,7 @@ void GLRenderer::glfw_onKey(GLFWwindow *window, int key, int scancode,
            controls_it != controls_systems.rend(); controls_it++) {
         handled = (*controls_it)->on_key(input, entity);
         if (handled) {
-          return;
+          goto end;
         }
       }
     }
@@ -2760,10 +2649,116 @@ void GLRenderer::glfw_onKey(GLFWwindow *window, int key, int scancode,
          controls_it != controls_systems.rend(); controls_it++) {
       handled = (*controls_it)->on_key(input, info.scene);
       if (handled) {
-        return;
+        goto end;
       }
     }
   }
+  // reset just released to false after callbacks
+  end:
+  input.SPACE_JUST_RELEASED = false;
+  input.APOSTROPHE_JUST_RELEASED = false;
+  input.COMMA_JUST_RELEASED = false;
+  input.MINUS_JUST_RELEASED = false;
+  input.PERIOD_JUST_RELEASED = false;
+  input.FORWARD_SLASH_JUST_RELEASED = false;
+  input.ZERO_JUST_RELEASED = false;
+  input.ONE_JUST_RELEASED = false;
+  input.TWO_JUST_RELEASED = false;
+  input.THREE_JUST_RELEASED = false;
+  input.FOUR_JUST_RELEASED = false;
+  input.FIVE_JUST_RELEASED = false;
+  input.SIX_JUST_RELEASED = false;
+  input.SEVEN_JUST_RELEASED = false;
+  input.EIGHT_JUST_RELEASED = false;
+  input.NINE_JUST_RELEASED = false;
+  input.SEMICOLON_JUST_RELEASED = false;
+  input.EQUAL_JUST_RELEASED = false;
+  input.A_JUST_RELEASED = false;
+  input.B_JUST_RELEASED = false;
+  input.C_JUST_RELEASED = false;
+  input.D_JUST_RELEASED = false;
+  input.E_JUST_RELEASED = false;
+  input.F_JUST_RELEASED = false;
+  input.G_JUST_RELEASED = false;
+  input.H_JUST_RELEASED = false;
+  input.I_JUST_RELEASED = false;
+  input.J_JUST_RELEASED = false;
+  input.K_JUST_RELEASED = false;
+  input.L_JUST_RELEASED = false;
+  input.M_JUST_RELEASED = false;
+  input.N_JUST_RELEASED = false;
+  input.O_JUST_RELEASED = false;
+  input.P_JUST_RELEASED = false;
+  input.Q_JUST_RELEASED = false;
+  input.R_JUST_RELEASED = false;
+  input.S_JUST_RELEASED = false;
+  input.T_JUST_RELEASED = false;
+  input.U_JUST_RELEASED = false;
+  input.V_JUST_RELEASED = false;
+  input.W_JUST_RELEASED = false;
+  input.X_JUST_RELEASED = false;
+  input.Y_JUST_RELEASED = false;
+  input.Z_JUST_RELEASED = false;
+  input.LEFT_BRACKET_JUST_RELEASED = false;
+  input.RIGHT_BRACKET_JUST_RELEASED = false;
+  input.GRAVE_ACCENT_JUST_RELEASED = false;
+  input.ESCAPE_JUST_RELEASED = false;
+  input.ENTER_JUST_RELEASED = false;
+  input.TAB_JUST_RELEASED = false;
+  input.BACKSPACE_JUST_RELEASED = false;
+  input.INSERT_JUST_RELEASED = false;
+  input.DELETE_JUST_RELEASED = false;
+  input.RIGHT_JUST_RELEASED = false;
+  input.LEFT_JUST_RELEASED = false;
+  input.UP_JUST_RELEASED = false;
+  input.DOWN_JUST_RELEASED = false;
+  input.PAGE_UP_JUST_RELEASED = false;
+  input.PAGE_DOWN_JUST_RELEASED = false;
+  input.HOME_JUST_RELEASED = false;
+  input.END_JUST_RELEASED = false;
+  input.CAPS_LOCK_JUST_RELEASED = false;
+  input.SCROLL_LOCK_JUST_RELEASED = false;
+  input.NUM_LOCK_JUST_RELEASED = false;
+  input.PRINT_SCREEN_JUST_RELEASED = false;
+  input.PAUSE_JUST_RELEASED = false;
+  input.F1_JUST_RELEASED = false;
+  input.F2_JUST_RELEASED = false;
+  input.F3_JUST_RELEASED = false;
+  input.F4_JUST_RELEASED = false;
+  input.F5_JUST_RELEASED = false;
+  input.F6_JUST_RELEASED = false;
+  input.F7_JUST_RELEASED = false;
+  input.F8_JUST_RELEASED = false;
+  input.F9_JUST_RELEASED = false;
+  input.F10_JUST_RELEASED = false;
+  input.F11_JUST_RELEASED = false;
+  input.F12_JUST_RELEASED = false;
+  input.KEY_PAD_0_JUST_RELEASED = false;
+  input.KEY_PAD_1_JUST_RELEASED = false;
+  input.KEY_PAD_2_JUST_RELEASED = false;
+  input.KEY_PAD_3_JUST_RELEASED = false;
+  input.KEY_PAD_4_JUST_RELEASED = false;
+  input.KEY_PAD_5_JUST_RELEASED = false;
+  input.KEY_PAD_6_JUST_RELEASED = false;
+  input.KEY_PAD_7_JUST_RELEASED = false;
+  input.KEY_PAD_8_JUST_RELEASED = false;
+  input.KEY_PAD_9_JUST_RELEASED = false;
+  input.KEY_PAD_DECIMAL_JUST_RELEASED = false;
+  input.KEY_PAD_DIVIDE_JUST_RELEASED = false;
+  input.KEY_PAD_MULTIPLY_JUST_RELEASED = false;
+  input.KEY_PAD_SUBTRACT_JUST_RELEASED = false;
+  input.KEY_PAD_ADD_JUST_RELEASED = false;
+  input.KEY_PAD_ENTER_JUST_RELEASED = false;
+  input.KEY_PAD_EQUAL_JUST_RELEASED = false;
+  input.LEFT_SHIFT_JUST_RELEASED = false;
+  input.LEFT_CONTROL_JUST_RELEASED = false;
+  input.LEFT_ALT_JUST_RELEASED = false;
+  input.LEFT_SUPER_JUST_RELEASED = false;
+  input.RIGHT_SHIFT_JUST_RELEASED = false;
+  input.RIGHT_CONTROL_JUST_RELEASED = false;
+  input.RIGHT_ALT_JUST_RELEASED = false;
+  input.RIGHT_SUPER_JUST_RELEASED = false;
+  input.MENU_JUST_RELEASED = false;
 }
 
 void GLRenderer::glfw_onMouseButton(GLFWwindow *window, int button, int action,
@@ -2843,7 +2838,7 @@ void GLRenderer::glfw_onMouseButton(GLFWwindow *window, int button, int action,
              controls_it != controls_systems.rend(); controls_it++) {
           handled = (*controls_it)->on_mouse_button(input, entity);
           if (handled) {
-            return;
+            goto end;
           }
         }
       }
@@ -2853,7 +2848,7 @@ void GLRenderer::glfw_onMouseButton(GLFWwindow *window, int button, int action,
            controls_it != controls_systems.rend(); controls_it++) {
         handled = (*controls_it)->on_mouse_button(input, layer);
         if (handled) {
-          return;
+          goto end;
         }
       }
     }
@@ -2869,7 +2864,7 @@ void GLRenderer::glfw_onMouseButton(GLFWwindow *window, int button, int action,
            controls_it != controls_systems.rend(); controls_it++) {
         handled = (*controls_it)->on_mouse_button(input, entity);
         if (handled) {
-          return;
+          goto end;
         }
       }
     }
@@ -2879,10 +2874,17 @@ void GLRenderer::glfw_onMouseButton(GLFWwindow *window, int button, int action,
          controls_it != controls_systems.rend(); controls_it++) {
       handled = (*controls_it)->on_mouse_button(input, info.scene);
       if (handled) {
-        return;
+        goto end;
       }
     }
   }
+  end:
+  input.LEFT_MOUSE_JUST_RELEASED = false;
+  input.MIDDLE_MOUSE_JUST_RELEASED = false;
+  input.RIGHT_MOUSE_JUST_RELEASED = false;
+  input.LEFT_MOUSE_JUST_PRESSED = false;
+  input.MIDDLE_MOUSE_JUST_PRESSED = false;
+  input.RIGHT_MOUSE_JUST_PRESSED = false;
 }
 
 void GLRenderer::glfw_onMouseMove(GLFWwindow *window, double x, double y) {

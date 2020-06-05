@@ -3,6 +3,7 @@
 
 // MARE
 #include "mare/Assets/Materials/BasicMaterial.hpp"
+#include "mare/Assets/Materials/VertexColorMaterial.hpp"
 #include "mare/Assets/Meshes/CircleMesh.hpp"
 #include "mare/Assets/Meshes/QuadrangleMesh.hpp"
 #include "mare/Components/RenderPack.hpp"
@@ -18,6 +19,61 @@ namespace mare {
 // forward declare Slider components
 class SliderRenderer;
 class SliderControls;
+
+class KnobShadowMesh : public SimpleMesh {
+public:
+  KnobShadowMesh(int sides, float outer_radius, float inner_radius) {
+    set_draw_method(DrawMethod::TRIANGLES);
+    // Ring---------------------------------------------
+    std::vector<float> ring_verts;
+    std::vector<float> ring_colors;
+    std::vector<uint32_t> ring_indes;
+    float thickness = outer_radius - inner_radius;
+    float angle = 0.0f;
+    float dtheta = 2.0f * math::PI / static_cast<float>(sides);
+    for (int i = 0; i < sides + 1; i++) {
+      ring_verts.push_back(inner_radius * cos(angle));
+      ring_verts.push_back(inner_radius * sin(angle));
+      glm::vec4 color = {0.0f, 0.0f, 0.0f, 1.0f};
+      ring_colors.push_back(color.r);
+      ring_colors.push_back(color.g);
+      ring_colors.push_back(color.b);
+      ring_colors.push_back(color.a);
+      angle += dtheta;
+    }
+    angle = 0.0f;
+    for (int i = 0; i < sides + 1; i++) {
+      ring_verts.push_back((inner_radius+ thickness) * cos(angle));
+      ring_verts.push_back((inner_radius + thickness) * sin(angle));
+      glm::vec4 color = {0.0f, 0.0f, 0.0f, 0.0f};
+      ring_colors.push_back(color.r);
+      ring_colors.push_back(color.g);
+      ring_colors.push_back(color.b);
+      ring_colors.push_back(color.a);
+      angle += dtheta;
+    }
+    for (int i = 0; i < sides; i++) {
+      ring_indes.push_back(i);
+      ring_indes.push_back(sides + i + 1);
+      ring_indes.push_back(i + 1);
+      ring_indes.push_back(i + 1);
+      ring_indes.push_back(sides + i + 1);
+      ring_indes.push_back(sides + i + 2);
+    }
+    Referenced<Buffer<float>> ring_vert_buffer = Renderer::gen_buffer<float>(
+        &ring_verts[0], sizeof(float) * ring_verts.size());
+    Referenced<Buffer<float>> ring_color_buffer = Renderer::gen_buffer<float>(
+        &ring_colors[0], sizeof(float) * ring_colors.size());
+    Referenced<Buffer<uint32_t>> ring_index_buffer =
+        Renderer::gen_buffer<uint32_t>(&ring_indes[0],
+                                       sizeof(float) * ring_indes.size());
+    ring_vert_buffer->set_format({{AttributeType::POSITION_2D, "position"}});
+    ring_color_buffer->set_format({{AttributeType::COLOR, "color"}});
+    add_geometry_buffer(ring_vert_buffer);
+    add_geometry_buffer(ring_color_buffer);
+    set_index_buffer(ring_index_buffer);
+  }
+};
 
 /**
  * @brief A simple UI element that provides a slider bar and contains a `float`
@@ -37,12 +93,14 @@ public:
     fill_mesh = gen_ref<QuadrangleMesh>();
     bar_mesh = gen_ref<QuadrangleMesh>();
     knob_mesh = gen_ref<CircleMesh>(32, 0.5f);
+    knob_shadow_mesh = gen_ref<KnobShadowMesh>(32, 0.6f, 0.24f);
     left_circle_mesh = gen_ref<CircleMesh>(32, 0.5f);
     right_circle_mesh = gen_ref<CircleMesh>(32, 0.5f);
 
     slider_material = gen_ref<BasicMaterial>();
     fill_material = gen_ref<BasicMaterial>();
     knob_material = gen_ref<BasicMaterial>();
+    knob_shadow_material = gen_ref<VertexColorMaterial>();
     slider_material->set_color(slider_color);
     fill_material->set_color(fill_color);
     knob_material->set_color(knob_color);
@@ -54,11 +112,13 @@ public:
     push_packet({right_circle_mesh, slider_material});
     push_packet({fill_mesh, fill_material});
     push_packet({bar_mesh, slider_material});
+    push_packet({knob_shadow_mesh, knob_shadow_material});
     push_packet({knob_mesh, knob_material});
 
     // push systems
     gen_system<PacketRenderer>();
     gen_system<SliderControls>();
+    gen_system<SliderRenderer>();
   }
   void rescale() override {
     float height = bounds.top() - bounds.bottom();
@@ -83,6 +143,9 @@ public:
     bar_mesh->set_position(
         {right - 0.5f * (1.0f - value) * (right - left) + center.x, center.y,
          0.0f});
+
+    knob_shadow_mesh->set_position(knob_mesh->get_position());
+    knob_shadow_mesh->set_scale(knob_mesh->get_scale());
   }
   /**
    * @brief Convert the horizontal coordinate in model space to a value for the
@@ -100,6 +163,7 @@ public:
   Referenced<QuadrangleMesh> fill_mesh;
   Referenced<QuadrangleMesh> bar_mesh;
   Referenced<CircleMesh> knob_mesh;
+  Referenced<KnobShadowMesh> knob_shadow_mesh;
   Referenced<CircleMesh> left_circle_mesh;
   Referenced<CircleMesh> right_circle_mesh;
   Referenced<BasicMaterial>
@@ -108,12 +172,29 @@ public:
   Referenced<BasicMaterial>
       fill_material; /**< The material used to render the slider background.*/
   Referenced<BasicMaterial> knob_material;
+  Referenced<VertexColorMaterial> knob_shadow_material;
   glm::vec4 slider_color{
       1.0f, 1.0f, 1.0f,
       1.0f}; /**< The color of the bacground and knob for the slider.*/
   glm::vec4 fill_color{0.25f, 0.3f, 0.9f,
                        1.0f}; /**< The color of the fill for the slider.*/
   glm::vec4 knob_color{0.77f, 0.77f, 0.85f, 1.0f};
+};
+
+class SliderRenderer : public RenderSystem<Slider> {
+public:
+  void render(float dt, Camera *camera, Slider *slider) {
+    if (slider->is_focused()) {
+      a = glm::clamp(a + speed * dt, 0.0f, 1.0f);
+    } else {
+      a = glm::clamp(a - speed * dt, 0.0f, 1.0f);
+    }
+
+    glm::vec4 knob_color = glm::mix(slider->knob_color, slider->fill_color, a);
+    slider->knob_material->set_color(knob_color);
+  }
+  float a = 0.0f;
+  float speed = 10.0f;
 };
 
 /**

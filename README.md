@@ -363,14 +363,14 @@ Mare allows the user to use general purpose compute programs created from glsl S
 
 ## TODO List
 ### Version 2.0.0
-* A font loader to be added to enable the use of bitmap fonts.
-* Text billboards for CharMesh and bitmap fonts.
+* Text billboards for CharMesh
 * PhongMaterial to have arrays for spotlight, point light, and directional lights, as well as shadowmaping for directional, point, and spot lights.
 * ShadowMap Component to have arrays for each type of light and depth buffers/light views for each
 * ShadowMap Camera view creation to be automated.
 * Raypicking of Entities in a Scene.
 * Cylinder, Cone, and Tube Meshes to have an option for flat shading normals or smooth shading normals.
 * More Materials to be added (BasicColor, BasicTexture, Depth, Phong, Toon, Shadow).
+* Updated Documentation
 
 ### Version 3.0.0
 * InstancedMeshes to have a Transform Buffer not a glm::mat4 Buffer and Transform Component to only contain a single glm::mat4 with functions to get and set parts of it.
@@ -380,6 +380,7 @@ Mare allows the user to use general purpose compute programs created from glsl S
 * Teapot Primative Mesh from bezier curves and surfaces to be added.
 * Cloth Physics PhysicsSystem
 * Metaballs Entity
+* A font loader to be added to enable the use of bitmap fonts.
 * Loader for models to be added.
 * Loader for sound to be added. Sound Components and Systems to be added.
 * Loaders for animations to be added. Animation Components and Systems to be added.

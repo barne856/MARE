@@ -6,6 +6,7 @@
 #include <memory>
 #include <variant>
 #include <vector>
+#include <string>
 
 // External Libraries
 #include "glm.hpp"

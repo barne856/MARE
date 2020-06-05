@@ -3,11 +3,13 @@
 
 // MARE
 #include "mare/Assets/Materials/BasicMaterial.hpp"
+#include "mare/Assets/Materials/VertexColorMaterial.hpp"
 #include "mare/Assets/Meshes/CircleMesh.hpp"
 #include "mare/Assets/Meshes/QuadrangleMesh.hpp"
 #include "mare/Components/RenderPack.hpp"
 #include "mare/Components/Rigidbody.hpp"
 #include "mare/Components/Widget.hpp"
+#include "mare/Entities/UI/Slider.hpp"
 #include "mare/Entity.hpp"
 #include "mare/Meshes.hpp"
 #include "mare/Systems/Rendering/PacketRenderer.hpp"
@@ -33,11 +35,13 @@ public:
 
     left_circle_mesh = gen_ref<CircleMesh>(32, 0.5f);
     right_circle_mesh = gen_ref<CircleMesh>(32, 0.5f);
-    knob_mesh = gen_ref<CircleMesh>(32, 0.4f);
+    knob_mesh = gen_ref<CircleMesh>(32, 0.35f);
+    knob_shadow_mesh = gen_ref<KnobShadowMesh>(32, 0.45f, 0.15f);
     quad_mesh = gen_ref<QuadrangleMesh>();
 
     switch_material = gen_ref<BasicMaterial>();
     knob_material = gen_ref<BasicMaterial>();
+    knob_shadow_material = gen_ref<VertexColorMaterial>();
     switch_material->set_color(switch_off_color);
     knob_material->set_color(knob_color);
 
@@ -46,6 +50,7 @@ public:
     push_packet({left_circle_mesh, switch_material});
     push_packet({right_circle_mesh, switch_material});
     push_packet({quad_mesh, switch_material});
+    push_packet({knob_shadow_mesh, knob_shadow_material});
     push_packet({knob_mesh, knob_material});
 
     gen_system<PacketRenderer>();
@@ -72,15 +77,20 @@ public:
     knob_mesh->translate({center.x, center.y, 0.0f});
     quad_mesh->translate({center.x, center.y, 0.0f});
 
+    knob_shadow_mesh->set_scale(knob_mesh->get_scale());
+    knob_shadow_mesh->set_position(knob_mesh->get_position());
+
     off_position = glm::vec2(left + center.x, center.y);
     on_position = glm::vec2(right + center.x, center.y);
   }
   Referenced<CircleMesh> left_circle_mesh;
   Referenced<CircleMesh> right_circle_mesh;
   Referenced<CircleMesh> knob_mesh;
+  Referenced<KnobShadowMesh> knob_shadow_mesh;
   Referenced<QuadrangleMesh> quad_mesh;
   Referenced<BasicMaterial> switch_material;
   Referenced<BasicMaterial> knob_material;
+  Referenced<VertexColorMaterial> knob_shadow_material;
   glm::vec4 switch_off_color{1.0f, 1.0f, 1.0f, 1.0f};
   glm::vec4 switch_on_color{0.25f, 0.3f, 0.9f, 1.0f};
   glm::vec4 knob_color{0.77f, 0.77f, 0.85f, 1.0f};
@@ -109,7 +119,7 @@ public:
       glm::vec3 force = k * (lerp_to - position) - c * sw->linear_velocity;
       sw->linear_velocity += force * dt;
       sw->knob_mesh->translate(sw->linear_velocity * dt);
-
+      position = sw->knob_mesh->get_position();
       float dist = length(lerp_to - position);
       // if knob is within the tolerance distance, span to the lerp position.
       if (dist < tol) {
@@ -120,8 +130,11 @@ public:
         sw->knob_mesh->set_position(lerp_to);
       }
 
+      sw->knob_shadow_mesh->set_position(sw->knob_mesh->get_position());
+
       // lerp switch color
-      float a = dist / length(sw->on_position - sw->off_position);
+      float a = glm::clamp(dist / length(sw->on_position - sw->off_position),
+                           0.0f, 1.0f);
       a = sw->get_value() ? a : 1.0f - a;
       sw->switch_material->set_color(
           glm::mix(sw->switch_on_color, sw->switch_off_color, a));

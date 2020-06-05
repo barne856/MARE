@@ -344,7 +344,7 @@ private:
   void push_char(unsigned int column, unsigned int row, char letter) {
     std::vector<glm::mat4> transforms{};
     glm::vec3 offset = glm::vec3(0.5f * static_cast<float>(column),
-                                 static_cast<float>(row), 0.0f);
+                                 -static_cast<float>(row), 0.0f);
     std::vector<unsigned int> indices = ASCII_font[letter];
     for (int i = 0; i < indices.size() / 4; i++) {
 

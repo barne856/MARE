@@ -43,7 +43,20 @@ public:
           get_model() * glm::vec4(bounds.right(), bounds.top(), 0.0f, 1.0f));
       glm::vec2 v4 = glm::vec2(
           get_model() * glm::vec4(bounds.left(), bounds.top(), 0.0f, 1.0f));
-      glm::vec2 v5 = glm::vec2(Renderer::raycast(base_layer));
+      glm::vec2 v5{};
+      if (base_layer->get_type() == ProjectionType::ORTHOGRAPHIC) {
+        float x = base_layer->get_ortho_scale() * base_layer->get_aspect() *
+                  (2.0f * (float)Renderer::get_input().mouse_pos.x /
+                       (float)(Renderer::get_info().window_width) -
+                   1.0f);
+        float y = base_layer->get_ortho_scale() *
+                  (-2.0f * (float)Renderer::get_input().mouse_pos.y /
+                       (float)(Renderer::get_info().window_height) +
+                   1.0f);
+        v5 = {x, y};
+      } else {
+        v5 = glm::vec2(Renderer::raycast(base_layer));
+      }
       float bounded_area = math::shoelace({v1, v2, v3, v4});
       if (bounded_area < math::shoelace({v1, v2, v3, v4, v5})) {
         return false;
@@ -72,6 +85,18 @@ public:
    */
   glm::vec2 get_model_coords() {
     if (base_layer) {
+      if (base_layer->get_type() == ProjectionType::ORTHOGRAPHIC) {
+        float x = base_layer->get_ortho_scale() * base_layer->get_aspect() *
+                  (2.0f * (float)Renderer::get_input().mouse_pos.x /
+                       (float)(Renderer::get_info().window_width) -
+                   1.0f);
+        float y = base_layer->get_ortho_scale() *
+                  (-2.0f * (float)Renderer::get_input().mouse_pos.y /
+                       (float)(Renderer::get_info().window_height) +
+                   1.0f);
+        return glm::vec2(glm::inverse(get_model()) *
+                         glm::vec4(x, y, 0.0f, 1.0f));
+      }
       return glm::vec2(glm::inverse(get_model()) *
                        glm::vec4(Renderer::raycast(base_layer), 1.0f));
     }

@@ -172,22 +172,24 @@ public:
    *
    */
   void rescale() override {
-    float text_scale =
-        (bounds.top() - bounds.bottom() - 2.0f * margin_thickness) /
-        static_cast<float>(max_lines);
-    max_chars_per_line = floor(
-        2.0f * (bounds.right() - bounds.left() - 2.0f * margin_thickness) /
-        text_scale);
-    float box_width =
-        (bounds.right() - bounds.left()) - 2.0f * boarder_thickness;
-    float box_height =
-        (bounds.top() - bounds.bottom()) - 2.0f * boarder_thickness;
-    float highlight_width = bounds.right() - bounds.left();
-    float highlight_height = bounds.top() - bounds.bottom();
-    float boarder_width =
-        (bounds.right() - bounds.left()) + 2.0f * boarder_thickness;
-    float boarder_height =
-        (bounds.top() - bounds.bottom()) + 2.0f * boarder_thickness;
+    float text_scale = (bounds.top() - bounds.bottom() -
+                        2.0f * margin_thickness - 2.0f * boarder_thickness) /
+                       static_cast<float>(max_lines);
+    max_chars_per_line =
+        floor(2.0f *
+              (bounds.right() - bounds.left() - 2.0f * margin_thickness -
+               2.0f * boarder_thickness) /
+              text_scale);
+    float box_width = (bounds.right() - bounds.left()) -
+                      4.0f * boarder_thickness;
+    float box_height = (bounds.top() - bounds.bottom()) -
+                       4.0f * boarder_thickness;
+    float highlight_width =
+        bounds.right() - bounds.left() - 2.0f * boarder_thickness;
+    float highlight_height =
+        bounds.top() - bounds.bottom() - 2.0f * boarder_thickness;
+    float boarder_width = (bounds.right() - bounds.left());
+    float boarder_height = (bounds.top() - bounds.bottom());
     glm::vec2 box_center = glm::vec2((bounds.left() + bounds.right()) / 2.0f,
                                      (bounds.top() + bounds.bottom()) / 2.0f);
     box->set_scale({box_width, box_height, 1.0f});
@@ -197,8 +199,9 @@ public:
     box->set_position({box_center.x, box_center.y, 0.0f});
     boarder->set_position({box_center.x, box_center.y, 0.0f});
     highlight->set_position({box_center.x, box_center.y, 0.0f});
-    text->set_position({bounds.left() + 2.0f * margin_thickness,
-                        bounds.top() - margin_thickness, 0.0f});
+    text->set_position({bounds.left() + margin_thickness + 2.0f*boarder_thickness,
+                        bounds.top() - margin_thickness - boarder_thickness,
+                        0.0f});
   }
   void on_focus() override {
     highlight_material->set_color({0.25f, 0.3f, 0.9f, 1.0f});
