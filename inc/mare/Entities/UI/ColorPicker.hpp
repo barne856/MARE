@@ -378,9 +378,9 @@ public:
                              0.5f * sin(math::TAU / 3.0f), 0.0f, 1.0f);
     glm::vec4 v3 = glm::vec4(0.5f * cos(2.0f * math::TAU / 3.0f),
                              0.5f * sin(2.0f * math::TAU / 3.0f), 0.0f, 1.0f);
-    v1 = get_meshes<Mesh>()[1]->get_rotation() * v1;
-    v2 = get_meshes<Mesh>()[1]->get_rotation() * v2;
-    v3 = get_meshes<Mesh>()[1]->get_rotation() * v3;
+    v1 = get_meshes<Mesh>()[1]->get_rotation_matrix() * v1;
+    v2 = get_meshes<Mesh>()[1]->get_rotation_matrix() * v2;
+    v3 = get_meshes<Mesh>()[1]->get_rotation_matrix() * v3;
     glm::vec2 picker_pos =
         math::clamp_point_to_triangle(v1, v2, v3, widget_coords);
     get_meshes<Mesh>()[2]->set_position(glm::vec3(picker_pos, 0.0f));
@@ -523,9 +523,9 @@ public:
     glm::vec4 v3 = scale * glm::vec4(0.5f * cos(2.0f * math::TAU / 3.0f),
                                      0.5f * sin(2.0f * math::TAU / 3.0f), 0.0f,
                                      1.0f / scale);
-    v1 = mesh->get_meshes<Mesh>()[1]->get_rotation() * v1;
-    v2 = mesh->get_meshes<Mesh>()[1]->get_rotation() * v2;
-    v3 = mesh->get_meshes<Mesh>()[1]->get_rotation() * v3;
+    v1 = mesh->get_meshes<Mesh>()[1]->get_rotation_matrix() * v1;
+    v2 = mesh->get_meshes<Mesh>()[1]->get_rotation_matrix() * v2;
+    v3 = mesh->get_meshes<Mesh>()[1]->get_rotation_matrix() * v3;
     return math::is_in_polygon(
         widget_coords,
         {glm::vec2(v1.x + x_offset + center.x, v1.y + center.y),

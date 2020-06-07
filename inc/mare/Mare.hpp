@@ -101,6 +101,14 @@ template <typename T, typename... Args> Referenced<T> gen_ref(Args... args) {
  *
  */
 namespace math {
+  /**
+   * @brief Calculate the angle in radians between two 3D vectors
+   * 
+   * @param v1 The first vector.
+   * @param v2 The second vector.
+   * @return The angle between the two vectors.
+   */
+float angle_between(glm::vec3 v1, glm::vec3 v2);
 /**
  * @brief The shoelace method for finding the area of a 2D polygon
  *

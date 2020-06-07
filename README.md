@@ -363,7 +363,6 @@ Mare allows the user to use general purpose compute programs created from glsl S
 
 ## TODO List
 ### Version 2.0.0
-* Text billboards for CharMesh
 * PhongMaterial to have arrays for spotlight, point light, and directional lights, as well as shadowmaping for directional, point, and spot lights.
 * ShadowMap Component to have arrays for each type of light and depth buffers/light views for each
 * ShadowMap Camera view creation to be automated.

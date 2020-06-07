@@ -45,7 +45,7 @@ class FlyControls : public ControlsSystem<Transform, Rigidbody> {
         x /= sqrtf(x * x + y * y);
         y /= sqrtf(x * x + y * y);
       }
-      glm::vec3 dir = transform->get_direction();
+      glm::vec3 dir = transform->get_forward_vector();
       glm::vec3 up = transform->get_up_vector();
       glm::vec3 right = glm::normalize(glm::cross(dir, up));
       glm::vec3 velocity = (dir * y + right * x) * speed;
@@ -59,7 +59,7 @@ class FlyControls : public ControlsSystem<Transform, Rigidbody> {
     float sensitivity = 300.0f;
     float dtheta = float(input.mouse_vel.y) / sensitivity;
     float dphi = -float(input.mouse_vel.x) / sensitivity;
-    glm::vec3 dir = transform->get_direction();
+    glm::vec3 dir = transform->get_forward_vector();
 
     float theta = acosf(dir.z);
     float phi = atan2f(dir.y, dir.x);
@@ -72,8 +72,7 @@ class FlyControls : public ControlsSystem<Transform, Rigidbody> {
     glm::vec3 right = glm::normalize(glm::cross(dir, {0.0f, 0.0f, 1.0f}));
     glm::vec3 up = glm::cross(right, dir);
 
-    transform->face_towards(dir);
-    transform->set_up_vector(up);
+    transform->face_towards(dir, {0.0f, 0.0f, 1.0f});
     return false;
   }
   bool on_mouse_button(const RendererInput &input, Transform *transform,

@@ -30,12 +30,12 @@ public:
         material->bind();
         glm::mat4 shadow_matrix = sc->scale_bias_matrix *
                                   sc->light_view->get_projection() *
-                                  sc->light_view->get_view();
+                                  sc->light_view->get_transformation_matrix();
         material->upload_mat4("shadow_matrix", shadow_matrix);
         material->upload_texture2D("depth_texture",
                                    sc->depth_buffer->depth_texture());
 
-        mesh->render(camera, material.get(), sc->get_model());
+        mesh->render(camera, material.get(), sc->get_transformation_matrix());
       }
     }
   }

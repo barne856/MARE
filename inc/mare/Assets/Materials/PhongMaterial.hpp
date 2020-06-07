@@ -51,11 +51,19 @@ public:
    *
    */
   void render() override {
-    (*light_props)[0] = spotlight->properties;
-    upload_texture2D("tex", texture_.get());
+    if (spotlight) {
+      (*light_props)[0] = spotlight->properties;
+      upload_uniform("light_properties", light_props.get());
+      upload_vec3("light_position", spotlight->get_position());
+    }
+    else
+    {
+      std::cerr << "ERROR: No light assigned to PhongMaterial!" << std::endl;
+    }
+    if (texture_) {
+      upload_texture2D("tex", texture_.get());
+    }
     upload_uniform("material_properties", properties.get());
-    upload_uniform("light_properties", light_props.get());
-    upload_vec3("light_position", spotlight->get_position());
   }
   /**
    * @brief Set the ambient color of the material.
@@ -63,8 +71,7 @@ public:
    * @param color The color to set.
    */
   void set_ambient_color(glm::vec4 color) {
-    phong_properties props = {color,
-                              glm::vec4(0.5f, 0.5f, 0.5f, 1.0f),
+    phong_properties props = {color, glm::vec4(0.5f, 0.5f, 0.5f, 1.0f),
                               glm::vec4(1.0f), 32.0f};
     (*properties.get())[0] = props;
   }

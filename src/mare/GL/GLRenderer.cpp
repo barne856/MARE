@@ -280,7 +280,7 @@ void GLRenderer::api_enable_blending(bool enable) {
 
 glm::vec3 GLRenderer::api_raycast(Camera *camera) {
   glm::mat4 inversed_camera =
-      glm::inverse(camera->get_projection() * camera->get_view());
+      glm::inverse(camera->get_projection() * camera->get_view_matrix());
   float x = 2.0f * (float)input.mouse_pos.x / (float)(info.window_width) - 1.0f;
   float y =
       -2.0f * (float)input.mouse_pos.y / (float)(info.window_height) + 1.0f;
@@ -296,7 +296,7 @@ glm::vec3 GLRenderer::api_raycast(Camera *camera) {
 
 glm::vec3 GLRenderer::api_raycast(Camera *camera, glm::ivec2 screen_coords) {
   glm::mat4 inversed_camera =
-      glm::inverse(camera->get_projection() * camera->get_view());
+      glm::inverse(camera->get_projection() * camera->get_view_matrix());
   float x = 2.0f * (float)screen_coords.x / (float)(info.window_width) - 1.0f;
   float y = -2.0f * (float)screen_coords.y / (float)(info.window_height) + 1.0f;
   float z = 0.0f;

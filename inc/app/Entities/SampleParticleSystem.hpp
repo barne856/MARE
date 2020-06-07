@@ -74,7 +74,7 @@ public:
     auto mesh = sample_particle_system->particles;
     auto material = sample_particle_system->particle_material;
     sample_particle_system->compute_program->barrier(BarrierType::STORAGE);
-    mesh->render(camera, material.get(), sample_particle_system->get_model());
+    mesh->render(camera, material.get(), sample_particle_system->get_transformation_matrix());
     Renderer::wireframe_mode(false);
   }
 };

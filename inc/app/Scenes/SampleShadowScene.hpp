@@ -39,7 +39,7 @@ public:
 
     // Orient Camera
     set_position(glm::vec3(0.0f, 0.0f, 1.0f));
-    face_towards(glm::vec3(0.0f, 0.2f, -1.0f));
+    face_towards(glm::vec3(0.0f, 0.2f, -1.0f), {0.0f, 0.0f, 1.0f});
 
     // generate and push entities onto the stack
     gen_entity<SampleEntity>(100, 200, 0.1f, 0.2f);
@@ -47,7 +47,7 @@ public:
     light_pos = glm::vec3(5.0f, 0.0f, 5.0f);
     light_center = glm::vec3(0.0f);
     light->set_position(light_pos);
-    light->look_at(light_center);
+    light->face_towards(light_center, {0.0f, 0.0f, 1.0f});
 
     // set material and shadowmap properties
     get_entity<SampleEntity>()
@@ -80,7 +80,7 @@ public:
     // time += delta_time;
     light_pos = glm::vec3(5.0f * cos(5.0f * angle), 5.0f * sin(time), 1.0f);
     light->set_position(light_pos);
-    light->look_at(light_center);
+    light->face_towards(light_center, {0.0f, 0.0f, 1.0f});
   }
 
   void on_exit() override {

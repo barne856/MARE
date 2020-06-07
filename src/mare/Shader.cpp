@@ -34,23 +34,23 @@ namespace mare
     void Material::upload_camera(Camera *camera, bool suppress_warnings)
     {
         shader_->upload_mat4("projection", camera->get_projection(), suppress_warnings);
-        shader_->upload_mat4("view", camera->get_view(), suppress_warnings);
+        shader_->upload_mat4("view", camera->get_view_matrix(), suppress_warnings);
     }
     void Material::upload_mesh_model_matrix(Mesh *mesh, bool suppress_warnings)
     {
-        shader_->upload_mat4("model", mesh->get_model(), suppress_warnings);
+        shader_->upload_mat4("model", mesh->get_transformation_matrix(), suppress_warnings);
     }
     void Material::upload_mesh_model_matrix(Mesh *mesh, glm::mat4 parent_model, bool suppress_warnings)
     {
-        shader_->upload_mat4("model", parent_model * mesh->get_model(), suppress_warnings);
+        shader_->upload_mat4("model", parent_model * mesh->get_transformation_matrix(), suppress_warnings);
     }
     void Material::upload_mesh_normal_matrix(Mesh *mesh, bool suppress_warnings)
     {
-        shader_->upload_mat3("normal_matrix", glm::mat3(mesh->get_normal()), suppress_warnings);
+        shader_->upload_mat3("normal_matrix", glm::mat3(mesh->get_normal_matrix()), suppress_warnings);
     }
     void Material::upload_mesh_normal_matrix(Mesh *mesh, glm::mat4 parent_model, bool suppress_warnings)
     {
-        shader_->upload_mat3("normal_matrix", glm::transpose(glm::inverse(glm::mat3(parent_model * (mesh->get_model())))), suppress_warnings);
+        shader_->upload_mat3("normal_matrix", glm::transpose(glm::inverse(glm::mat3(parent_model * (mesh->get_transformation_matrix())))), suppress_warnings);
     }
     void Material::upload_mesh_instance_matrices(Buffer<glm::mat4> *models, bool suppress_warnings)
     {

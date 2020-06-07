@@ -90,7 +90,7 @@ void CompositeMesh::render(Camera *camera, Material *material)
 {
     for (auto &mesh : meshes_)
     {
-        mesh->render(camera, material, get_model());
+        mesh->render(camera, material, get_transformation_matrix());
     }
 }
 
@@ -98,7 +98,7 @@ void CompositeMesh::render(Camera *camera, Material *material, glm::mat4 parent_
 {
     for (auto &mesh : meshes_)
     {
-        mesh->render(camera, material, parent_model * get_model());
+        mesh->render(camera, material, parent_model * get_transformation_matrix());
     }
 }
 
@@ -106,7 +106,7 @@ void CompositeMesh::render(Camera *camera, Material *material, glm::mat4 parent_
 {
     for (auto &mesh : meshes_)
     {
-        mesh->render(camera, material, parent_model * get_model(), instance_count, models);
+        mesh->render(camera, material, parent_model * get_transformation_matrix(), instance_count, models);
     }
 }
 
@@ -169,12 +169,12 @@ glm::mat4 InstancedMesh::operator[](unsigned int i) const
 
 void InstancedMesh::render(Camera *camera, Material *material)
 {
-    mesh_->render(camera, material, get_model(), instance_count_, instance_transforms_.get());
+    mesh_->render(camera, material, get_transformation_matrix(), instance_count_, instance_transforms_.get());
 }
 
 void InstancedMesh::render(Camera *camera, Material *material, glm::mat4 parent_model)
 {
-    mesh_->render(camera, material, parent_model * get_model(), instance_count_, instance_transforms_.get());
+    mesh_->render(camera, material, parent_model * get_transformation_matrix(), instance_count_, instance_transforms_.get());
 }
 
 void InstancedMesh::render(Camera *camera, Material *material, glm::mat4 parent_model, unsigned int instance_count, Buffer<glm::mat4> *models)

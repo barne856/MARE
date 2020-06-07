@@ -30,7 +30,7 @@ public:
     float y = r * sin(t);
     float z = r * sin(t);
     set_position(glm::vec3(x, y, z));
-    look_at(glm::vec3(0.0f));
+    face_towards(glm::vec3(0.0f), {0.0f, 0.0f, 1.0f});
 
     gen_layer<SampleUI>();
     get_layer<SampleUI>()->get_entity<Slider>()->set_value(0.0f);
@@ -56,7 +56,7 @@ public:
     float y = r * sin(t);
     float z = r * sin(t);
     set_position(glm::vec3(x, y, z));
-    look_at(glm::vec3(0.0f));
+    face_towards(glm::vec3(0.0f), {0.0f, 0.0f, 1.0f});
 
     // Set G
     get_entity<SampleParticleSystem>()->G =
