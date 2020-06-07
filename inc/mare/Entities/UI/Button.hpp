@@ -2,7 +2,7 @@
 #define BUTTON
 
 // MARE
-#include "mare/Assets/Materials/BasicMaterial.hpp"
+#include "mare/Assets/Materials/BasicColorMaterial.hpp"
 #include "mare/Assets/Meshes/CharMesh.hpp"
 #include "mare/Assets/Meshes/QuadrangleMesh.hpp"
 #include "mare/Components/RenderPack.hpp"
@@ -30,9 +30,9 @@ public:
     button_box = gen_ref<QuadrangleMesh>();
     button_boarder = gen_ref<QuadrangleMesh>();
     label_mesh = gen_ref<CharMesh>(label, 1.0f / 17.0f);
-    box_material = gen_ref<BasicMaterial>();
-    boarder_material = gen_ref<BasicMaterial>();
-    label_material = gen_ref<BasicMaterial>();
+    box_material = gen_ref<BasicColorMaterial>();
+    boarder_material = gen_ref<BasicColorMaterial>();
+    label_material = gen_ref<BasicColorMaterial>();
     box_material->set_color(box_color);
     boarder_material->set_color(boarder_color);
     label_material->set_color(label_color);
@@ -86,9 +86,9 @@ public:
   Referenced<QuadrangleMesh> button_box;
   Referenced<QuadrangleMesh> button_boarder;
   Referenced<CharMesh> label_mesh;
-  Referenced<BasicMaterial> box_material;
-  Referenced<BasicMaterial> boarder_material;
-  Referenced<BasicMaterial> label_material;
+  Referenced<BasicColorMaterial> box_material;
+  Referenced<BasicColorMaterial> boarder_material;
+  Referenced<BasicColorMaterial> label_material;
   glm::vec4 boarder_color{0.0f, 0.0f, 0.0f, 1.0f};
   glm::vec4 box_color{1.0f, 1.0f, 1.0f, 1.0f};
   glm::vec4 box_pushed_color{0.8f, 0.8f, 0.9f, 1.0f};

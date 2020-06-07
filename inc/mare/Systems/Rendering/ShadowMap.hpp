@@ -2,7 +2,7 @@
 #define SHADOWMAP
 
 // MARE
-#include "mare/Assets/Materials/BasicMaterial.hpp"
+#include "mare/Assets/Materials/BasicColorMaterial.hpp"
 #include "mare/Components/Shadow.hpp"
 #include "mare/Entities/Camera.hpp"
 #include "mare/Entities/Spotlight.hpp"
@@ -35,7 +35,7 @@ public:
     depth_buffer = Renderer::gen_framebuffer(
         oversample_ * Renderer::get_info().window_width,
         oversample_ * Renderer::get_info().window_height);
-    material = gen_scoped<BasicMaterial>();
+    material = gen_scoped<BasicColorMaterial>();
   }
   ~ShadowMap() {}
   void set_light(Referenced<Spotlight> light) { spotlight = light; }
@@ -79,7 +79,7 @@ public:
   }
   Referenced<Framebuffer> depth_buffer;
   Referenced<Spotlight> spotlight;
-  Scoped<BasicMaterial> material;
+  Scoped<BasicColorMaterial> material;
 
 private:
   int oversample_;

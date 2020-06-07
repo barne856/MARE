@@ -363,8 +363,8 @@ Mare allows the user to use general purpose compute programs created from glsl S
 
 ## TODO List
 ### Version 2.0.0
-* More Materials to be added (BasicColor, BasicTexture, Depth, Phong, Toon, Shadow).
-* PhongMaterial to have arrays for spotlight, point light, and directional lights, as well as shadowmaping for directional, point, and spot lights.
+* More Materials to be added (BasicColor, BasicTexture, Phong, Shadow).
+* PhongMaterial and ShadowMaterial to have arrays for spotlight, point light, and directional lights, as well as shadowmaping for directional, point, and spot lights.
 * ShadowMap Component to have arrays for each type of light and depth buffers/light views for each
 * ShadowMap Camera view creation to be automated.
 * Raypicking of Entities in a Scene. (3D raypick position, then find nearst entity of type to the picked position).
@@ -372,16 +372,17 @@ Mare allows the user to use general purpose compute programs created from glsl S
 * Updated Documentation
 
 ### Version 3.0.0
+* Add toon shading material and depth texture material
+* Double-buffer Depth Framebuffer to make glReadPixels faster.
+* A font loader to be added to enable the use of bitmap fonts.
 * Systems and Components for collisions to be added.
 * Bezier curves and spline curves / surfaces to be added.
 * Teapot Primative Mesh from bezier curves and surfaces to be added.
 * Cloth Physics PhysicsSystem
 * Metaballs Entity
-* A font loader to be added to enable the use of bitmap fonts.
 * Loader for models to be added.
 * Loader for sound to be added. Sound Components and Systems to be added.
 * Loaders for animations to be added. Animation Components and Systems to be added.
 * Batch rendering to be implemented in CompositeMesh. CompositeMeshes will be rendered with gl multidraw calls.
 * Renderer blending to have all the opengl features such as custom blend functions.
 * Buffer, Texture, and Framebuffer classes to have all of the OpenGL features.
-* Double-buffer Depth Framebuffer to make glReadPixels faster.

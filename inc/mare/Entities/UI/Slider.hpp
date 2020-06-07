@@ -2,7 +2,7 @@
 #define SLIDER
 
 // MARE
-#include "mare/Assets/Materials/BasicMaterial.hpp"
+#include "mare/Assets/Materials/BasicColorMaterial.hpp"
 #include "mare/Assets/Materials/VertexColorMaterial.hpp"
 #include "mare/Assets/Meshes/CircleMesh.hpp"
 #include "mare/Assets/Meshes/QuadrangleMesh.hpp"
@@ -97,9 +97,9 @@ public:
     left_circle_mesh = gen_ref<CircleMesh>(32, 0.5f);
     right_circle_mesh = gen_ref<CircleMesh>(32, 0.5f);
 
-    slider_material = gen_ref<BasicMaterial>();
-    fill_material = gen_ref<BasicMaterial>();
-    knob_material = gen_ref<BasicMaterial>();
+    slider_material = gen_ref<BasicColorMaterial>();
+    fill_material = gen_ref<BasicColorMaterial>();
+    knob_material = gen_ref<BasicColorMaterial>();
     knob_shadow_material = gen_ref<VertexColorMaterial>();
     slider_material->set_color(slider_color);
     fill_material->set_color(fill_color);
@@ -166,12 +166,12 @@ public:
   Referenced<KnobShadowMesh> knob_shadow_mesh;
   Referenced<CircleMesh> left_circle_mesh;
   Referenced<CircleMesh> right_circle_mesh;
-  Referenced<BasicMaterial>
+  Referenced<BasicColorMaterial>
       slider_material; /**< The material used to render the slider background
                           and knob.*/
-  Referenced<BasicMaterial>
+  Referenced<BasicColorMaterial>
       fill_material; /**< The material used to render the slider background.*/
-  Referenced<BasicMaterial> knob_material;
+  Referenced<BasicColorMaterial> knob_material;
   Referenced<VertexColorMaterial> knob_shadow_material;
   glm::vec4 slider_color{
       1.0f, 1.0f, 1.0f,

@@ -2,7 +2,7 @@
 #define SAMPLEPARTICLESYSTEM
 
 // MARE
-#include "mare/Assets/Materials/BasicMaterial.hpp"
+#include "mare/Assets/Materials/BasicColorMaterial.hpp"
 #include "mare/Assets/Meshes/SphereMesh.hpp"
 #include "mare/Buffers.hpp"
 #include "mare/Components/Transform.hpp"
@@ -40,7 +40,7 @@ public:
         nullptr, sizeof(Transform) * P_COUNT, BufferType::READ_WRITE);
 
     particles = gen_ref<InstancedMesh>(P_COUNT);  // particles
-    particle_material = gen_ref<BasicMaterial>(); // particle material
+    particle_material = gen_ref<BasicColorMaterial>(); // particle material
     compute_program =
         gen_ref<ComputeProgram>("./inc/app/Assets/Shaders/NBodyGravity");
 
@@ -56,7 +56,7 @@ public:
   }
   Referenced<Buffer<Transform>> models_out;
   Referenced<Buffer<glm::vec3>> velocities;
-  Referenced<BasicMaterial> particle_material;
+  Referenced<BasicColorMaterial> particle_material;
   Referenced<InstancedMesh> particles;
   Referenced<ComputeProgram> compute_program;
   float G;

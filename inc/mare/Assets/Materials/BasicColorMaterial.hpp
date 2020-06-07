@@ -1,5 +1,5 @@
-#ifndef BASICMATERIAL
-#define BASICMATERIAL
+#ifndef BASICCOLORMATERIAL
+#define BASICCOLORMATERIAL
 
 // External Libraries
 #include "glm.hpp"
@@ -12,16 +12,16 @@ namespace mare {
  * @brief A Basic Material that provides a color but no lighting.
  * @details Useful for solid color UI elements or generating a ShadowMap. Only
  * one shader is ever compiled and is shared between all instances of
- * BasicMaterial.
+ * BasicColorMaterial.
  */
-class BasicMaterial : public virtual Material {
+class BasicColorMaterial : public virtual Material {
 public:
   /**
    * @brief Construct a new Basic Material
    */
-  BasicMaterial()
-      : Material("./inc/mare/Assets/Shaders/Basic"), m_color(glm::vec4(1.0f)) {}
-  virtual ~BasicMaterial() {}
+  BasicColorMaterial()
+      : Material("./inc/mare/Assets/Shaders/BasicColor"), m_color(glm::vec4(1.0f)) {}
+  virtual ~BasicColorMaterial() {}
   /**
    * @brief uploads the color to the shader when rendered.
    *

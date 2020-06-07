@@ -2,7 +2,7 @@
 #define TEXTBOX
 
 // MARE
-#include "mare/Assets/Materials/BasicMaterial.hpp"
+#include "mare/Assets/Materials/BasicColorMaterial.hpp"
 #include "mare/Assets/Meshes/CharMesh.hpp"
 #include "mare/Assets/Meshes/QuadrangleMesh.hpp"
 #include "mare/Components/RenderPack.hpp"
@@ -58,10 +58,10 @@ public:
     highlight = gen_ref<QuadrangleMesh>();
     text = gen_ref<CharMesh>("", 1.0f / 17.0f, 0.0f, max_strokes);
 
-    text_material = gen_ref<BasicMaterial>();
-    box_material = gen_ref<BasicMaterial>();
-    boarder_material = gen_ref<BasicMaterial>();
-    highlight_material = gen_ref<BasicMaterial>();
+    text_material = gen_ref<BasicColorMaterial>();
+    box_material = gen_ref<BasicColorMaterial>();
+    boarder_material = gen_ref<BasicColorMaterial>();
+    highlight_material = gen_ref<BasicColorMaterial>();
 
     text_material->set_color(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
     box_material->set_color(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
@@ -215,10 +215,10 @@ public:
   Referenced<CharMesh> text;
   float boarder_thickness;
   float margin_thickness;
-  Referenced<BasicMaterial> text_material;
-  Referenced<BasicMaterial> box_material;
-  Referenced<BasicMaterial> boarder_material;
-  Referenced<BasicMaterial> highlight_material;
+  Referenced<BasicColorMaterial> text_material;
+  Referenced<BasicColorMaterial> box_material;
+  Referenced<BasicColorMaterial> boarder_material;
+  Referenced<BasicColorMaterial> highlight_material;
   unsigned int max_lines;
   unsigned int max_chars_per_line;
 

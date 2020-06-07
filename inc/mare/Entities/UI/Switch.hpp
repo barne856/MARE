@@ -2,7 +2,7 @@
 #define SWITCH
 
 // MARE
-#include "mare/Assets/Materials/BasicMaterial.hpp"
+#include "mare/Assets/Materials/BasicColorMaterial.hpp"
 #include "mare/Assets/Materials/VertexColorMaterial.hpp"
 #include "mare/Assets/Meshes/CircleMesh.hpp"
 #include "mare/Assets/Meshes/QuadrangleMesh.hpp"
@@ -39,8 +39,8 @@ public:
     knob_shadow_mesh = gen_ref<KnobShadowMesh>(32, 0.45f, 0.15f);
     quad_mesh = gen_ref<QuadrangleMesh>();
 
-    switch_material = gen_ref<BasicMaterial>();
-    knob_material = gen_ref<BasicMaterial>();
+    switch_material = gen_ref<BasicColorMaterial>();
+    knob_material = gen_ref<BasicColorMaterial>();
     knob_shadow_material = gen_ref<VertexColorMaterial>();
     switch_material->set_color(switch_off_color);
     knob_material->set_color(knob_color);
@@ -88,8 +88,8 @@ public:
   Referenced<CircleMesh> knob_mesh;
   Referenced<KnobShadowMesh> knob_shadow_mesh;
   Referenced<QuadrangleMesh> quad_mesh;
-  Referenced<BasicMaterial> switch_material;
-  Referenced<BasicMaterial> knob_material;
+  Referenced<BasicColorMaterial> switch_material;
+  Referenced<BasicColorMaterial> knob_material;
   Referenced<VertexColorMaterial> knob_shadow_material;
   glm::vec4 switch_off_color{1.0f, 1.0f, 1.0f, 1.0f};
   glm::vec4 switch_on_color{0.25f, 0.3f, 0.9f, 1.0f};
