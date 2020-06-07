@@ -26,7 +26,7 @@ namespace mare {
  * references but by actually swaping the data in the Cameras.
  * @see Entity
  * @see System
- * @see Component
+ * @see Transform
  */
 class Layer : public Camera {
 public:

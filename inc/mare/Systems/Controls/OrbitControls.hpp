@@ -21,15 +21,15 @@ namespace mare {
  */
 class OrbitControls : public ControlsSystem<Transform> {
   float distance_to_center = 1.0f;
-  float translational_sensitivity = 300.0f;
+  float translational_sensitivity = 3.0f;
   float zoom_sensitvity = 0.1f;
   bool on_mouse_move(const RendererInput &input,
                      Transform *transform) override {
     if (input.LEFT_MOUSE_PRESSED) {
       // orbit around center and adjust inclination
 
-      float dtheta = -float(input.mouse_vel.y) / translational_sensitivity;
-      float dphi = -float(input.mouse_vel.x) / translational_sensitivity;
+      float dtheta = -translational_sensitivity*static_cast<float>(input.mouse_vel.y) / static_cast<float>(Renderer::get_info().window_height);
+      float dphi = -translational_sensitivity*static_cast<float>(input.mouse_vel.x) / static_cast<float>(Renderer::get_info().window_height);
       glm::vec3 dir = transform->get_forward_vector();
       glm::vec3 pos = transform->get_position();
       glm::vec3 up = {0.0f, 0.0f, 1.0f};

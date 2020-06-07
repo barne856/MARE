@@ -358,7 +358,7 @@ void GLRenderer::api_render_simple_mesh(Camera *camera, SimpleMesh *mesh,
 // composite rendering
 void GLRenderer::api_render_simple_mesh(Camera *camera, SimpleMesh *mesh,
                                         Material *material,
-                                        glm::mat4 parent_model) {
+                                        Transform* parent_model) {
   material->bind();
   mesh->bind(material);
   material->upload_camera(camera);
@@ -378,9 +378,9 @@ void GLRenderer::api_render_simple_mesh(Camera *camera, SimpleMesh *mesh,
 // instanced rendering
 void GLRenderer::api_render_simple_mesh(Camera *camera, SimpleMesh *mesh,
                                         Material *material,
-                                        glm::mat4 parent_model,
+                                        Transform* parent_model,
                                         unsigned int instance_count,
-                                        Buffer<glm::mat4> *models) {
+                                        Buffer<Transform> *models) {
   material->bind();
   mesh->bind(material);
   material->upload_camera(camera);

@@ -36,8 +36,8 @@ public:
     velocities = Renderer::gen_buffer<glm::vec3>(
         nullptr, sizeof(glm::vec3) * P_COUNT, BufferType::READ_WRITE);
     velocities->clear(glm::vec3(0.0f));
-    models_out = Renderer::gen_buffer<glm::mat4>(
-        nullptr, sizeof(glm::mat4) * P_COUNT, BufferType::READ_WRITE);
+    models_out = Renderer::gen_buffer<Transform>(
+        nullptr, sizeof(Transform) * P_COUNT, BufferType::READ_WRITE);
 
     particles = gen_ref<InstancedMesh>(P_COUNT);  // particles
     particle_material = gen_ref<BasicMaterial>(); // particle material
@@ -48,13 +48,13 @@ public:
     particles->set_mesh(gen_scoped<SphereMesh>(2, 0.02f));
     for (int i = 0; i < P_COUNT; i++) {
       glm::vec3 pos = glm::linearRand(glm::vec3(-1.0f), glm::vec3(1.0f));
-      particles->push_instance(glm::translate(glm::mat4(1.0f), pos));
+      particles->push_instance(Transform(glm::translate(glm::mat4(1.0f), pos)));
       (*models_out)[i] = glm::translate(glm::mat4(1.0f), pos);
     }
 
     G = 0.0002f;
   }
-  Referenced<Buffer<glm::mat4>> models_out;
+  Referenced<Buffer<Transform>> models_out;
   Referenced<Buffer<glm::vec3>> velocities;
   Referenced<BasicMaterial> particle_material;
   Referenced<InstancedMesh> particles;
@@ -74,7 +74,7 @@ public:
     auto mesh = sample_particle_system->particles;
     auto material = sample_particle_system->particle_material;
     sample_particle_system->compute_program->barrier(BarrierType::STORAGE);
-    mesh->render(camera, material.get(), sample_particle_system->get_transformation_matrix());
+    mesh->render(camera, material.get(), sample_particle_system);
     Renderer::wireframe_mode(false);
   }
 };

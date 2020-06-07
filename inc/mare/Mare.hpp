@@ -17,18 +17,6 @@
  */
 namespace mare {
 /**
- * @brief Abstract base class for all Components.
- * @details Components are used to add functionality to Entities through data
- * and function members. When creating Entities, inherit from Components to add
- * the required functionality. Components are operated on by Systems.
- * @see System
- * @see Entity
- */
-class Component {
-public:
-  virtual ~Component() = 0;
-};
-/**
  * @brief Abstract base class for all Systems.
  * @details Systems provide callbacks that operate on Components. There are
  * three main types of systems:
@@ -190,7 +178,6 @@ glm::vec2 intersection(glm::vec2 p1, glm::vec2 p2, glm::vec2 p3, glm::vec2 p4);
  */
 glm::vec2 clamp_point_to_triangle(glm::vec2 v1, glm::vec2 v2, glm::vec2 v3,
                                   glm::vec2 point);
-
 /** The ratio of a circle's circumference to its diameter approximated as a
  * 32-bit floating point number.*/
 const float PI = 3.141592653f;

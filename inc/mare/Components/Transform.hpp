@@ -11,21 +11,28 @@
 namespace mare {
 /**
  * @brief A Transform Component that provides the data and functions to
- * transform and Entity in space.
- * @details The Transform consists of a single glm::mat4 variable that is a TRS
- * matrix or Translation * Rotation * Scale matrix. This means that the order of
- * transformations applied is Scale then Rotate the Translate.
+ * transform an Entity in space.
+ * @details The Transform is the base class for all Components and consists of a
+ * single glm::mat4 variable that is a TRS matrix or Translation * Rotation *
+ * Scale matrix. This means that the order of transformations applied is Scale
+ * then Rotate the Translate.
  *
- * This Component contains the model matrix of an Entity and provides a
- * set of function to transform Entities.
+ * Components are used to add functionality to Entities through data
+ * and function members. All Components inherit virtually from Transform. When
+ * creating Entities, inherit from Components to add the required functionality.
+ * Components are operated on by Systems.
+ * @see System
+ * @see Entity
  */
-class Transform : virtual public Component {
+class Transform {
 public:
   /**
    * @brief Construct a new Transform object
    *
    */
   Transform() : transformation_matrix_(glm::mat4(1.0f)) {}
+  Transform(glm::mat4 transform_matrix)
+      : transformation_matrix_(transform_matrix) {}
   /**
    * @brief Get the position of the Transform.
    *
@@ -96,11 +103,10 @@ public:
   glm::mat4 get_transformation_matrix() { return transformation_matrix_; }
   /**
    * @brief Set the transformation matrix of the Transform
-   * 
+   *
    * @param transformation_matrix The matrix to set.
    */
-  void set_transformation_matrix(glm::mat4 transformation_matrix)
-  {
+  void set_transformation_matrix(glm::mat4 transformation_matrix) {
     transformation_matrix_ = transformation_matrix;
   }
   /**
@@ -175,9 +181,9 @@ public:
     transformation_matrix_ =
         get_translation_matrix() * rotation * get_scale_matrix();
   }
-  void set_rotation_matrix(glm::mat4 rotation_matrix)
-  {
-    transformation_matrix_ = get_translation_matrix()*rotation_matrix*get_scale_matrix();
+  void set_rotation_matrix(glm::mat4 rotation_matrix) {
+    transformation_matrix_ =
+        get_translation_matrix() * rotation_matrix * get_scale_matrix();
   }
   /**
    * @brief Set the scale of the Transform
@@ -226,6 +232,12 @@ public:
     glm::mat4 temp = transform->get_transformation_matrix();
     transform->set_transformation_matrix(temp);
     transformation_matrix_ = temp;
+  }
+  Transform operator*(Transform transform) {
+    Transform result{};
+    result.set_transformation_matrix(transformation_matrix_ *
+                                     transform.get_transformation_matrix());
+    return result;
   }
 
 private:

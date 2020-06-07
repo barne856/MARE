@@ -10,7 +10,6 @@
 #include <string>
 
 namespace mare {
-Component::~Component() {}
 System::~System() {}
 namespace math {
 float angle_between(glm::vec3 v1, glm::vec3 v2) {

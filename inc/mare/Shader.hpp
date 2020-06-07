@@ -4,6 +4,7 @@
 // MARE
 #include "mare/Buffers.hpp"
 #include "mare/Mare.hpp"
+#include "mare/Components/Transform.hpp"
 
 // External Libraries
 #include "glm.hpp"
@@ -451,12 +452,12 @@ public:
    *
    * @param mesh The Mesh whose model matrix will be uploaded after being
    * transformed by the parent model matrix.
-   * @param parent_model The parent model matrix to transform with.
+   * @param parent_transform The parent Transform Component.
    * @param suppress_warnings true enables reporting of warnings from the Engine
    * regarding the existence of the model matrix uniform.
    * @see Mesh
    */
-  void upload_mesh_model_matrix(Mesh *mesh, glm::mat4 parent_model,
+  void upload_mesh_model_matrix(Mesh *mesh, Transform* parent_transform,
                                 bool suppress_warnings = false);
   /**
    * @brief Upload a Mesh's normal matrix to the Material after. The Material
@@ -477,12 +478,12 @@ public:
    *
    * @param mesh The Mesh whose normal matrix will be uploaded after being
    * transformed by the parent model matrix.
-   * @param parent_model The parent model matrix to transform with.
+   * @param parent_transform The parent Transform Component.
    * @param suppress_warnings true enables reporting of warnings from the Engine
    * regarding the existence of the normal matrix uniform.
    * @see Mesh
    */
-  void upload_mesh_normal_matrix(Mesh *mesh, glm::mat4 parent_model,
+  void upload_mesh_normal_matrix(Mesh *mesh, Transform* parent_transform,
                                  bool suppress_warnings = false);
   /**
    * @brief Upload a Transform Buffer to the Material.
@@ -493,7 +494,7 @@ public:
    * @param suppress_warnings true enables reporting of warnings from the Engine
    * regarding the existence of the shader storage block.
    */
-  void upload_mesh_instance_matrices(Buffer<glm::mat4> *models,
+  void upload_mesh_instance_matrices(Buffer<Transform> *models,
                                      bool suppress_warnings = false);
   /**
    * @brief A convience function to call all the neccesary functions to upload a
@@ -513,11 +514,11 @@ public:
    * upload_mesh_normal_matrix(Mesh*, glm::mat4, bool)
    *
    * @param mesh The Mesh to upload.
-   * @param parent_model The parent model to use.
+   * @param parent_transform The parent Transform Component.
    * @param suppress_warnings true enables reporting of warnings from the Engine
    * regarding the existence of the Shader resources.
    */
-  void upload_mesh(Mesh *mesh, glm::mat4 parent_model,
+  void upload_mesh(Mesh *mesh, Transform* parent_transform,
                    bool suppress_warnings = false);
   /**
    * @brief A convience function to call all the neccesary functions to upload a
@@ -527,13 +528,13 @@ public:
    * upload_mesh_instance_matrices(Buffer<glm::mat4>*,bool)
    *
    * @param mesh The Mesh to upload.
-   * @param parent_model The parent model to use.
+   * @param parent_transform The parent Transform Component.
    * @param models A pointer to a Transform Buffer to upload.
    * @param suppress_warnings true enables reporting of warnings from the Engine
    * regarding the existence of the Shader resources.
    */
-  void upload_mesh(Mesh *mesh, glm::mat4 parent_model,
-                   Buffer<glm::mat4> *models, bool suppress_warnings = false);
+  void upload_mesh(Mesh *mesh, Transform* parent_transform,
+                   Buffer<Transform> *models, bool suppress_warnings = false);
 };
 } // namespace mare
 

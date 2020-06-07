@@ -640,11 +640,11 @@ public:
    * @param camera The Camera to render from.
    * @param mesh The SimpleMesh to render.
    * @param material The Material to render with.
-   * @param parent_model The parent Transform to render with.
+   * @param parent_transform The parent Transform to render with.
    */
   virtual void api_render_simple_mesh(Camera *camera, SimpleMesh *mesh,
                                       Material *material,
-                                      glm::mat4 parent_model) = 0;
+                                      Transform* parent_transform) = 0;
   /**
    * @brief API implemented function to render a SimpleMesh with a Material and
    * a parent Transform.
@@ -652,16 +652,16 @@ public:
    * @param camera The Camera to render from.
    * @param mesh The SimpleMesh to render.
    * @param material The Material to render with.
-   * @param parent_model The parent Transform to render with.
+   * @param parent_transform The parent Transform to render with.
    * @param instance_count The number of instances to render.
    * @param models The Transform Buffer containing the Transforms to be
    * used for instancing.
    */
   virtual void api_render_simple_mesh(Camera *camera, SimpleMesh *mesh,
                                       Material *material,
-                                      glm::mat4 parent_model,
+                                      Transform* parent_transform,
                                       unsigned int instance_count,
-                                      Buffer<glm::mat4> *models) = 0;
+                                      Buffer<Transform> *models) = 0;
   /**
    * @brief API implemented function to bind a SimpleMesh's render state to a
    * Material.
@@ -894,13 +894,13 @@ public:
    * @param camera The Camera to render from.
    * @param mesh The SimpleMesh to render.
    * @param material The Material to render with.
-   * @param parent_model The parent Transform to render with.
+   * @param parent_transform The parent Transform to render with.
    * @see Renderer::api_renderer_simple_mesh(Camera*, SimpleMesh*, Material*,
    * glm::mat4&)
    */
   static void render_simple_mesh(Camera *camera, SimpleMesh *mesh,
-                                 Material *material, glm::mat4 &parent_model) {
-    API->api_render_simple_mesh(camera, mesh, material, parent_model);
+                                 Material *material, Transform* parent_transform) {
+    API->api_render_simple_mesh(camera, mesh, material, parent_transform);
   }
   /**
    * @brief Static access to Renderer::api_renderer_simple_mesh(Camera*,
@@ -909,7 +909,7 @@ public:
    * @param camera The Camera to render from.
    * @param mesh The SimpleMesh to render.
    * @param material The Material to render with.
-   * @param parent_model The parent Transform to render with.
+   * @param parent_transform The parent Transform to render with.
    * @param instance_count The number of instances to render.
    * @param models The Transform Buffer containing the Transforms to be
    * used for instancing.
@@ -917,10 +917,10 @@ public:
    * glm::mat4&, unsigned int, Buffer<glm::mat4>*)
    */
   static void render_simple_mesh(Camera *camera, SimpleMesh *mesh,
-                                 Material *material, glm::mat4 &parent_model,
+                                 Material *material, Transform* parent_transform,
                                  unsigned int instance_count,
-                                 Buffer<glm::mat4> *models) {
-    API->api_render_simple_mesh(camera, mesh, material, parent_model,
+                                 Buffer<Transform> *models) {
+    API->api_render_simple_mesh(camera, mesh, material, parent_transform,
                                 instance_count, models);
   }
   /**

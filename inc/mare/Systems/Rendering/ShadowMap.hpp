@@ -64,7 +64,7 @@ public:
            pack_it++) {
         auto mesh = (*pack_it).first;
         mesh->render(std::dynamic_pointer_cast<Camera>(spotlight).get(),
-                     material.get(), ent->get_transformation_matrix());
+                     material.get(), ent);
       }
       // set shadow properties
       ent->light_view = spotlight;

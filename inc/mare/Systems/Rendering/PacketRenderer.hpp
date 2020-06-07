@@ -23,7 +23,7 @@ public:
          pack_it++) {
       auto mesh = (*pack_it).first;
       auto material = (*pack_it).second;
-      mesh->render(camera, material.get(), rp->get_transformation_matrix());
+      mesh->render(camera, material.get(), rp);
     }
   }
 };

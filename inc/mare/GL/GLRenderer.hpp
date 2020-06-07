@@ -226,7 +226,7 @@ public:
    */
   virtual void api_render_simple_mesh(Camera *camera, SimpleMesh *mesh,
                                       Material *material,
-                                      glm::mat4 parent_model) override;
+                                      Transform* parent_transform) override;
   /**
    * @brief GLRenderer implemented function to render a SimpleMesh with a
    * Material and a parent Transform.
@@ -234,16 +234,16 @@ public:
    * @param camera The Camera to render from.
    * @param mesh The SimpleMesh to render.
    * @param material The Material to render with.
-   * @param parent_model The parent Transform to render with.
+   * @param parent_transform The parent Transform to render with.
    * @param instance_count The number of instances to render.
    * @param models The Transform Buffer containing the Transforms to be
    * used for instancing.
    */
   virtual void api_render_simple_mesh(Camera *camera, SimpleMesh *mesh,
                                       Material *material,
-                                      glm::mat4 parent_model,
+                                      Transform* parent_transform,
                                       unsigned int instance_count,
-                                      Buffer<glm::mat4> *models) override;
+                                      Buffer<Transform> *models) override;
   /**
    * @brief GLRenderer implemented function to bind a SimpleMesh's render state
    * to a Material.

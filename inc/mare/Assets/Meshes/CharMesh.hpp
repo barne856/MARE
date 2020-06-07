@@ -357,8 +357,8 @@ private:
       glm::vec3 p3 = 0.5f * (p1 + p2);
       // push node instances
       if (thickness != 0.0f && extrusion == 0.0f) {
-        nodes->push_instance(glm::translate(glm::mat4(1.0f), p1));
-        nodes->push_instance(glm::translate(glm::mat4(1.0f), p2));
+        nodes->push_instance(Transform(glm::translate(glm::mat4(1.0f), p1)));
+        nodes->push_instance(Transform(glm::translate(glm::mat4(1.0f), p2)));
       } else {
         glm::mat4 node1_instance =
             glm::translate(glm::mat4(1.0f),
@@ -370,8 +370,8 @@ private:
                            p2 - glm::vec3(0.0f, 0.0f, 0.5f * extrusion)) *
             glm::scale(glm::mat4(1.0f),
                        glm::vec3(thickness, thickness, extrusion));
-        nodes->push_instance(node1_instance);
-        nodes->push_instance(node2_instance);
+        nodes->push_instance(Transform(node1_instance));
+        nodes->push_instance(Transform(node2_instance));
       }
       // push link instance
       float angle = atan2f(p2.y - p1.y, p2.x - p1.x);
@@ -381,13 +381,13 @@ private:
             glm::translate(glm::mat4(1.0f), p3) *
             glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0.0f, 0.0f, 1.0f)) *
             glm::scale(glm::mat4(1.0f), glm::vec3(length, 1.0f, 1.0f));
-        links->push_instance(link_instance);
+        links->push_instance(Transform(link_instance));
       } else {
         glm::mat4 link_instance =
             glm::translate(glm::mat4(1.0f), p3) *
             glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0.0f, 0.0f, 1.0f)) *
             glm::scale(glm::mat4(1.0f), glm::vec3(length, thickness, extrusion));
-        links->push_instance(link_instance);
+        links->push_instance(Transform(link_instance));
       }
 
       stroke_count++;

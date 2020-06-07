@@ -35,7 +35,7 @@ public:
         material->upload_texture2D("depth_texture",
                                    sc->depth_buffer->depth_texture());
 
-        mesh->render(camera, material.get(), sc->get_transformation_matrix());
+        mesh->render(camera, material.get(), sc);
       }
     }
   }

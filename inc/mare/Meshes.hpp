@@ -91,10 +91,10 @@ public:
    *
    * @param camera The Camera to render from.
    * @param material The Material to render with.
-   * @param parent_model The parent transformation matrix to use.
+   * @param parent_transform The parent Transform Component.
    */
   virtual void render(Camera *camera, Material *material,
-                      glm::mat4 parent_model) = 0;
+                      Transform* parent_transform) = 0;
   /**
    * @brief Abstract interface to render multiple instances of a Mesh using a
    * Material from the perspective of a Camera and transformed by a parent
@@ -102,13 +102,13 @@ public:
    *
    * @param camera The Camera to render from.
    * @param material The Material to render with.
-   * @param parent_model The parent transformation matrix to use.
+   * @param parent_transform The parent Transform Component.
    * @param models The Buffer of transformation matricies to use for instanced.
    * rendering.
    */
   virtual void render(Camera *camera, Material *material,
-                      glm::mat4 parent_model, unsigned int instance_count,
-                      Buffer<glm::mat4> *models) = 0;
+                      Transform* parent_transform, unsigned int instance_count,
+                      Buffer<Transform> *models) = 0;
 };
 
 /**
@@ -145,22 +145,22 @@ public:
    *
    * @param camera The Camera to render from.
    * @param material The Material to render with.
-   * @param parent_model The parent model matrix to use.
+   * @param parent_transform The parent Transform Component.
    * @see Mesh
    */
   void render(Camera *camera, Material *material,
-              glm::mat4 parent_model) override;
+              Transform* parent_transform) override;
   /**
    * @brief The implementation of the abstract render method supplied by Mesh.
    *
    * @param camera The Camera to render from.
    * @param material The Material to render with.
-   * @param parent_model The parent transformation matrix to use.
+   * @param parent_transform The parent Transform Component.
    * @param models The Buffer of transformation matricies to use for instanced.
    * @see Mesh
    */
-  void render(Camera *camera, Material *material, glm::mat4 parent_model,
-              unsigned int instance_count, Buffer<glm::mat4> *models) override;
+  void render(Camera *camera, Material *material, Transform* parent_transform,
+              unsigned int instance_count, Buffer<Transform> *models) override;
 
   /**
    * @brief Binds the Mesh's Geometry Buffer and render state to the Material.
@@ -312,22 +312,22 @@ public:
    *
    * @param camera The Camera to render from.
    * @param material The Material to render with.
-   * @param parent_model The parent model matrix to use.
+   * @param parent_transform The parent Transform Component.
    * @see Mesh
    */
   void render(Camera *camera, Material *material,
-              glm::mat4 parent_model) override;
+              Transform* parent_transform) override;
   /**
    * @brief The implementation of the abstract render method supplied by Mesh.
    *
    * @param camera The Camera to render from.
    * @param material The Material to render with.
-   * @param parent_model The parent transformation matrix to use.
+   * @param parent_transform The parent Transform Component.
    * @param models The Buffer of transformation matricies to use for instanced.
    * @see Mesh
    */
-  void render(Camera *camera, Material *material, glm::mat4 parent_model,
-              unsigned int instance_count, Buffer<glm::mat4> *models) override;
+  void render(Camera *camera, Material *material, Transform* parent_transform,
+              unsigned int instance_count, Buffer<Transform> *models) override;
   /**
    * @brief Push a Mesh onto the Mesh stack.
    *
@@ -397,11 +397,11 @@ public:
    *
    * @param camera The Camera to render from.
    * @param material The Material to render with.
-   * @param parent_model The parent model matrix to use.
+   * @param parent_transform The parent Transform Component.
    * @see Mesh
    */
   void render(Camera *camera, Material *material,
-              glm::mat4 parent_model) override;
+              Transform* parent_transform) override;
   /**
    * @brief The implementation of the abstract render method supplied by Mesh.
    * @details Rendering an InstancedMesh of InstancedMeshes is supported, but
@@ -410,12 +410,12 @@ public:
    *
    * @param camera The Camera to render from.
    * @param material The Material to render with.
-   * @param parent_model The parent transformation matrix to use.
+   * @param parent_transform The parent Transform Component.
    * @param models The Buffer of transformation matricies to use for instanced.
    * @see Mesh
    */
-  void render(Camera *camera, Material *material, glm::mat4 parent_model,
-              unsigned int instance_count, Buffer<glm::mat4> *models) override;
+  void render(Camera *camera, Material *material, Transform* parent_transform,
+              unsigned int instance_count, Buffer<Transform> *models) override;
   /**
    * @brief Set the Mesh to be instanced.
    *
@@ -425,9 +425,9 @@ public:
   /**
    * @brief Push an instance transform onto the Transform Buffer.
    *
-   * @param model The transform to push onto the Transform Buffer.
+   * @param model The Transform to push onto the Transform Buffer.
    */
-  void push_instance(glm::mat4 model);
+  void push_instance(Transform model);
   /**
    * @brief Remove the last instance transform from the Transform Buffer.
    */
@@ -443,8 +443,9 @@ public:
    * @param models A vector of Transforms to insert into the Transform Buffer.
    * @param offset The index into the Buffer to start the insertion. In units of
    * number of Transforms.
+   * @param count The number of Transforms to flush.
    */
-  void flush_instances(std::vector<glm::mat4> *models, uint32_t offset);
+  void flush_instances(Transform *models, uint32_t offset, uint32_t count);
   /**
    * @brief Read an write a Transform to the Transform Buffer using the
    * subscript operator.
@@ -452,7 +453,7 @@ public:
    * @param i The index into the Buffer to read or write to.
    * @return A reference to the Transform in the Buffer at the index provided.
    */
-  glm::mat4 &operator[](unsigned int i);
+  Transform &operator[](unsigned int i);
   /**
    * @brief Read a Transform from the Transform Buffer using the subscript
    * operator.
@@ -461,14 +462,14 @@ public:
    * @return A copy of the Transform in the Transform Buffer at the index
    * provided.
    */
-  glm::mat4 operator[](unsigned int i) const;
+  Transform operator[](unsigned int i) const;
   /**
    * @brief Get a pointer to the Transform Buffer.
    * @details Used to send the Buffer to a shader when rendering.
    *
    * @return A pointer to the Transform Buffer.
    */
-  Buffer<glm::mat4> *get_instance_models();
+  Buffer<Transform> *get_instance_models();
   /**
    * @brief Swap the instanced Transforms with the Transforms of another
    * Transform Buffer.
@@ -476,19 +477,19 @@ public:
    * @param models The Transform Buffer the swap with.
    * @return The Transform Buffer of the InstancedMesh before the swap occured.
    */
-  Referenced<Buffer<glm::mat4>>
-  swap_instance_models(Referenced<Buffer<glm::mat4>> models);
+  Referenced<Buffer<Transform>>
+  swap_instance_models(Referenced<Buffer<Transform>> models);
   /**
    * @brief Replace the Transform Buffer with another Transform Buffer.
    *
    * @param models The Transform Buffer used to replace the current Transform
    * Buffer.
    */
-  void set_instance_models(Referenced<Buffer<glm::mat4>> models);
+  void set_instance_models(Referenced<Buffer<Transform>> models);
 
 protected:
   unsigned int instance_count_; /**< The current number of instances.*/
-  Referenced<Buffer<glm::mat4>>
+  Referenced<Buffer<Transform>>
       instance_transforms_;    /**< The Transform Buffer.*/
   Referenced<Mesh> mesh_;          /**< The Mesh that is instanced.*/
   unsigned int max_instances_; /**< The maximum number of instances allowed.*/

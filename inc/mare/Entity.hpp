@@ -12,7 +12,7 @@ namespace mare {
  * @details An Entity is the base class for all user created Entities. All
  * Entities contain a *system stack* and inherit from zero or more Component(s).
  * @see System
- * @see Component
+ * @see Transform
  */
 class Entity {
 public:

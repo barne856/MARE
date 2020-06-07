@@ -363,17 +363,15 @@ Mare allows the user to use general purpose compute programs created from glsl S
 
 ## TODO List
 ### Version 2.0.0
+* More Materials to be added (BasicColor, BasicTexture, Depth, Phong, Toon, Shadow).
 * PhongMaterial to have arrays for spotlight, point light, and directional lights, as well as shadowmaping for directional, point, and spot lights.
 * ShadowMap Component to have arrays for each type of light and depth buffers/light views for each
 * ShadowMap Camera view creation to be automated.
-* Raypicking of Entities in a Scene.
+* Raypicking of Entities in a Scene. (3D raypick position, then find nearst entity of type to the picked position).
 * Cylinder, Cone, and Tube Meshes to have an option for flat shading normals or smooth shading normals.
-* More Materials to be added (BasicColor, BasicTexture, Depth, Phong, Toon, Shadow).
 * Updated Documentation
 
 ### Version 3.0.0
-* InstancedMeshes to have a Transform Buffer not a glm::mat4 Buffer and Transform Component to only contain a single glm::mat4 with functions to get and set parts of it.
-* `api_render_mesh()` should use Transforms to render not glm::mat4
 * Systems and Components for collisions to be added.
 * Bezier curves and spline curves / surfaces to be added.
 * Teapot Primative Mesh from bezier curves and surfaces to be added.
@@ -386,3 +384,4 @@ Mare allows the user to use general purpose compute programs created from glsl S
 * Batch rendering to be implemented in CompositeMesh. CompositeMeshes will be rendered with gl multidraw calls.
 * Renderer blending to have all the opengl features such as custom blend functions.
 * Buffer, Texture, and Framebuffer classes to have all of the OpenGL features.
+* Double-buffer Depth Framebuffer to make glReadPixels faster.
