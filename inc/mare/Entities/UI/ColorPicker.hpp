@@ -11,6 +11,9 @@
 #include "mare/Shader.hpp"
 #include "mare/Systems/Rendering/PacketRenderer.hpp"
 
+// Standard Library
+#include <math.h>
+
 // External Libraries
 #include "glm.hpp"
 
@@ -454,7 +457,7 @@ public:
     glm::vec2 s1 = math::intersection(p1, p2, v3, v2);
     glm::vec2 s2 = math::intersection(p1, p2, v3, v1);
     float V, S;
-    if (isnanf(s1.x) || isnanf(s2.x) || glm::length(s2 - s1) == 0.0f) {
+    if (isnan(s1.x) || isnan(s2.x) || glm::length(s2 - s1) == 0.0f) {
       V = 0.0f;
       S = 1.0f;
     } else {

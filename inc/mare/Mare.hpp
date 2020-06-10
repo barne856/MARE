@@ -229,6 +229,7 @@ std::string rgb_to_string(glm::vec3 color);
  * @brief A simple struct to define a bounding box of a UI element.
  */
 struct Rect {
+  Rect() : m_values(glm::vec4(-0.5f, -0.5f, 0.5f, 0.5f)){}
   float &left() { return m_values[0]; }
   float &bottom() { return m_values[1]; }
   float &right() { return m_values[2]; }
