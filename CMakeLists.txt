@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 
-project(APP)
+project(MARE)
 
 add_definitions(-DGLEW_STATIC)
 
@@ -23,17 +23,16 @@ add_subdirectory(ext/glfw)
 
 set(SRC
 ./ext/glew-2.1.0/src/glew.c
-./src/app/main.cpp
-./src/mare/Buffers.cpp
-./src/mare/Mare.cpp
-./src/mare/Meshes.cpp
-./src/mare/Renderer.cpp
-./src/mare/Shader.cpp
-./src/mare/GL/GLBuffers.cpp
-./src/mare/GL/GLRenderer.cpp
-./src/mare/GL/GLShader.cpp)
+./src/Buffers.cpp
+./src/Mare.cpp
+./src/Meshes.cpp
+./src/Renderer.cpp
+./src/Shader.cpp
+./src/GL/GLBuffers.cpp
+./src/GL/GLRenderer.cpp
+./src/GL/GLShader.cpp)
 
-add_executable(APP ${SRC})
+add_library(MARE STATIC ${SRC})
 # UNIX libraries
 if(UNIX)
     target_link_libraries(APP GL glfw pthread X11 dl stdc++fs)
