@@ -4,6 +4,7 @@
 // MARE
 #include "Layer.hpp"
 #include "Mare.hpp"
+#include "Entity.hpp"
 
 // External Libraries
 #include "glm.hpp"
@@ -14,7 +15,7 @@
 namespace mare {
 using namespace util;
 
-class UIElement : virtual public Transform {
+class UIElement : virtual public Entity {
 public:
   /**
    * @brief Abstract interface for a UIElement.
@@ -35,14 +36,18 @@ public:
    */
   bool is_cursor_in_bounds() {
     if (base_layer) {
-      glm::vec2 v1 = glm::vec2(
-          get_transformation_matrix() * glm::vec4(bounds.left(), bounds.bottom(), 0.0f, 1.0f));
-      glm::vec2 v2 = glm::vec2(
-          get_transformation_matrix() * glm::vec4(bounds.right(), bounds.bottom(), 0.0f, 1.0f));
-      glm::vec2 v3 = glm::vec2(
-          get_transformation_matrix() * glm::vec4(bounds.right(), bounds.top(), 0.0f, 1.0f));
-      glm::vec2 v4 = glm::vec2(
-          get_transformation_matrix() * glm::vec4(bounds.left(), bounds.top(), 0.0f, 1.0f));
+      glm::vec2 v1 =
+          glm::vec2(get_transformation_matrix() *
+                    glm::vec4(bounds.left(), bounds.bottom(), 0.0f, 1.0f));
+      glm::vec2 v2 =
+          glm::vec2(get_transformation_matrix() *
+                    glm::vec4(bounds.right(), bounds.bottom(), 0.0f, 1.0f));
+      glm::vec2 v3 =
+          glm::vec2(get_transformation_matrix() *
+                    glm::vec4(bounds.right(), bounds.top(), 0.0f, 1.0f));
+      glm::vec2 v4 =
+          glm::vec2(get_transformation_matrix() *
+                    glm::vec4(bounds.left(), bounds.top(), 0.0f, 1.0f));
       glm::vec2 v5{};
       if (base_layer->get_type() == ProjectionType::ORTHOGRAPHIC) {
         float x = base_layer->get_ortho_scale() * base_layer->get_aspect() *
@@ -136,6 +141,18 @@ public:
     bounds.top() = value;
     rescale();
   }
+  void set_bounds(Rect new_bounds)
+  {
+    bounds.left() = new_bounds.left();
+    bounds.right() = new_bounds.right();
+    bounds.top() = new_bounds.top();
+    bounds.bottom() = new_bounds.bottom();
+    rescale();
+  }
+  float get_left() { return bounds.left(); }
+  float get_right() { return bounds.right(); }
+  float get_top() { return bounds.top(); }
+  float get_bottom() { return bounds.bottom(); }
 
 protected:
   Rect bounds; /**< The bounds of the UIElement in the base UIElement's model

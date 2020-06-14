@@ -2,14 +2,14 @@
 #define SLIDER
 
 // MARE
-#include "Materials/BasicColorMaterial.hpp"
-#include "Materials/VertexColorMaterial.hpp"
-#include "Meshes/CircleMesh.hpp"
-#include "Meshes/QuadrangleMesh.hpp"
 #include "Components/RenderPack.hpp"
 #include "Components/Widget.hpp"
 #include "Entity.hpp"
+#include "Materials/BasicColorMaterial.hpp"
+#include "Materials/VertexColorMaterial.hpp"
 #include "Meshes.hpp"
+#include "Meshes/CircleMesh.hpp"
+#include "Meshes/QuadrangleMesh.hpp"
 #include "Renderer.hpp"
 #include "Systems.hpp"
 #include "Systems/Rendering/PacketRenderer.hpp"
@@ -43,7 +43,7 @@ public:
     }
     angle = 0.0f;
     for (int i = 0; i < sides + 1; i++) {
-      ring_verts.push_back((inner_radius+ thickness) * cos(angle));
+      ring_verts.push_back((inner_radius + thickness) * cos(angle));
       ring_verts.push_back((inner_radius + thickness) * sin(angle));
       glm::vec4 color = {0.0f, 0.0f, 0.0f, 0.0f};
       ring_colors.push_back(color.r);
@@ -79,7 +79,7 @@ public:
  * @brief A simple UI element that provides a slider bar and contains a `float`
  * value.
  */
-class Slider : public Entity, public Widget<float>, public RenderPack {
+class Slider : public Widget<float>, public RenderPack {
 public:
   /**
    * @brief Construct a new SliderUI object.
@@ -216,6 +216,10 @@ public:
     if (input.LEFT_MOUSE_JUST_PRESSED && slider_ui->is_cursor_in_bounds()) {
       UIElement::focus(slider_ui);
       return on_mouse_move(input, slider_ui);
+    }
+    if(slider_ui->is_focused())
+    {
+      UIElement::focus(nullptr);
     }
     return false;
   }

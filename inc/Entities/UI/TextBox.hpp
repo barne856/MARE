@@ -2,13 +2,13 @@
 #define TEXTBOX
 
 // MARE
-#include "Materials/BasicColorMaterial.hpp"
-#include "Meshes/CharMesh.hpp"
-#include "Meshes/QuadrangleMesh.hpp"
 #include "Components/RenderPack.hpp"
 #include "Components/Widget.hpp"
 #include "Entity.hpp"
+#include "Materials/BasicColorMaterial.hpp"
 #include "Meshes.hpp"
+#include "Meshes/CharMesh.hpp"
+#include "Meshes/QuadrangleMesh.hpp"
 #include "Systems.hpp"
 #include "Systems/Rendering/PacketRenderer.hpp"
 
@@ -29,7 +29,7 @@ class TextBoxControls;
  * Ctrl-V will paste into the box.
  *
  */
-class TextBox : public Entity, public Widget<std::string>, public RenderPack {
+class TextBox : public Widget<std::string>, public RenderPack {
 public:
   /**
    * @brief Construct a new TextBox
@@ -38,9 +38,9 @@ public:
    * @param widget_bounds The bounds in model space for the text box.
    * @param line_count The maximum number of lines in the text box. This will
    * determine the font size.
-   * @param margin_thickness The thickness in model space of the margin space
+   * @param margin_thickness The thickness as a percentage of the margin space
    * around the text box.
-   * @param boarder_thickness The thickness in model space of the boarder of the
+   * @param boarder_thickness The thickness as a percentage of the boarder of the
    * text box.
    * @param size_in_bytes The maximum size in bytes allocated for the text in
    * the text box.
@@ -172,22 +172,24 @@ public:
    *
    */
   void rescale() override {
+    float boarder_thickness_world_scale = boarder_thickness*(bounds.top() - bounds.bottom());
+    float margin_thickness_world_scale = margin_thickness*(bounds.top() - bounds.bottom());
     float text_scale = (bounds.top() - bounds.bottom() -
-                        2.0f * margin_thickness - 2.0f * boarder_thickness) /
+                        2.0f * margin_thickness_world_scale - 2.0f * boarder_thickness_world_scale) /
                        static_cast<float>(max_lines);
     max_chars_per_line =
         floor(2.0f *
-              (bounds.right() - bounds.left() - 2.0f * margin_thickness -
-               2.0f * boarder_thickness) /
+              (bounds.right() - bounds.left() - 2.0f * margin_thickness_world_scale -
+               2.0f * boarder_thickness_world_scale) /
               text_scale);
-    float box_width = (bounds.right() - bounds.left()) -
-                      4.0f * boarder_thickness;
-    float box_height = (bounds.top() - bounds.bottom()) -
-                       4.0f * boarder_thickness;
+    float box_width =
+        (bounds.right() - bounds.left()) - 4.0f * boarder_thickness_world_scale;
+    float box_height =
+        (bounds.top() - bounds.bottom()) - 4.0f * boarder_thickness_world_scale;
     float highlight_width =
-        bounds.right() - bounds.left() - 2.0f * boarder_thickness;
+        bounds.right() - bounds.left() - 2.0f * boarder_thickness_world_scale;
     float highlight_height =
-        bounds.top() - bounds.bottom() - 2.0f * boarder_thickness;
+        bounds.top() - bounds.bottom() - 2.0f * boarder_thickness_world_scale;
     float boarder_width = (bounds.right() - bounds.left());
     float boarder_height = (bounds.top() - bounds.bottom());
     glm::vec2 box_center = glm::vec2((bounds.left() + bounds.right()) / 2.0f,
@@ -199,9 +201,9 @@ public:
     box->set_position({box_center.x, box_center.y, 0.0f});
     boarder->set_position({box_center.x, box_center.y, 0.0f});
     highlight->set_position({box_center.x, box_center.y, 0.0f});
-    text->set_position({bounds.left() + margin_thickness + 2.0f*boarder_thickness,
-                        bounds.top() - margin_thickness - boarder_thickness,
-                        0.0f});
+    text->set_position(
+        {bounds.left() + margin_thickness_world_scale + 2.0f * boarder_thickness_world_scale,
+         bounds.top() - margin_thickness_world_scale - boarder_thickness_world_scale, 0.0f});
   }
   void on_focus() override {
     highlight_material->set_color({0.25f, 0.3f, 0.9f, 1.0f});
@@ -286,8 +288,12 @@ public:
     if (text_box->is_cursor_in_bounds()) {
       if (input.LEFT_MOUSE_JUST_PRESSED) {
         UIElement::focus(text_box);
+        return true;
       }
-      return true;
+      if(text_box->is_focused() && input.LEFT_MOUSE_JUST_RELEASED)
+      {
+        return true;
+      }
     }
     return false;
   }

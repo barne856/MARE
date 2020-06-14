@@ -2,6 +2,7 @@
 #define ENTITY
 
 // MARE
+#include "Components/Transform.hpp"
 #include "Mare.hpp"
 #include "Systems.hpp"
 
@@ -14,12 +15,18 @@ namespace mare {
  * @see System
  * @see Transform
  */
-class Entity {
+class Entity : virtual public Transform {
 public:
   /**
    * @brief Construct a new Entity object
    */
   Entity() {}
+  /**
+   * @brief Construct a new Entity object with an initial transform
+   *
+   * @param transform The initial transform to set.
+   */
+  Entity(glm::mat4 transform) : Transform(transform) {}
   /**
    * @brief Destroy the Entity object
    */

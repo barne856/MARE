@@ -18,7 +18,7 @@ class BillboardRenderer;
  * @brief A Text Billboard that will face the camera
  *
  */
-class Billboard : public Entity, public RenderPack {
+class Billboard : public RenderPack {
 public:
   /**
    * @brief Construct a new Billboard object

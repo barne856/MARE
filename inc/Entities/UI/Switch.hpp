@@ -2,16 +2,16 @@
 #define SWITCH
 
 // MARE
-#include "Materials/BasicColorMaterial.hpp"
-#include "Materials/VertexColorMaterial.hpp"
-#include "Meshes/CircleMesh.hpp"
-#include "Meshes/QuadrangleMesh.hpp"
 #include "Components/RenderPack.hpp"
 #include "Components/Rigidbody.hpp"
 #include "Components/Widget.hpp"
 #include "Entities/UI/Slider.hpp"
 #include "Entity.hpp"
+#include "Materials/BasicColorMaterial.hpp"
+#include "Materials/VertexColorMaterial.hpp"
 #include "Meshes.hpp"
+#include "Meshes/CircleMesh.hpp"
+#include "Meshes/QuadrangleMesh.hpp"
 #include "Systems/Rendering/PacketRenderer.hpp"
 
 namespace mare {
@@ -24,10 +24,7 @@ class SwitchPhysics;
  * @brief A Switch Widget used to toggle settings.
  *
  */
-class Switch : public Entity,
-               public Widget<bool>,
-               public RenderPack,
-               public Rigidbody {
+class Switch : public Widget<bool>, public RenderPack, public Rigidbody {
 public:
   Switch(Layer *layer, util::Rect widget_bounds)
       : Widget(layer, widget_bounds) {
@@ -68,8 +65,9 @@ public:
     right_circle_mesh->set_scale(glm::vec3(height));
     right_circle_mesh->set_position({right, 0.0f, 0.0f});
     knob_mesh->set_scale(glm::vec3(height));
-    knob_mesh->set_position({left, 0.0f, 0.0f});
+    knob_mesh->set_position({ (get_value() ? right : left), 0.0f, 0.0f});
     quad_mesh->set_scale({right - left, height, 1.0f});
+    quad_mesh->set_position({0.0f, 0.0f, 0.0f});
 
     glm::vec2 center = util::get_rect_center(bounds);
     left_circle_mesh->translate({center.x, center.y, 0.0f});

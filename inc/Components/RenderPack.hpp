@@ -2,7 +2,7 @@
 #define RENDERPACK
 
 // MARE
-#include "Components/Transform.hpp"
+#include "Entity.hpp"
 #include "Mare.hpp"
 #include "Meshes.hpp"
 #include "Shader.hpp"
@@ -18,7 +18,7 @@ namespace mare {
  * *Render Packets* which are rendered each frame. Any Entity that inherits from
  * RenderPack can push Render Packets to the Component which will render them.
  */
-class RenderPack : virtual public Transform {
+class RenderPack : virtual public Entity {
 public:
   /**
    * @brief Get a pointer to the first Packet of type <T,U> in the Entity's
@@ -96,7 +96,7 @@ public:
       if (auto mesh = std::dynamic_pointer_cast<T>((*pack_it).first)) {
         if (auto material = std::dynamic_pointer_cast<U>((*pack_it).second)) {
           std::pair<Referenced<T>, Referenced<U>> pulled_packet =
-              std::move(std::pair<T, U>{mesh, material});
+              std::pair<Referenced<T>, Referenced<U>>{mesh, material};
           packets_.erase(pack_it);
           return pulled_packet;
         }
@@ -114,17 +114,32 @@ public:
    */
   template <typename T, typename U>
   std::vector<std::pair<Referenced<T>, Referenced<U>>> pull_packets() {
+    std::vector<int> rm{};
+    int i = 0;
     std::vector<std::pair<Referenced<T>, Referenced<U>>> packets{};
     for (auto pack_it = packets_begin(); pack_it != packets_end(); pack_it++) {
       if (auto mesh = std::dynamic_pointer_cast<T>((*pack_it).first)) {
         if (auto material = std::dynamic_pointer_cast<U>((*pack_it).second)) {
           std::pair<Referenced<T>, Referenced<U>> pulled_packet =
-              std::move(std::pair<T, U>{mesh, material});
-          packets_.erase(pack_it);
+              std::pair<Referenced<T>, Referenced<U>>{mesh, material};
           packets.push_back(pulled_packet);
+          rm.push_back(i);
+          i++;
         }
       }
     }
+    // remove all pulled packets
+    size_t rm_index = 0;
+    packets_.erase(std::remove_if(std::begin(packets_), std::end(packets_),
+                                  [&](auto &elem) {
+                                    if (rm.size() != rm_index &&
+                                        &elem - &packets_[0] == rm[rm_index]) {
+                                      rm_index++;
+                                      return true;
+                                    }
+                                    return false;
+                                  }),
+                   std::end(packets_));
     return packets;
   }
 

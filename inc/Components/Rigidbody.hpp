@@ -2,7 +2,7 @@
 #define RIGIDBODY
 
 // MARE
-#include "Components/Transform.hpp"
+#include "Entity.hpp"
 
 // External Libraries
 #include "glm.hpp"
@@ -11,7 +11,7 @@ namespace mare {
 /**
  * @brief A Rigidbody Component that provides Rigidbody properties.
  */
-class Rigidbody : virtual public Transform {
+class Rigidbody : virtual public Entity {
 public:
   glm::vec3 linear_velocity{};  /**< The linear velocity of the body.*/
   glm::vec3 angular_velocity{}; /**< The angular velocity of the body.*/

@@ -22,7 +22,7 @@ typedef void (*on_click_callback)(Layer *);
  * clicked.
  *
  */
-class Button : public Entity, public Widget<bool>, public RenderPack {
+class Button : public Widget<bool>, public RenderPack {
 public:
   Button(Layer *layer, util::Rect widget_bounds, std::string label)
       : Widget(layer, widget_bounds) {
@@ -50,9 +50,9 @@ public:
     float text_scale = (bounds.top() - bounds.bottom()) / 1.5f;
     label_mesh->set_scale(glm::vec3(text_scale, text_scale, 1.0f));
     label_mesh->set_center(util::get_rect_center(bounds));
-    float boarder_thickness = 0.01f * (bounds.right() - bounds.left());
-    float box_scale_x = bounds.right() - bounds.left();
-    float box_scale_y = bounds.top() - bounds.bottom();
+    float boarder_thickness = 0.05f * (bounds.top() - bounds.bottom());
+    float box_scale_x = bounds.right() - bounds.left()-boarder_thickness;
+    float box_scale_y = bounds.top() - bounds.bottom()-boarder_thickness;
     float boarder_scale_x = box_scale_x + boarder_thickness;
     float boarder_scale_y = box_scale_y + boarder_thickness;
     button_boarder->set_scale({boarder_scale_x, boarder_scale_y, 1.0f});

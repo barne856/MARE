@@ -2,12 +2,12 @@
 #define COLORPICKER
 
 // MARE
-#include "Materials/VertexColorMaterial.hpp"
-#include "Meshes/ArrayMesh.hpp"
 #include "Components/RenderPack.hpp"
 #include "Components/Widget.hpp"
 #include "Entity.hpp"
+#include "Materials/VertexColorMaterial.hpp"
 #include "Meshes.hpp"
+#include "Meshes/ArrayMesh.hpp"
 #include "Shader.hpp"
 #include "Systems/Rendering/PacketRenderer.hpp"
 
@@ -487,7 +487,7 @@ class ColorPickerControls;
  * @brief A UI Element for Selecting Colors
  * @details A Widget with a glm::vec4 vlaue for an rgba color.
  */
-class ColorPicker : public Entity, public Widget<glm::vec4>, public RenderPack {
+class ColorPicker : public Widget<glm::vec4>, public RenderPack {
 public:
   ColorPicker(Layer *base_layer, util::Rect bounds,
               bool transparency_slider = false)
@@ -558,8 +558,7 @@ public:
     glm::vec2 widget_coords = get_model_coords();
     widget_coords.x -= (x_offset + center.x);
     widget_coords.y -= center.y;
-    if (glm::length(widget_coords) <=
-        scale * 0.6f) {
+    if (glm::length(widget_coords) <= scale * 0.6f) {
       return true;
     }
     return false;
@@ -569,9 +568,9 @@ public:
    *
    * @param hue The hue to set.
    */
-  void set_hue(glm::vec2 widget_coords)
-  { 
-    float hue = atan2f(widget_coords.y - center.y, widget_coords.x - (x_offset + center.x));
+  void set_hue(glm::vec2 widget_coords) {
+    float hue = atan2f(widget_coords.y - center.y,
+                       widget_coords.x - (x_offset + center.x));
     mesh->set_hue(hue);
   }
   /**
@@ -584,16 +583,16 @@ public:
   void set_picker_color(glm::vec2 widget_coords) {
     widget_coords.x -= (center.x + x_offset);
     widget_coords.y -= center.y;
-    mesh->set_picker_coords(widget_coords/scale);
+    mesh->set_picker_coords(widget_coords / scale);
   }
   /**
    * @brief Set the alpha of the ColorPicker.
    *
    * @param alpha The alpha to set.
    */
-  void set_alpha(glm::vec2 widget_coords)
-  { 
-    float alpha = glm::clamp((widget_coords.y - center.y)/scale + 0.5f, 0.0f, 1.0f);
+  void set_alpha(glm::vec2 widget_coords) {
+    float alpha =
+        glm::clamp((widget_coords.y - center.y) / scale + 0.5f, 0.0f, 1.0f);
     mesh->set_alpha(alpha);
   }
 
@@ -634,6 +633,9 @@ public:
 
       return on_mouse_move(input, picker);
     }
+    if (picker->is_focused()) {
+      UIElement::focus(nullptr);
+    }
     focused_mesh = nullptr;
     return false;
   }
@@ -654,7 +656,8 @@ public:
       // clamp to triangle
       if (focused_mesh == picker->mesh->get_meshes<Mesh>()[1]) {
         picker->set_picker_color(widget_coords);
-      } else if (picker->transparency && focused_mesh == picker->mesh->get_meshes<Mesh>()[3]) {
+      } else if (picker->transparency &&
+                 focused_mesh == picker->mesh->get_meshes<Mesh>()[3]) {
         picker->set_alpha(widget_coords);
       } else if (focused_mesh == picker->mesh->get_meshes<Mesh>()[0]) {
         picker->set_hue(widget_coords);
