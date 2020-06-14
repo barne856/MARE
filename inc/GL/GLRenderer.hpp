@@ -50,6 +50,24 @@ public:
    */
   void start_renderer() final;
   /**
+   * @brief Get a string of the current vendor
+   *
+   * @return The vendor string
+   */
+  virtual std::string api_get_vendor_string() override;
+  /**
+   * @brief Get a string of the current version
+   *
+   * @return The version string
+   */
+  virtual std::string api_get_version_string() override;
+  /**
+   * @brief Get a string of the current renderer
+   *
+   * @return The renderer string
+   */
+  virtual std::string api_get_renderer_string() override;
+  /**
    * @brief OpenGL implementation to set the operating system's clipboad to a
    * string.
    *

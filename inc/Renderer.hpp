@@ -498,6 +498,24 @@ public:
    */
   static void load_scene(int index);
   /**
+   * @brief Get a string of the current vendor
+   *
+   * @return The vendor string
+   */
+  virtual std::string api_get_vendor_string() = 0;
+  /**
+   * @brief Get a string of the current version
+   *
+   * @return The version string
+   */
+  virtual std::string api_get_version_string() = 0;
+  /**
+   * @brief Get a string of the current renderer
+   *
+   * @return The renderer string
+   */
+  virtual std::string api_get_renderer_string() = 0;
+  /**
    * @brief Set the operating system's clipboad to a string.
    *
    * @param str The string to set the clipboard to.
@@ -644,7 +662,7 @@ public:
    */
   virtual void api_render_simple_mesh(Camera *camera, SimpleMesh *mesh,
                                       Material *material,
-                                      Transform* parent_transform) = 0;
+                                      Transform *parent_transform) = 0;
   /**
    * @brief API implemented function to render a SimpleMesh with a Material and
    * a parent Transform.
@@ -659,7 +677,7 @@ public:
    */
   virtual void api_render_simple_mesh(Camera *camera, SimpleMesh *mesh,
                                       Material *material,
-                                      Transform* parent_transform,
+                                      Transform *parent_transform,
                                       unsigned int instance_count,
                                       Buffer<Transform> *models) = 0;
   /**
@@ -738,7 +756,33 @@ public:
    * @see Shader
    */
   virtual Scoped<Shader> api_gen_shader(const char *directory) = 0;
-
+  /**
+   * @brief Get a string of the current vendor
+   *
+   * @return The vendor string
+   */
+  static std::string get_vendor_string()
+  {
+    return API->api_get_vendor_string();
+  }
+  /**
+   * @brief Get a string of the current version
+   *
+   * @return The version string
+   */
+  static std::string get_version_string()
+  {
+    return API->api_get_version_string();
+  }
+  /**
+   * @brief Get a string of the current renderer
+   *
+   * @return The renderer string
+   */
+  static std::string get_renderer_string()
+  {
+    return API->api_get_renderer_string();
+  }
   /**
    * @brief Static access to Renderer::api_set_window_title(const char*).
    *
@@ -899,7 +943,8 @@ public:
    * glm::mat4&)
    */
   static void render_simple_mesh(Camera *camera, SimpleMesh *mesh,
-                                 Material *material, Transform* parent_transform) {
+                                 Material *material,
+                                 Transform *parent_transform) {
     API->api_render_simple_mesh(camera, mesh, material, parent_transform);
   }
   /**
@@ -917,7 +962,8 @@ public:
    * glm::mat4&, unsigned int, Buffer<glm::mat4>*)
    */
   static void render_simple_mesh(Camera *camera, SimpleMesh *mesh,
-                                 Material *material, Transform* parent_transform,
+                                 Material *material,
+                                 Transform *parent_transform,
                                  unsigned int instance_count,
                                  Buffer<Transform> *models) {
     API->api_render_simple_mesh(camera, mesh, material, parent_transform,

@@ -189,6 +189,24 @@ void GLRenderer::start_renderer() {
   glfwTerminate();
 }
 
+std::string GLRenderer::api_get_vendor_string() {
+  std::string result = "GL VENDOR: ";
+  result += std::string(reinterpret_cast<const char *>(glGetString(GL_VENDOR)));
+  return result;
+}
+std::string GLRenderer::api_get_version_string() {
+  std::string result = "GL VERSION: ";
+  result +=
+      std::string(reinterpret_cast<const char *>(glGetString(GL_VERSION)));
+  return result;
+}
+std::string GLRenderer::api_get_renderer_string() {
+  std::string result = "GL RENDERER: ";
+  result +=
+      std::string(reinterpret_cast<const char *>(glGetString(GL_RENDERER)));
+  return result;
+}
+
 void GLRenderer::api_set_clipboard_string(std::string str) {
   glfwSetClipboardString(window, str.c_str());
 }
@@ -358,7 +376,7 @@ void GLRenderer::api_render_simple_mesh(Camera *camera, SimpleMesh *mesh,
 // composite rendering
 void GLRenderer::api_render_simple_mesh(Camera *camera, SimpleMesh *mesh,
                                         Material *material,
-                                        Transform* parent_model) {
+                                        Transform *parent_model) {
   material->bind();
   mesh->bind(material);
   material->upload_camera(camera);
@@ -378,7 +396,7 @@ void GLRenderer::api_render_simple_mesh(Camera *camera, SimpleMesh *mesh,
 // instanced rendering
 void GLRenderer::api_render_simple_mesh(Camera *camera, SimpleMesh *mesh,
                                         Material *material,
-                                        Transform* parent_model,
+                                        Transform *parent_model,
                                         unsigned int instance_count,
                                         Buffer<Transform> *models) {
   material->bind();
@@ -2653,8 +2671,8 @@ void GLRenderer::glfw_onKey(GLFWwindow *window, int key, int scancode,
       }
     }
   }
-  // reset just released to false after callbacks
-  end:
+// reset just released to false after callbacks
+end:
   input.SPACE_JUST_RELEASED = false;
   input.APOSTROPHE_JUST_RELEASED = false;
   input.COMMA_JUST_RELEASED = false;
@@ -2878,7 +2896,7 @@ void GLRenderer::glfw_onMouseButton(GLFWwindow *window, int button, int action,
       }
     }
   }
-  end:
+end:
   input.LEFT_MOUSE_JUST_RELEASED = false;
   input.MIDDLE_MOUSE_JUST_RELEASED = false;
   input.RIGHT_MOUSE_JUST_RELEASED = false;
