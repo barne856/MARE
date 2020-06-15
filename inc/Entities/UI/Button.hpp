@@ -29,7 +29,7 @@ public:
     value = false;
     button_box = gen_ref<QuadrangleMesh>();
     button_boarder = gen_ref<QuadrangleMesh>();
-    label_mesh = gen_ref<CharMesh>(label, 1.0f / 17.0f);
+    label_mesh = gen_ref<CharMesh>(label, 0.08f);
     box_material = gen_ref<BasicColorMaterial>();
     boarder_material = gen_ref<BasicColorMaterial>();
     label_material = gen_ref<BasicColorMaterial>();
@@ -91,7 +91,7 @@ public:
   Referenced<BasicColorMaterial> label_material;
   glm::vec4 boarder_color{0.0f, 0.0f, 0.0f, 1.0f};
   glm::vec4 box_color{1.0f, 1.0f, 1.0f, 1.0f};
-  glm::vec4 box_pushed_color{0.8f, 0.8f, 0.9f, 1.0f};
+  glm::vec4 box_pushed_color{0.17f, 0.45f, 1.0f, 1.0f};
   glm::vec4 label_color{0.0f, 0.0f, 0.0f, 1.0f};
 
 private:

@@ -206,7 +206,7 @@ public:
          bounds.top() - margin_thickness_world_scale - boarder_thickness_world_scale, 0.0f});
   }
   void on_focus() override {
-    highlight_material->set_color({0.25f, 0.3f, 0.9f, 1.0f});
+    highlight_material->set_color({0.17f, 0.45f, 1.0f, 1.0f});
   }
   void on_unfocus() override {
     highlight_material->set_color({1.0f, 1.0f, 1.0f, 1.0f});

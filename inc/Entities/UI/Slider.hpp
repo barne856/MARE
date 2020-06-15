@@ -176,8 +176,7 @@ public:
   glm::vec4 slider_color{
       1.0f, 1.0f, 1.0f,
       1.0f}; /**< The color of the bacground and knob for the slider.*/
-  glm::vec4 fill_color{0.25f, 0.3f, 0.9f,
-                       1.0f}; /**< The color of the fill for the slider.*/
+  glm::vec4 fill_color{0.17f, 0.45f, 1.0f, 1.0f}; /**< The color of the fill for the slider.*/
   glm::vec4 knob_color{0.77f, 0.77f, 0.85f, 1.0f};
 };
 

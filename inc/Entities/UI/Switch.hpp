@@ -90,7 +90,7 @@ public:
   Referenced<BasicColorMaterial> knob_material;
   Referenced<VertexColorMaterial> knob_shadow_material;
   glm::vec4 switch_off_color{1.0f, 1.0f, 1.0f, 1.0f};
-  glm::vec4 switch_on_color{0.25f, 0.3f, 0.9f, 1.0f};
+  glm::vec4 switch_on_color{0.17f, 0.45f, 1.0f, 1.0f};
   glm::vec4 knob_color{0.77f, 0.77f, 0.85f, 1.0f};
   glm::vec2 on_position;
   glm::vec2 off_position;
