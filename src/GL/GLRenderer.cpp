@@ -123,59 +123,89 @@ void GLRenderer::start_renderer() {
     float delta_time = (float)(time - info.current_time);
     // Update render and physics systems
     if (info.scene) {
+      info.scene->remove_null_layers();
+      info.scene->remove_null_entities();
+      info.scene->remove_null_systems();
       info.scene->render(delta_time);
       // Scene/Camera systems
       auto physics_systems = info.scene->get_systems<IPhysicsSystem>();
       auto render_systems = info.scene->get_systems<IRenderSystem>();
       for (auto system : physics_systems) {
-        system->update(delta_time, info.scene);
+        if (system) {
+          system->update(delta_time, info.scene);
+        }
       }
       for (auto system : render_systems) {
-        system->render(delta_time, info.scene, info.scene);
+        if (system) {
+          system->render(delta_time, info.scene, info.scene);
+        }
       }
 
       // Entities in scene
       for (auto entity_it = info.scene->entity_begin();
            entity_it != info.scene->entity_end(); entity_it++) {
         Entity *entity = entity_it->get();
-        physics_systems = entity->get_systems<IPhysicsSystem>();
-        render_systems = entity->get_systems<IRenderSystem>();
-        for (auto system : physics_systems) {
-          system->update(delta_time, entity);
-        }
-        for (auto system : render_systems) {
-          system->render(delta_time, info.scene, entity);
+        if (entity) {
+          entity->remove_null_systems();
+          physics_systems = entity->get_systems<IPhysicsSystem>();
+          render_systems = entity->get_systems<IRenderSystem>();
+          for (auto system : physics_systems) {
+            if (system) {
+              system->update(delta_time, entity);
+            }
+          }
+          for (auto system : render_systems) {
+            if (system) {
+              system->render(delta_time, info.scene, entity);
+            }
+          }
         }
       }
       // Layers on scene and entities/widgets in overlays
       for (auto layr_it = info.scene->layer_begin();
            layr_it != info.scene->layer_end(); layr_it++) {
         Layer *layer = layr_it->get();
-        layer->render(delta_time);
-        physics_systems = layer->get_systems<IPhysicsSystem>();
-        render_systems = layer->get_systems<IRenderSystem>();
-        for (auto system : physics_systems) {
-          system->update(delta_time, layer);
-        }
-        for (auto system : render_systems) {
-          system->render(delta_time, layer, layer);
-        }
-
-        for (auto ent_it = layer->entity_begin(); ent_it != layer->entity_end();
-             ent_it++) {
-          Entity *entity = ent_it->get();
-          physics_systems = entity->get_systems<IPhysicsSystem>();
-          render_systems = entity->get_systems<IRenderSystem>();
+        if (layer) {
+          layer->remove_null_entities();
+          layer->remove_null_systems();
+          layer->render(delta_time);
+          physics_systems = layer->get_systems<IPhysicsSystem>();
+          render_systems = layer->get_systems<IRenderSystem>();
           for (auto system : physics_systems) {
-            system->update(delta_time, entity);
+            if (system) {
+              system->update(delta_time, layer);
+            }
           }
           for (auto system : render_systems) {
-            system->render(delta_time, layer, entity);
+            if (system) {
+              system->render(delta_time, layer, layer);
+            }
+          }
+
+          for (auto ent_it = layer->entity_begin();
+               ent_it != layer->entity_end(); ent_it++) {
+            Entity *entity = ent_it->get();
+            if (entity) {
+              entity->remove_null_systems();
+              physics_systems = entity->get_systems<IPhysicsSystem>();
+              render_systems = entity->get_systems<IRenderSystem>();
+              for (auto system : physics_systems) {
+                if (system) {
+                  system->update(delta_time, entity);
+                }
+              }
+              for (auto system : render_systems) {
+                if (system) {
+                  system->render(delta_time, layer, entity);
+                }
+              }
+            }
           }
         }
       }
     }
     info.current_time = time;
+
     glfwPollEvents();
     glfwSwapBuffers(window);
   } while (running && !glfwWindowShouldClose(window));
@@ -584,27 +614,35 @@ void GLRenderer::glfw_onResize(GLFWwindow *window, int w, int h) {
     for (auto layr_it = info.scene->layer_rbegin();
          layr_it != info.scene->layer_rend(); layr_it++) {
       Layer *layer = layr_it->get();
-      // reverse iterate through layer entities
-      for (auto ent_it = layer->entity_rbegin(); ent_it != layer->entity_rend();
-           ent_it++) {
-        Entity *entity = ent_it->get();
-        auto controls_systems = entity->get_systems<IControlsSystem>();
-        // reverse iterate through entity controls callbacks
-        for (auto controls_it = controls_systems.rbegin();
-             controls_it != controls_systems.rend(); controls_it++) {
-          handled = (*controls_it)->on_resize(input, entity);
-          if (handled) {
-            return;
+      if (layer) {
+        // reverse iterate through layer entities
+        for (auto ent_it = layer->entity_rbegin();
+             ent_it != layer->entity_rend(); ent_it++) {
+          Entity *entity = ent_it->get();
+          if (entity) {
+            auto controls_systems = entity->get_systems<IControlsSystem>();
+            // reverse iterate through entity controls callbacks
+            for (auto controls_it = controls_systems.rbegin();
+                 controls_it != controls_systems.rend(); controls_it++) {
+              if (*controls_it) {
+                handled = (*controls_it)->on_resize(input, entity);
+                if (handled) {
+                  return;
+                }
+              }
+            }
           }
         }
-      }
-      auto controls_systems = layer->get_systems<IControlsSystem>();
-      // reverse iterate through layer controls callbacks
-      for (auto controls_it = controls_systems.rbegin();
-           controls_it != controls_systems.rend(); controls_it++) {
-        handled = (*controls_it)->on_resize(input, layer);
-        if (handled) {
-          return;
+        auto controls_systems = layer->get_systems<IControlsSystem>();
+        // reverse iterate through layer controls callbacks
+        for (auto controls_it = controls_systems.rbegin();
+             controls_it != controls_systems.rend(); controls_it++) {
+          if (*controls_it) {
+            handled = (*controls_it)->on_resize(input, layer);
+            if (handled) {
+              return;
+            }
+          }
         }
       }
     }
@@ -613,13 +651,17 @@ void GLRenderer::glfw_onResize(GLFWwindow *window, int w, int h) {
     for (auto entity_it = info.scene->entity_rbegin();
          entity_it != info.scene->entity_rend(); entity_it++) {
       Entity *entity = entity_it->get();
-      auto controls_systems = entity->get_systems<IControlsSystem>();
-      // reverse iterate through entity controls callbacks
-      for (auto controls_it = controls_systems.rbegin();
-           controls_it != controls_systems.rend(); controls_it++) {
-        handled = (*controls_it)->on_resize(input, entity);
-        if (handled) {
-          return;
+      if (entity) {
+        auto controls_systems = entity->get_systems<IControlsSystem>();
+        // reverse iterate through entity controls callbacks
+        for (auto controls_it = controls_systems.rbegin();
+             controls_it != controls_systems.rend(); controls_it++) {
+          if (*controls_it) {
+            handled = (*controls_it)->on_resize(input, entity);
+            if (handled) {
+              return;
+            }
+          }
         }
       }
     }
@@ -627,9 +669,11 @@ void GLRenderer::glfw_onResize(GLFWwindow *window, int w, int h) {
     // reverse iterate through scene controls callbacks
     for (auto controls_it = controls_systems.rbegin();
          controls_it != controls_systems.rend(); controls_it++) {
-      handled = (*controls_it)->on_resize(input, info.scene);
-      if (handled) {
-        return;
+      if (*controls_it) {
+        handled = (*controls_it)->on_resize(input, info.scene);
+        if (handled) {
+          return;
+        }
       }
     }
   }
@@ -2622,27 +2666,35 @@ void GLRenderer::glfw_onKey(GLFWwindow *window, int key, int scancode,
     for (auto layr_it = info.scene->layer_rbegin();
          layr_it != info.scene->layer_rend(); layr_it++) {
       Layer *layer = layr_it->get();
-      // reverse iterate through overlay widgets
-      for (auto ent_it = layer->entity_rbegin(); ent_it != layer->entity_rend();
-           ent_it++) {
-        Entity *entity = ent_it->get();
-        auto controls_systems = entity->get_systems<IControlsSystem>();
-        // reverse iterate through widget controls callbacks
-        for (auto controls_it = controls_systems.rbegin();
-             controls_it != controls_systems.rend(); controls_it++) {
-          handled = (*controls_it)->on_key(input, entity);
-          if (handled) {
-            goto end;
+      if (layer) {
+        // reverse iterate through overlay widgets
+        for (auto ent_it = layer->entity_rbegin();
+             ent_it != layer->entity_rend(); ent_it++) {
+          Entity *entity = ent_it->get();
+          if (entity) {
+            auto controls_systems = entity->get_systems<IControlsSystem>();
+            // reverse iterate through widget controls callbacks
+            for (auto controls_it = controls_systems.rbegin();
+                 controls_it != controls_systems.rend(); controls_it++) {
+              if (*controls_it) {
+                handled = (*controls_it)->on_key(input, entity);
+                if (handled) {
+                  goto end;
+                }
+              }
+            }
           }
         }
-      }
-      auto controls_systems = layer->get_systems<IControlsSystem>();
-      // reverse iterate through overlay controls callbacks
-      for (auto controls_it = controls_systems.rbegin();
-           controls_it != controls_systems.rend(); controls_it++) {
-        handled = (*controls_it)->on_key(input, layer);
-        if (handled) {
-          goto end;
+        auto controls_systems = layer->get_systems<IControlsSystem>();
+        // reverse iterate through overlay controls callbacks
+        for (auto controls_it = controls_systems.rbegin();
+             controls_it != controls_systems.rend(); controls_it++) {
+          if (*controls_it) {
+            handled = (*controls_it)->on_key(input, layer);
+            if (handled) {
+              goto end;
+            }
+          }
         }
       }
     }
@@ -2651,13 +2703,17 @@ void GLRenderer::glfw_onKey(GLFWwindow *window, int key, int scancode,
     for (auto entity_it = info.scene->entity_rbegin();
          entity_it != info.scene->entity_rend(); entity_it++) {
       Entity *entity = entity_it->get();
-      auto controls_systems = entity->get_systems<IControlsSystem>();
-      // reverse iterate through entity controls callbacks
-      for (auto controls_it = controls_systems.rbegin();
-           controls_it != controls_systems.rend(); controls_it++) {
-        handled = (*controls_it)->on_key(input, entity);
-        if (handled) {
-          goto end;
+      if (entity) {
+        auto controls_systems = entity->get_systems<IControlsSystem>();
+        // reverse iterate through entity controls callbacks
+        for (auto controls_it = controls_systems.rbegin();
+             controls_it != controls_systems.rend(); controls_it++) {
+          if (*controls_it) {
+            handled = (*controls_it)->on_key(input, entity);
+            if (handled) {
+              goto end;
+            }
+          }
         }
       }
     }
@@ -2665,9 +2721,11 @@ void GLRenderer::glfw_onKey(GLFWwindow *window, int key, int scancode,
     // reverse iterate through scene controls callbacks
     for (auto controls_it = controls_systems.rbegin();
          controls_it != controls_systems.rend(); controls_it++) {
-      handled = (*controls_it)->on_key(input, info.scene);
-      if (handled) {
-        goto end;
+      if (*controls_it) {
+        handled = (*controls_it)->on_key(input, info.scene);
+        if (handled) {
+          goto end;
+        }
       }
     }
   }
@@ -2846,27 +2904,33 @@ void GLRenderer::glfw_onMouseButton(GLFWwindow *window, int button, int action,
     for (auto layer_it = info.scene->layer_rbegin();
          layer_it != info.scene->layer_rend(); layer_it++) {
       Layer *layer = layer_it->get();
-      // reverse iterate through overlay entities
-      for (auto entity_it = layer->entity_rbegin();
-           entity_it != layer->entity_rend(); entity_it++) {
-        Entity *entity = entity_it->get();
-        auto controls_systems = entity->get_systems<IControlsSystem>();
-        // reverse iterate through entity controls callbacks
-        for (auto controls_it = controls_systems.rbegin();
-             controls_it != controls_systems.rend(); controls_it++) {
-          handled = (*controls_it)->on_mouse_button(input, entity);
-          if (handled) {
-            goto end;
+      if (layer) {
+        // reverse iterate through overlay entities
+        for (auto entity_it = layer->entity_rbegin();
+             entity_it != layer->entity_rend(); entity_it++) {
+          Entity *entity = entity_it->get();
+          if (entity) {
+            auto controls_systems = entity->get_systems<IControlsSystem>();
+            // reverse iterate through entity controls callbacks
+            for (auto controls_it = controls_systems.rbegin();
+                 controls_it != controls_systems.rend(); controls_it++) {
+              handled = (*controls_it)->on_mouse_button(input, entity);
+              if (handled) {
+                goto end;
+              }
+            }
           }
         }
-      }
-      auto controls_systems = layer->get_systems<IControlsSystem>();
-      // reverse iterate through layer controls callbacks
-      for (auto controls_it = controls_systems.rbegin();
-           controls_it != controls_systems.rend(); controls_it++) {
-        handled = (*controls_it)->on_mouse_button(input, layer);
-        if (handled) {
-          goto end;
+        auto controls_systems = layer->get_systems<IControlsSystem>();
+        // reverse iterate through layer controls callbacks
+        for (auto controls_it = controls_systems.rbegin();
+             controls_it != controls_systems.rend(); controls_it++) {
+          if (*controls_it) {
+            handled = (*controls_it)->on_mouse_button(input, layer);
+            if (handled) {
+              goto end;
+            }
+          }
         }
       }
     }
@@ -2876,13 +2940,17 @@ void GLRenderer::glfw_onMouseButton(GLFWwindow *window, int button, int action,
     for (auto entity_it = info.scene->entity_rbegin();
          entity_it != info.scene->entity_rend(); entity_it++) {
       Entity *entity = entity_it->get();
-      auto controls_systems = entity->get_systems<IControlsSystem>();
-      // reverse iterate through entity controls callbacks
-      for (auto controls_it = controls_systems.rbegin();
-           controls_it != controls_systems.rend(); controls_it++) {
-        handled = (*controls_it)->on_mouse_button(input, entity);
-        if (handled) {
-          goto end;
+      if (entity) {
+        auto controls_systems = entity->get_systems<IControlsSystem>();
+        // reverse iterate through entity controls callbacks
+        for (auto controls_it = controls_systems.rbegin();
+             controls_it != controls_systems.rend(); controls_it++) {
+          if (*controls_it) {
+            handled = (*controls_it)->on_mouse_button(input, entity);
+            if (handled) {
+              goto end;
+            }
+          }
         }
       }
     }
@@ -2890,9 +2958,11 @@ void GLRenderer::glfw_onMouseButton(GLFWwindow *window, int button, int action,
     // reverse iterate through scene controls callbacks
     for (auto controls_it = controls_systems.rbegin();
          controls_it != controls_systems.rend(); controls_it++) {
-      handled = (*controls_it)->on_mouse_button(input, info.scene);
-      if (handled) {
-        goto end;
+      if (*controls_it) {
+        handled = (*controls_it)->on_mouse_button(input, info.scene);
+        if (handled) {
+          goto end;
+        }
       }
     }
   }
@@ -2919,31 +2989,40 @@ void GLRenderer::glfw_onMouseMove(GLFWwindow *window, double x, double y) {
     for (auto layr_it = info.scene->layer_rbegin();
          layr_it != info.scene->layer_rend(); layr_it++) {
       Layer *layer = layr_it->get();
-      // reverse iterate through layer entities
-      for (auto ent_it = layer->entity_rbegin(); ent_it != layer->entity_rend();
-           ent_it++) {
-        Entity *entity = ent_it->get();
-        auto controls_systems = entity->get_systems<IControlsSystem>();
-        // reverse iterate through entity controls callbacks
-        for (auto controls_it = controls_systems.rbegin();
-             controls_it != controls_systems.rend(); controls_it++) {
-          handled = (*controls_it)->on_mouse_move(input, entity);
-          if (handled) {
-            // mouse velocity is always zero outside of mouse move callbacks
-            input.mouse_vel = glm::ivec2(0, 0);
-            return;
+      if (layer) {
+        // reverse iterate through layer entities
+        for (auto ent_it = layer->entity_rbegin();
+             ent_it != layer->entity_rend(); ent_it++) {
+          Entity *entity = ent_it->get();
+          if (entity) {
+            auto controls_systems = entity->get_systems<IControlsSystem>();
+            // reverse iterate through entity controls callbacks
+            for (auto controls_it = controls_systems.rbegin();
+                 controls_it != controls_systems.rend(); controls_it++) {
+              if (*controls_it) {
+                handled = (*controls_it)->on_mouse_move(input, entity);
+                if (handled) {
+                  // mouse velocity is always zero outside of mouse move
+                  // callbacks
+                  input.mouse_vel = glm::ivec2(0, 0);
+                  return;
+                }
+              }
+            }
           }
         }
-      }
-      auto controls_systems = layer->get_systems<IControlsSystem>();
-      // reverse iterate through layer controls callbacks
-      for (auto controls_it = controls_systems.rbegin();
-           controls_it != controls_systems.rend(); controls_it++) {
-        handled = (*controls_it)->on_mouse_move(input, layer);
-        if (handled) {
-          // mouse velocity is always zero outside of mouse move callbacks
-          input.mouse_vel = glm::ivec2(0, 0);
-          return;
+        auto controls_systems = layer->get_systems<IControlsSystem>();
+        // reverse iterate through layer controls callbacks
+        for (auto controls_it = controls_systems.rbegin();
+             controls_it != controls_systems.rend(); controls_it++) {
+          if (*controls_it) {
+            handled = (*controls_it)->on_mouse_move(input, layer);
+            if (handled) {
+              // mouse velocity is always zero outside of mouse move callbacks
+              input.mouse_vel = glm::ivec2(0, 0);
+              return;
+            }
+          }
         }
       }
     }
@@ -2952,15 +3031,19 @@ void GLRenderer::glfw_onMouseMove(GLFWwindow *window, double x, double y) {
     for (auto entity_it = info.scene->entity_rbegin();
          entity_it != info.scene->entity_rend(); entity_it++) {
       Entity *entity = entity_it->get();
-      auto controls_systems = entity->get_systems<IControlsSystem>();
-      // reverse iterate through entity controls callbacks
-      for (auto controls_it = controls_systems.rbegin();
-           controls_it != controls_systems.rend(); controls_it++) {
-        handled = (*controls_it)->on_mouse_move(input, entity);
-        if (handled) {
-          // mouse velocity is always zero outside of mouse move callbacks
-          input.mouse_vel = glm::ivec2(0, 0);
-          return;
+      if (entity) {
+        auto controls_systems = entity->get_systems<IControlsSystem>();
+        // reverse iterate through entity controls callbacks
+        for (auto controls_it = controls_systems.rbegin();
+             controls_it != controls_systems.rend(); controls_it++) {
+          if (*controls_it) {
+            handled = (*controls_it)->on_mouse_move(input, entity);
+            if (handled) {
+              // mouse velocity is always zero outside of mouse move callbacks
+              input.mouse_vel = glm::ivec2(0, 0);
+              return;
+            }
+          }
         }
       }
     }
@@ -2968,11 +3051,13 @@ void GLRenderer::glfw_onMouseMove(GLFWwindow *window, double x, double y) {
     // reverse iterate through scene controls callbacks
     for (auto controls_it = controls_systems.rbegin();
          controls_it != controls_systems.rend(); controls_it++) {
-      handled = (*controls_it)->on_mouse_move(input, info.scene);
-      if (handled) {
-        // mouse velocity is always zero outside of mouse move callbacks
-        input.mouse_vel = glm::ivec2(0, 0);
-        return;
+      if (*controls_it) {
+        handled = (*controls_it)->on_mouse_move(input, info.scene);
+        if (handled) {
+          // mouse velocity is always zero outside of mouse move callbacks
+          input.mouse_vel = glm::ivec2(0, 0);
+          return;
+        }
       }
     }
   }
@@ -2994,31 +3079,39 @@ void GLRenderer::glfw_onMouseWheel(GLFWwindow *window, double xoffset,
     for (auto layr_it = info.scene->layer_rbegin();
          layr_it != info.scene->layer_rend(); layr_it++) {
       Layer *layer = layr_it->get();
-      // reverse iterate through layer entities
-      for (auto ent_it = layer->entity_rbegin(); ent_it != layer->entity_rend();
-           ent_it++) {
-        Entity *entity = ent_it->get();
-        auto controls_systems = entity->get_systems<IControlsSystem>();
-        // reverse iterate through widget controls callbacks
-        for (auto controls_it = controls_systems.rbegin();
-             controls_it != controls_systems.rend(); controls_it++) {
-          handled = (*controls_it)->on_mouse_wheel(input, entity);
-          if (handled) {
-            // mouse scroll is always 0 outside of mouse scroll callbacks
-            input.mouse_scroll = 0;
-            return;
+      if (layer) {
+        // reverse iterate through layer entities
+        for (auto ent_it = layer->entity_rbegin();
+             ent_it != layer->entity_rend(); ent_it++) {
+          Entity *entity = ent_it->get();
+          if (entity) {
+            auto controls_systems = entity->get_systems<IControlsSystem>();
+            // reverse iterate through widget controls callbacks
+            for (auto controls_it = controls_systems.rbegin();
+                 controls_it != controls_systems.rend(); controls_it++) {
+              if (*controls_it) {
+                handled = (*controls_it)->on_mouse_wheel(input, entity);
+                if (handled) {
+                  // mouse scroll is always 0 outside of mouse scroll callbacks
+                  input.mouse_scroll = 0;
+                  return;
+                }
+              }
+            }
           }
         }
-      }
-      auto controls_systems = layer->get_systems<IControlsSystem>();
-      // reverse iterate through overlay controls callbacks
-      for (auto controls_it = controls_systems.rbegin();
-           controls_it != controls_systems.rend(); controls_it++) {
-        handled = (*controls_it)->on_mouse_wheel(input, layer);
-        if (handled) {
-          // mouse scroll is always 0 outside of mouse scroll callbacks
-          input.mouse_scroll = 0;
-          return;
+        auto controls_systems = layer->get_systems<IControlsSystem>();
+        // reverse iterate through overlay controls callbacks
+        for (auto controls_it = controls_systems.rbegin();
+             controls_it != controls_systems.rend(); controls_it++) {
+          if (*controls_it) {
+            handled = (*controls_it)->on_mouse_wheel(input, layer);
+            if (handled) {
+              // mouse scroll is always 0 outside of mouse scroll callbacks
+              input.mouse_scroll = 0;
+              return;
+            }
+          }
         }
       }
     }
@@ -3027,15 +3120,19 @@ void GLRenderer::glfw_onMouseWheel(GLFWwindow *window, double xoffset,
     for (auto entity_it = info.scene->entity_rbegin();
          entity_it != info.scene->entity_rend(); entity_it++) {
       Entity *entity = entity_it->get();
-      auto controls_systems = entity->get_systems<IControlsSystem>();
-      // reverse iterate through entity controls callbacks
-      for (auto controls_it = controls_systems.rbegin();
-           controls_it != controls_systems.rend(); controls_it++) {
-        handled = (*controls_it)->on_mouse_wheel(input, entity);
-        if (handled) {
-          // mouse scroll is always 0 outside of mouse scroll callbacks
-          input.mouse_scroll = 0;
-          return;
+      if (entity) {
+        auto controls_systems = entity->get_systems<IControlsSystem>();
+        // reverse iterate through entity controls callbacks
+        for (auto controls_it = controls_systems.rbegin();
+             controls_it != controls_systems.rend(); controls_it++) {
+          if (*controls_it) {
+            handled = (*controls_it)->on_mouse_wheel(input, entity);
+            if (handled) {
+              // mouse scroll is always 0 outside of mouse scroll callbacks
+              input.mouse_scroll = 0;
+              return;
+            }
+          }
         }
       }
     }
@@ -3043,11 +3140,13 @@ void GLRenderer::glfw_onMouseWheel(GLFWwindow *window, double xoffset,
     // reverse iterate through scene controls callbacks
     for (auto controls_it = controls_systems.rbegin();
          controls_it != controls_systems.rend(); controls_it++) {
-      handled = (*controls_it)->on_mouse_wheel(input, info.scene);
-      if (handled) {
-        // mouse scroll is always 0 outside of mouse scroll callbacks
-        input.mouse_scroll = 0;
-        return;
+      if (*controls_it) {
+        handled = (*controls_it)->on_mouse_wheel(input, info.scene);
+        if (handled) {
+          // mouse scroll is always 0 outside of mouse scroll callbacks
+          input.mouse_scroll = 0;
+          return;
+        }
       }
     }
   }
@@ -3062,28 +3161,37 @@ void GLRenderer::glfw_onChar(GLFWwindow *window, unsigned int code_point) {
     for (auto layr_it = info.scene->layer_rbegin();
          layr_it != info.scene->layer_rend(); layr_it++) {
       Layer *layer = layr_it->get();
-      // reverse iterate through layer entities
-      for (auto ent_it = layer->entity_rbegin(); ent_it != layer->entity_rend();
-           ent_it++) {
-        Entity *entity = ent_it->get();
-        auto controls_systems = entity->get_systems<IControlsSystem>();
-        // reverse iterate through widget controls callbacks
-        for (auto controls_it = controls_systems.rbegin();
-             controls_it != controls_systems.rend(); controls_it++) {
-          handled =
-              (*controls_it)->on_char(static_cast<char>(code_point), entity);
-          if (handled) {
-            return;
+      if (layer) {
+        // reverse iterate through layer entities
+        for (auto ent_it = layer->entity_rbegin();
+             ent_it != layer->entity_rend(); ent_it++) {
+          Entity *entity = ent_it->get();
+          if (entity) {
+            auto controls_systems = entity->get_systems<IControlsSystem>();
+            // reverse iterate through widget controls callbacks
+            for (auto controls_it = controls_systems.rbegin();
+                 controls_it != controls_systems.rend(); controls_it++) {
+              if (*controls_it) {
+                handled = (*controls_it)
+                              ->on_char(static_cast<char>(code_point), entity);
+                if (handled) {
+                  return;
+                }
+              }
+            }
           }
         }
-      }
-      auto controls_systems = layer->get_systems<IControlsSystem>();
-      // reverse iterate through layer controls callbacks
-      for (auto controls_it = controls_systems.rbegin();
-           controls_it != controls_systems.rend(); controls_it++) {
-        handled = (*controls_it)->on_char(static_cast<char>(code_point), layer);
-        if (handled) {
-          return;
+        auto controls_systems = layer->get_systems<IControlsSystem>();
+        // reverse iterate through layer controls callbacks
+        for (auto controls_it = controls_systems.rbegin();
+             controls_it != controls_systems.rend(); controls_it++) {
+          if (*controls_it) {
+            handled =
+                (*controls_it)->on_char(static_cast<char>(code_point), layer);
+            if (handled) {
+              return;
+            }
+          }
         }
       }
     }
@@ -3092,14 +3200,18 @@ void GLRenderer::glfw_onChar(GLFWwindow *window, unsigned int code_point) {
     for (auto entity_it = info.scene->entity_rbegin();
          entity_it != info.scene->entity_rend(); entity_it++) {
       Entity *entity = entity_it->get();
-      auto controls_systems = entity->get_systems<IControlsSystem>();
-      // reverse iterate through entity controls callbacks
-      for (auto controls_it = controls_systems.rbegin();
-           controls_it != controls_systems.rend(); controls_it++) {
-        handled =
-            (*controls_it)->on_char(static_cast<char>(code_point), entity);
-        if (handled) {
-          return;
+      if (entity) {
+        auto controls_systems = entity->get_systems<IControlsSystem>();
+        // reverse iterate through entity controls callbacks
+        for (auto controls_it = controls_systems.rbegin();
+             controls_it != controls_systems.rend(); controls_it++) {
+          if (*controls_it) {
+            handled =
+                (*controls_it)->on_char(static_cast<char>(code_point), entity);
+            if (handled) {
+              return;
+            }
+          }
         }
       }
     }
@@ -3107,10 +3219,12 @@ void GLRenderer::glfw_onChar(GLFWwindow *window, unsigned int code_point) {
     // reverse iterate through scene controls callbacks
     for (auto controls_it = controls_systems.rbegin();
          controls_it != controls_systems.rend(); controls_it++) {
-      handled =
-          (*controls_it)->on_char(static_cast<char>(code_point), info.scene);
-      if (handled) {
-        return;
+      if (*controls_it) {
+        handled =
+            (*controls_it)->on_char(static_cast<char>(code_point), info.scene);
+        if (handled) {
+          return;
+        }
       }
     }
   }

@@ -1195,44 +1195,6 @@ public:
         scenes_.push_back(scn);
     }
   }
-  /**
-   * @brief Remove the first Scene of type <T> from the Scene stack and return
-   * the Referenced Scene.
-   *
-   * @tparam <T> The type of Scene to pull.
-   * @return The Referenced Scene that was pulled from the Scene stack.
-   * @see Scene
-   */
-  template <typename T> static Referenced<T> pull_scene() {
-    for (auto scn_it = scene_begin(); scn_it != scene_end(); scn_it++) {
-      if (auto scene = std::dynamic_pointer_cast<T>(*scn_it)) {
-        Referenced<T> pulled_scene = std::move(scene);
-        scenes_.erase(scn_it);
-        return pulled_scene;
-      }
-    }
-    return nullptr;
-  }
-  /**
-   * @brief Remove all of the Scenes of type <T> from the Scene stack and
-   * return a `std::vector` of the Referenced Scenes.
-   *
-   * @tparam <T> The type of Scenes to pull.
-   * @return A `std::vector` of the Referenced Scenes that were pulled from the
-   * Scene stack.
-   * @see Scene
-   */
-  template <typename T> static std::vector<Referenced<T>> pull_scenes() {
-    std::vector<T *> scenes{};
-    for (auto scn_it = scene_begin(); scn_it != scene_end(); scn_it++) {
-      if (auto scene = std::dynamic_pointer_cast<T>(*scn_it)) {
-        Referenced<T> pulled_scene = std::move(scene);
-        scenes_.erase(scn_it);
-        scenes.push_back(pulled_scene);
-      }
-    }
-    return scenes;
-  }
 
   /**
    * @brief Get a iterator pointing to the begining of the Scene stack.

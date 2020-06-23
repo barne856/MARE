@@ -201,9 +201,7 @@ public:
    * @param entity A Referenced Entity.
    * @see Entity
    */
-  template <typename T> void push_entity(Referenced<T> entity) {
-    entities_.push_back(entity);
-  }
+  void push_entity(Referenced<Entity> entity) { entities_.push_back(entity); }
   /**
    * @brief Push a `std::vector` of existing Referenced Entities onto the
    * Layer's Entity stack.
@@ -211,49 +209,31 @@ public:
    * @param entities A `std::vector` of existing Referenced Entities.
    * @see Entity
    */
-  template <typename T>
-  void push_entities(std::vector<Referenced<T>> entities) {
+  void push_entities(std::vector<Referenced<Entity>> entities) {
     for (size_t i = 0; i < entities.size(); i++) {
       entities_.push_back(entities[i]);
     }
   }
   /**
-   * @brief Remove the first Entity of type <T> from the Entity stack and return
+   * @brief Remove the Entity of type <T> from the Entity stack and return
    * the Referenced Entity.
    *
    * @tparam <T> The type of Entity to pull.
+   * @param entity A pointer to the data of the Entity to pull.
    * @return The Referenced Entity that was pulled from the Entity stack.
+   * nullptr if the Entity was not on the stack.
    * @see Entity
    */
-  template <typename T> Referenced<T> pull_entity() {
+  template <typename T> Referenced<T> pull_entity(T *entity) {
     for (auto ent_it = entity_begin(); ent_it != entity_end(); ent_it++) {
-      if (auto entity = std::dynamic_pointer_cast<T>(*ent_it)) {
-        Referenced<T> pulled_entity = entity;
-        entities_.erase(ent_it);
+      if (entity == (*ent_it).get()) {
+        Referenced<T> pulled_entity = std::dynamic_pointer_cast<T>(*ent_it);
+        (*ent_it) = nullptr;
+        entity_pulled = false;
         return pulled_entity;
       }
     }
     return nullptr;
-  }
-  /**
-   * @brief Remove all of the Entities of type <T> from the Entity stack and
-   * return a `std::vector` of the Referenced Entities.
-   *
-   * @tparam <T> The type of Entities to pull.
-   * @return A `std::vector` of the Referenced Entities that were pulled from
-   * the Entity stack.
-   * @see Entity
-   */
-  template <typename T> std::vector<Referenced<T>> pull_entities() {
-    std::vector<Referenced<T>> entities{};
-    for (auto ent_it = entity_begin(); ent_it != entity_end(); ent_it++) {
-      if (auto entity = std::dynamic_pointer_cast<T>(*ent_it)) {
-        Referenced<T> pulled_entity = entity;
-        entities_.erase(ent_it);
-        entities.push_back(pulled_entity);
-      }
-    }
-    return entities;
   }
   /**
    * @brief Get a const iterator pointing to the begining of the Entity stack.
@@ -333,9 +313,20 @@ public:
   std::vector<Referenced<Entity>>::reverse_iterator entity_rend() {
     return entities_.rend();
   }
+  void remove_null_entities() {
+    if (entity_pulled) {
+      entity_pulled = false;
+      entities_.erase(std::remove_if(entity_begin(), entity_end(),
+                                     [](Referenced<Entity> ent) {
+                                       return ent.get() == nullptr;
+                                     }),
+                      entity_end());
+    }
+  }
 
 private:
   std::vector<Referenced<Entity>> entities_{}; /**< The Entity stack.*/
+  bool entity_pulled = false;
 };
 } // namespace mare
 

@@ -146,38 +146,19 @@ public:
    * the Referenced Layer.
    *
    * @tparam <T> The type of Layer to pull.
+   * @param layer A pointer to the data of the Layer to pull.
    * @return The Referenced Layer that was pulled from the Layer stack.
    * @see Layer
    */
-  template <typename T> Referenced<T> pull_layer() {
+  template <typename T> Referenced<T> pull_layer(Layer *layer) {
     for (auto layr_it = layer_begin(); layr_it != layer_end(); layr_it++) {
-      if (auto layer = std::dynamic_pointer_cast<T>(*layr_it)) {
-        Referenced<T> pulled_layer = std::move(layer);
-        layers_.erase(layr_it);
+      if (layer == (*layr_it).get()) {
+        Referenced<T> pulled_layer =
+            std::dynamic_pointer_cast<T>(*layr_it)(*layr_it) = nullptr;
         return pulled_layer;
       }
     }
     return nullptr;
-  }
-  /**
-   * @brief Remove all of the Layers of type <T> from the Layer stack and
-   * return a `std::vector` of the Referenced Layers.
-   *
-   * @tparam <T> The type of Layers to pull.
-   * @return A `std::vector` of the Referenced Layer that were pulled from the
-   * Layer stack.
-   * @see Layer
-   */
-  template <typename T> std::vector<Referenced<T>> pull_layers() {
-    std::vector<T *> layers{};
-    for (auto layr_it = layer_begin(); layr_it != layer_end(); layr_it++) {
-      if (auto layer = std::dynamic_pointer_cast<T>(*layr_it)) {
-        Referenced<T> pulled_layer = std::move(layer);
-        layers_.erase(layr_it);
-        layers.push_back(pulled_layer);
-      }
-    }
-    return layers;
   }
 
   /**
@@ -255,9 +236,20 @@ public:
   std::vector<Referenced<Layer>>::reverse_iterator layer_rend() {
     return layers_.rend();
   }
+  void remove_null_layers() {
+    if (layer_pulled) {
+      layer_pulled = false;
+      layers_.erase(std::remove_if(layer_begin(), layer_end(),
+                                   [](Referenced<Layer> layer) {
+                                     return layer.get() == nullptr;
+                                   }),
+                    layer_end());
+    }
+  }
 
 private:
   std::vector<Referenced<Layer>> layers_{}; /**< The Layer stack.*/
+  bool layer_pulled = false;
 };
 } // namespace mare
 

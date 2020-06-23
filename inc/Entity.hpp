@@ -136,44 +136,25 @@ public:
     }
   }
   /**
-   * @brief Remove the first System of type <T> from the System stack and return
+   * @brief Remove a System of type <T> from the System stack and return
    * the Referenced System.
    *
    * @tparam <T> The type of System to pull.
+   * @param system A pointer to the System to pull.
    * @return The Referenced System that was pulled from the System stack.
    * @see System
    */
-  template <typename T> Referenced<T> pull_system() {
+  template <typename T> Referenced<T> pull_system(T *system) {
     static_assert(std::is_base_of<System, T>::value);
     for (auto sys_it = systems_begin(); sys_it != systems_end(); sys_it++) {
-      if (auto system = std::dynamic_pointer_cast<T>(*sys_it)) {
-        Referenced<T> pulled_system = system;
-        systems_.erase(sys_it);
+      if (system == (*sys_it).get()) {
+        Referenced<T> pulled_system = (*sys_it);
+        (*sys_it) = nullptr;
+        system_pulled = true;
         return pulled_system;
       }
     }
     return nullptr;
-  }
-  /**
-   * @brief Remove all of the Systems of type <T> from the System stack and
-   * return a `std::vector` of the Referenced Systems.
-   *
-   * @tparam <T> The type of Systems to pull.
-   * @return A `std::vector` of the Referenced Systems that were pulled from the
-   * System stack.
-   * @see System
-   */
-  template <typename T> std::vector<Referenced<T>> pull_systems() {
-    static_assert(std::is_base_of<System, T>::value);
-    std::vector<T *> systems{};
-    for (auto sys_it = systems_begin(); sys_it != systems_end(); sys_it++) {
-      if (auto system = std::dynamic_pointer_cast<T>(*sys_it)) {
-        Referenced<T> pulled_system = system;
-        systems_.erase(sys_it);
-        systems.push_back(pulled_system);
-      }
-    }
-    return systems;
   }
 
   /**
@@ -254,9 +235,20 @@ public:
   std::vector<Referenced<System>>::reverse_iterator systems_rend() {
     return systems_.rend();
   }
+  void remove_null_systems() {
+    if (system_pulled) {
+      system_pulled = false;
+      systems_.erase(std::remove_if(systems_begin(), systems_end(),
+                                    [](Referenced<System> sys) {
+                                      return sys.get() == nullptr;
+                                    }),
+                     systems_end());
+    }
+  }
 
 private:
   std::vector<Referenced<System>> systems_; /**< The System stack.*/
+  bool system_pulled = false;
 };
 } // namespace mare
 
