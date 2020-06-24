@@ -2,27 +2,27 @@
 #define BUTTON
 
 // MARE
-#include "Materials/BasicColorMaterial.hpp"
-#include "Meshes/CharMesh.hpp"
-#include "Meshes/QuadrangleMesh.hpp"
 #include "Components/RenderPack.hpp"
 #include "Components/Widget.hpp"
 #include "Entity.hpp"
+#include "Materials/BasicColorMaterial.hpp"
+#include "Meshes/CharMesh.hpp"
+#include "Meshes/QuadrangleMesh.hpp"
 #include "Systems/Rendering/PacketRenderer.hpp"
 
 namespace mare {
 
 // forward declare controls
-class ButtonControls;
-// typedef callback
-typedef void (*on_click_callback)(Layer *);
+template <typename T> class ButtonControls;
+// declare button template callback type
+template <typename T> using on_click_callback = void (*)(T *);
 
 /**
  * @brief A Button UI element for executing a process or toggling a setting when
  * clicked.
  *
  */
-class Button : public Widget<bool>, public RenderPack {
+template <typename T> class Button : public Widget<bool>, public RenderPack {
 public:
   Button(Layer *layer, util::Rect widget_bounds, std::string label)
       : Widget(layer, widget_bounds) {
@@ -44,15 +44,15 @@ public:
     push_packet({label_mesh, boarder_material});
 
     gen_system<PacketRenderer>();
-    gen_system<ButtonControls>();
+    gen_system<ButtonControls<T>>();
   }
   void rescale() override {
     float text_scale = (bounds.top() - bounds.bottom()) / 1.5f;
     label_mesh->set_scale(glm::vec3(text_scale, text_scale, 1.0f));
     label_mesh->set_center(util::get_rect_center(bounds));
     float boarder_thickness = 0.05f * (bounds.top() - bounds.bottom());
-    float box_scale_x = bounds.right() - bounds.left()-boarder_thickness;
-    float box_scale_y = bounds.top() - bounds.bottom()-boarder_thickness;
+    float box_scale_x = bounds.right() - bounds.left() - boarder_thickness;
+    float box_scale_y = bounds.top() - bounds.bottom() - boarder_thickness;
     float boarder_scale_x = box_scale_x + boarder_thickness;
     float boarder_scale_y = box_scale_y + boarder_thickness;
     button_boarder->set_scale({boarder_scale_x, boarder_scale_y, 1.0f});
@@ -68,7 +68,9 @@ public:
    *
    * @param callback_func The function to set as a callback for the Button.
    */
-  void set_on_click_callback(on_click_callback callback_func) {
+  void set_on_click_callback(on_click_callback<T> callback_func,
+                             T *callback_entity) {
+    callback_entity_ = callback_entity;
     on_click_func = callback_func;
   }
   /**
@@ -78,9 +80,9 @@ public:
    *
    */
   void on_click() {
-    if (on_click_func) {
+    if (on_click_func && callback_entity_) {
       value = !value;
-      on_click_func(get_layer());
+      on_click_func(callback_entity_);
     }
   }
   Referenced<QuadrangleMesh> button_box;
@@ -95,12 +97,13 @@ public:
   glm::vec4 label_color{0.0f, 0.0f, 0.0f, 1.0f};
 
 private:
-  on_click_callback on_click_func = nullptr;
+  on_click_callback<T> on_click_func = nullptr;
+  T *callback_entity_ = nullptr;
 };
 
-class ButtonControls : public ControlsSystem<Button> {
+template <typename T> class ButtonControls : public ControlsSystem<Button<T>> {
 public:
-  bool on_mouse_button(const RendererInput &input, Button *button) override {
+  bool on_mouse_button(const RendererInput &input, Button<T> *button) override {
     if (input.LEFT_MOUSE_JUST_PRESSED && button->is_cursor_in_bounds()) {
       UIElement::focus(button);
       button->box_material->set_color(button->box_pushed_color);
