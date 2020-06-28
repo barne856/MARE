@@ -131,7 +131,7 @@ public:
    * the horizontal plane is level.
    *
    * @param point The point in space to face towards.
-   * @param normal_plane The normal vector for the horizontal plane.
+   * @param normal_vector The normal vector for the horizontal plane.
    */
   void face_towards(glm::vec3 point, glm::vec3 normal_vector) {
     glm::mat4 view = glm::lookAt(get_position(), point, normal_vector);

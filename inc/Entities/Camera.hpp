@@ -31,7 +31,7 @@ class CameraControls;
  * The Camera class provides functions to set the scale, clip planes, fovy, and
  * aspect of the Camera.
  */
-class Camera : public Entity {
+class Camera : virtual public Entity {
 public:
   /**
    * @brief Construct a new Camera object

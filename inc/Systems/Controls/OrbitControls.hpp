@@ -20,6 +20,7 @@ namespace mare {
  *
  */
 class OrbitControls : public ControlsSystem<Transform> {
+  public:
   float distance_to_center = 1.0f;
   float translational_sensitivity = 3.0f;
   float zoom_sensitvity = 0.1f;

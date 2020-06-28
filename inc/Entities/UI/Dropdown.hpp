@@ -3,8 +3,8 @@
 
 // TODO:
 // animate scrolling and dropdown
-// display "..." if names are too long
-// scroll bar
+// display "..." if names are too long, translate across to view entire string
+// when mouse is hovered over scroll bar
 
 // MARE
 #include "Components/RenderPack.hpp"
@@ -21,11 +21,13 @@
 
 namespace mare {
 // forward declare systems
-class DropdownControls;
-class DropdownListControls;
-class DropdownListPhysics;
-class DropdownListRenderer;
-class Dropdown;
+template <typename T> class DropdownControls;
+template <typename T> class DropdownListControls;
+template <typename T> class DropdownListPhysics;
+template <typename T> class DropdownListRenderer;
+template <typename T> class Dropdown;
+// declare dropdown on select template callback type
+template <typename T> using on_select_callback = void (*)(T *);
 
 /**
  * @brief The list part of the Dropdown Widget. This is pushed onto the entity
@@ -33,10 +35,11 @@ class Dropdown;
  * dropdown box.
  *
  */
+template <typename T>
 class DropdownList : public Widget<std::vector<std::string>> {
 public:
   DropdownList(Layer *layer, util::Rect widget_bounds,
-               Dropdown *parent_dropdown_box)
+               Dropdown<T> *parent_dropdown_box)
       : Widget(layer, widget_bounds) {
     dropdown_box = parent_dropdown_box;
 
@@ -49,9 +52,9 @@ public:
 
     rescale();
 
-    gen_system<DropdownListControls>();
-    // gen_system<DropdownListPhysics>();
-    gen_system<DropdownListRenderer>();
+    gen_system<DropdownListControls<T>>();
+    // gen_system<DropdownListPhysics<T>>();
+    gen_system<DropdownListRenderer<T>>();
   }
   void set_selection_options(std::vector<std::string> options,
                              uint32_t max_options_shown) {
@@ -142,13 +145,14 @@ public:
   uint32_t max_rows = 0;
   uint32_t scroll_pos = 0;
   int selection = -1;
-  Dropdown *dropdown_box;
+  Dropdown<T> *dropdown_box;
 };
 
 /**
  * @brief A Dropdown UI element to select an option from a list of options.
  *
  */
+template <typename T>
 class Dropdown : public Widget<std::string>, public RenderPack {
 public:
   Dropdown(Layer *layer, util::Rect widget_bounds, std::string selection_hint)
@@ -156,7 +160,7 @@ public:
     value = "";
     selection_hint_ = selection_hint;
 
-    dropdown_list = gen_ref<DropdownList>(layer, util::Rect(), this);
+    dropdown_list = gen_ref<DropdownList<T>>(layer, util::Rect(), this);
 
     value_box = gen_ref<QuadrangleMesh>();
     dropdown_arrow_box = gen_ref<QuadrangleMesh>();
@@ -178,7 +182,7 @@ public:
     push_packet({dropdown_arrow, box_material});
     push_packet({value_string_mesh, text_material});
 
-    gen_system<DropdownControls>();
+    gen_system<DropdownControls<T>>();
     gen_system<PacketRenderer>();
   }
   void set_selection_options(std::vector<std::string> options,
@@ -228,6 +232,7 @@ public:
       dropdown_list->update_selection(position);
       set_value(dropdown_list->get_value()[dropdown_list->selection]);
       value_string_mesh->set_text(selection_hint_ + ": " + value);
+      on_select();
       rescale();
       on_unfocus();
       return true;
@@ -237,8 +242,30 @@ public:
   void on_focus() override {}
   void on_unfocus() override {
     if (dropdown_list->opened) {
-      get_layer()->pull_entity<DropdownList>(dropdown_list.get());
+      get_layer()->pull_entity<DropdownList<T>>(dropdown_list.get());
       dropdown_list->opened = false;
+    }
+  }
+  /**
+   * @brief Set the on select callback of the Button.
+   * @details The on select callback will be executed each time the button is
+   * pressed.
+   *
+   * @param callback_func The function to set as a callback for the Button.
+   */
+  void set_on_select_callback(on_select_callback<T> callback_func,
+                              T *callback_entity) {
+    callback_entity_ = callback_entity;
+    on_select_func = callback_func;
+  }
+  /**
+   * @brief Executes a user defined function when an item is selected form the
+   * dropdown.
+   *
+   */
+  void on_select() {
+    if (on_select_func && callback_entity_) {
+      on_select_func(callback_entity_);
     }
   }
   Referenced<QuadrangleMesh> value_box;
@@ -251,14 +278,19 @@ public:
   glm::vec4 box_color{1.0f, 1.0f, 1.0f, 1.0f};
   glm::vec4 text_color{0.0f, 0.0f, 0.0f, 1.0f};
   glm::vec4 accent_color{0.17f, 0.45f, 1.0f, 1.0f};
-  Referenced<DropdownList> dropdown_list;
+  Referenced<DropdownList<T>> dropdown_list;
   std::string selection_hint_;
+
+private:
+  on_select_callback<T> on_select_func = nullptr;
+  T *callback_entity_ = nullptr;
 };
 
-class DropdownControls : public ControlsSystem<Dropdown> {
+template <typename T>
+class DropdownControls : public ControlsSystem<Dropdown<T>> {
 public:
   bool on_mouse_button(const RendererInput &input,
-                       Dropdown *dropdown) override {
+                       Dropdown<T> *dropdown) override {
     if (input.LEFT_MOUSE_JUST_RELEASED && dropdown->is_cursor_in_bounds() &&
         dropdown->dropdown_list->opened == false) {
       dropdown->get_layer()->push_entity(dropdown->dropdown_list);
@@ -269,7 +301,7 @@ public:
     if (!dropdown->is_cursor_in_bounds() &&
         !dropdown->is_cursor_in_list_bounds() &&
         dropdown->dropdown_list->opened == true) {
-      dropdown->get_layer()->pull_entity<DropdownList>(
+      dropdown->get_layer()->template pull_entity<DropdownList<T>>(
           dropdown->dropdown_list.get());
       dropdown->dropdown_list->opened = false;
       return false;
@@ -278,10 +310,11 @@ public:
   }
 };
 
-class DropdownListControls : public ControlsSystem<DropdownList> {
+template <typename T>
+class DropdownListControls : public ControlsSystem<DropdownList<T>> {
 public:
   bool on_mouse_button(const RendererInput &input,
-                       DropdownList *dropdown_list) override {
+                       DropdownList<T> *dropdown_list) override {
     if (input.LEFT_MOUSE_JUST_RELEASED) {
       return dropdown_list->dropdown_box->update_selection();
     }
@@ -293,7 +326,7 @@ public:
     return false;
   }
   bool on_key(const RendererInput &input,
-              DropdownList *dropdown_list) override {
+              DropdownList<T> *dropdown_list) override {
     if (dropdown_list->opened) {
       if (input.UP_JUST_PRESSED) {
         dropdown_list->scroll_pos =
@@ -311,7 +344,7 @@ public:
     return false;
   }
   bool on_mouse_wheel(const RendererInput &input,
-                      DropdownList *dropdown_list) override {
+                      DropdownList<T> *dropdown_list) override {
     if (dropdown_list->opened &&
         dropdown_list->dropdown_box->is_cursor_in_list_bounds()) {
       if (input.mouse_scroll == 1) {
@@ -333,9 +366,10 @@ public:
   }
 };
 
-class DropdownListPhysics : public PhysicsSystem<DropdownList> {
+template <typename T>
+class DropdownListPhysics : public PhysicsSystem<DropdownList<T>> {
 public:
-  void update(float dt, DropdownList *dropdown_list) override {
+  void update(float dt, DropdownList<T> *dropdown_list) override {
     float unit_height = dropdown_list->get_unit_height();
     float width = dropdown_list->get_unit_width();
     glm::vec2 center = dropdown_list->get_center();
@@ -414,9 +448,11 @@ public:
   float translate_speed = 1.0f;
 };
 
-class DropdownListRenderer : public RenderSystem<DropdownList> {
+template <typename T>
+class DropdownListRenderer : public RenderSystem<DropdownList<T>> {
 public:
-  void render(float dt, Camera *camera, DropdownList *dropdown_list) override {
+  void render(float dt, Camera *camera,
+              DropdownList<T> *dropdown_list) override {
     for (int i = 0; i < dropdown_list->get_value().size(); i++) {
       if (i == dropdown_list->selection) {
         dropdown_list->dropdown_boxes[i]->render(
