@@ -6,6 +6,9 @@
 #include "Renderer.hpp"
 #include "Systems.hpp"
 
+// External Libraries
+#include <gtx/rotate_vector.hpp> // rotateZ
+
 namespace mare {
 
 /**
@@ -22,15 +25,40 @@ namespace mare {
 class OrbitControls : public ControlsSystem<Transform> {
   public:
   float distance_to_center = 1.0f;
-  float translational_sensitivity = 3.0f;
+  float orbit_sensitivity = 3.0f;
+  float translational_sensitivity = 1.0f;
   float zoom_sensitvity = 0.1f;
+  float minimum_distance_to_center = 1.0f;
+  float maximum_distance_to_center = 20000.0f;
   bool on_mouse_move(const RendererInput &input,
                      Transform *transform) override {
-    if (input.LEFT_MOUSE_PRESSED) {
+    if(input.MIDDLE_MOUSE_PRESSED)
+    {
+      glm::vec3 dir = transform->get_forward_vector();
+      glm::vec3 pos = transform->get_position();
+      glm::vec3 center = pos + dir * distance_to_center;
+      float dist_2D = glm::length(glm::vec2(center - pos));
+      float angle = atan2f(dir.y, dir.x) - math::PI/2.0f;
+      glm::vec3 direction{};
+      direction.x = 2.0f * static_cast<float>(input.mouse_vel.x) / static_cast<float>(Renderer::get_info().window_height);
+      direction.y = -2.0f * static_cast<float>(input.mouse_vel.y) / static_cast<float>(Renderer::get_info().window_height);
+      direction.z = 0.0f;
+      if(dist_2D < 0.1f)
+      {
+        glm::vec3 up = transform->get_up_vector();
+        angle = atan2f(up.y, up.x) - math::PI/2.0f;
+      }
+      else if(dir.z > 0.0f)
+      {
+        direction.y *= -1.0f;
+      }
+      transform->translate(-0.5f * distance_to_center * translational_sensitivity * glm::rotateZ(direction, angle));
+    }
+    else if (input.LEFT_MOUSE_PRESSED) {
       // orbit around center and adjust inclination
 
-      float dtheta = -translational_sensitivity*static_cast<float>(input.mouse_vel.y) / static_cast<float>(Renderer::get_info().window_height);
-      float dphi = -translational_sensitivity*static_cast<float>(input.mouse_vel.x) / static_cast<float>(Renderer::get_info().window_height);
+      float dtheta = -orbit_sensitivity*static_cast<float>(input.mouse_vel.y) / static_cast<float>(Renderer::get_info().window_height);
+      float dphi = -orbit_sensitivity*static_cast<float>(input.mouse_vel.x) / static_cast<float>(Renderer::get_info().window_height);
       glm::vec3 dir = transform->get_forward_vector();
       glm::vec3 pos = transform->get_position();
       glm::vec3 up = {0.0f, 0.0f, 1.0f};
@@ -69,6 +97,7 @@ class OrbitControls : public ControlsSystem<Transform> {
       }
       transform->set_position(pos);
       transform->face_towards(center, up);
+      return true;
     }
     return false;
   }
@@ -84,7 +113,7 @@ class OrbitControls : public ControlsSystem<Transform> {
     glm::vec3 dir = transform->get_forward_vector();
     glm::vec3 pos = transform->get_position();
     glm::vec3 center = pos + dir * distance_to_center;
-    distance_to_center -= input.mouse_scroll * zoom_sensitvity;
+    distance_to_center = glm::clamp(distance_to_center - input.mouse_scroll * zoom_sensitvity, minimum_distance_to_center, maximum_distance_to_center);
     transform->set_position({center - dir * distance_to_center});
     return false;
   }
