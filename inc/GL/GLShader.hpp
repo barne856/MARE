@@ -200,7 +200,7 @@ private:
    */
   void init_shader(const char *directory);
 
-  std::unordered_map<std::string, int>
+  std::unordered_map<std::string, GLuint>
       resource_cache_; /**< The cahced location of the resources in the shader
                           program.*/
   std::unordered_map<std::string, GLuint>

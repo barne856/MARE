@@ -140,10 +140,10 @@ void GLShader::upload_float(const char *name, float value,
   if (!resource_cache_.count(name)) {
     // cache the location
     resource_cache_.insert_or_assign(name,
-                                     glGetUniformLocation(shader_ID_, name));
+                                     glGetProgramResourceIndex(shader_ID_, GL_UNIFORM, name));
   }
   glUniform1f(resource_cache_[name], value);
-  if (resource_cache_[name] == -1 && suppress_warnings == false) {
+  if (resource_cache_[name] == GL_INVALID_INDEX && suppress_warnings == false) {
     std::cerr << "SHADER WARNING: No uniform '" << name
               << "' exists in the shader" << std::endl;
   }
@@ -154,10 +154,10 @@ void GLShader::upload_vec3(const char *name, glm::vec3 value,
   if (!resource_cache_.count(name)) {
     // cache the location
     resource_cache_.insert_or_assign(name,
-                                     glGetUniformLocation(shader_ID_, name));
+                                     glGetProgramResourceIndex(shader_ID_, GL_UNIFORM, name));
   }
   glUniform3f(resource_cache_[name], value.x, value.y, value.z);
-  if (resource_cache_[name] == -1 && suppress_warnings == false) {
+  if (resource_cache_[name] == GL_INVALID_INDEX && suppress_warnings == false) {
     std::cerr << "SHADER WARNING: No uniform '" << name
               << "' exists in the shader" << std::endl;
   }
@@ -168,10 +168,10 @@ void GLShader::upload_vec4(const char *name, glm::vec4 value,
   if (!resource_cache_.count(name)) {
     // cache the location
     resource_cache_.insert_or_assign(name,
-                                     glGetUniformLocation(shader_ID_, name));
+                                     glGetProgramResourceIndex(shader_ID_, GL_UNIFORM, name));
   }
   glUniform4f(resource_cache_[name], value.x, value.y, value.z, value.w);
-  if (resource_cache_[name] == -1 && suppress_warnings == false) {
+  if (resource_cache_[name] == GL_INVALID_INDEX && suppress_warnings == false) {
     std::cerr << "SHADER WARNING: No uniform '" << name
               << "' exists in the shader" << std::endl;
   }
@@ -182,10 +182,10 @@ void GLShader::upload_mat3(const char *name, glm::mat3 value,
   if (!resource_cache_.count(name)) {
     // cache the location
     resource_cache_.insert_or_assign(name,
-                                     glGetUniformLocation(shader_ID_, name));
+                                     glGetProgramResourceIndex(shader_ID_, GL_UNIFORM, name));
   }
   glUniformMatrix3fv(resource_cache_[name], 1, GL_FALSE, glm::value_ptr(value));
-  if (resource_cache_[name] == -1 && suppress_warnings == false) {
+  if (resource_cache_[name] == GL_INVALID_INDEX && suppress_warnings == false) {
     std::cerr << "SHADER WARNING: No uniform '" << name
               << "' exists in the shader" << std::endl;
   }
@@ -196,10 +196,10 @@ void GLShader::upload_mat4(const char *name, glm::mat4 value,
   if (!resource_cache_.count(name)) {
     // cache the location
     resource_cache_.insert_or_assign(name,
-                                     glGetUniformLocation(shader_ID_, name));
+                                     glGetProgramResourceIndex(shader_ID_, GL_UNIFORM, name));
   }
   glUniformMatrix4fv(resource_cache_[name], 1, GL_FALSE, glm::value_ptr(value));
-  if (resource_cache_[name] == -1 && suppress_warnings == false) {
+  if (resource_cache_[name] == GL_INVALID_INDEX && suppress_warnings == false) {
     std::cerr << "SHADER WARNING: No uniform '" << name
               << "' exists in the shader" << std::endl;
   }
@@ -214,7 +214,7 @@ void GLShader::upload_uniform(const char *name, IBuffer *uniform,
   if (!resource_cache_.count(name)) {
     // cache the location
     resource_cache_.insert_or_assign(name,
-                                     glGetUniformBlockIndex(shader_ID_, name));
+                                     glGetProgramResourceIndex(shader_ID_, GL_UNIFORM_BLOCK, name));
     uniform_binding_cache_.insert_or_assign(
         name, static_cast<GLuint>(uniform_binding_cache_.size()));
     glUniformBlockBinding(shader_ID_, resource_cache_[name],
@@ -222,7 +222,7 @@ void GLShader::upload_uniform(const char *name, IBuffer *uniform,
   }
   glBindBufferBase(GL_UNIFORM_BUFFER, uniform_binding_cache_[name],
                    uniform->name());
-  if (resource_cache_[name] == -1 && suppress_warnings == false) {
+  if (resource_cache_[name] == GL_INVALID_INDEX && suppress_warnings == false) {
     std::cerr << "SHADER WARNING: No uniform block '" << name
               << "' exists in the shader" << std::endl;
   }
@@ -259,13 +259,13 @@ void GLShader::upload_texture2D(const char *name, Texture2D *texture2D,
   if (!resource_cache_.count(name)) {
     // cache the location
     resource_cache_.insert_or_assign(name,
-                                     glGetUniformLocation(shader_ID_, name));
+                                     glGetProgramResourceIndex(shader_ID_, GL_UNIFORM, name));
     texture_binding_cache_.insert_or_assign(
         name, static_cast<GLuint>(texture_binding_cache_.size()));
     glUniform1i(resource_cache_[name], texture_binding_cache_[name]);
   }
   glBindTextureUnit(texture_binding_cache_[name], texture2D->name());
-  if (resource_cache_[name] == -1 && suppress_warnings == false) {
+  if (resource_cache_[name] == GL_INVALID_INDEX && suppress_warnings == false) {
     std::cerr << "SHADER WARNING: No uniform sampler2D '" << name
               << "' exists in the shader" << std::endl;
   }
@@ -280,7 +280,7 @@ void GLShader::upload_image2D(const char *name, Texture2D *texture2D,
   if (!resource_cache_.count(name)) {
     // cache the location
     resource_cache_.insert_or_assign(name,
-                                     glGetUniformLocation(shader_ID_, name));
+                                     glGetProgramResourceIndex(shader_ID_, GL_UNIFORM, name));
     image_binding_cache_.insert_or_assign(
         name, static_cast<GLuint>(image_binding_cache_.size()));
     glUniform1i(resource_cache_[name], image_binding_cache_[name]);
@@ -288,7 +288,7 @@ void GLShader::upload_image2D(const char *name, Texture2D *texture2D,
   glBindImageTexture(image_binding_cache_[name], texture2D->name(), 0, GL_FALSE,
                      0, GL_READ_WRITE,
                      opengl::gl_sized_tex_format(texture2D->type()));
-  if (resource_cache_[name] == -1 && suppress_warnings == false) {
+  if (resource_cache_[name] == GL_INVALID_INDEX && suppress_warnings == false) {
     std::cerr << "SHADER WARNING: No uniform image2D '" << name
               << "' exists in the shader" << std::endl;
   }
