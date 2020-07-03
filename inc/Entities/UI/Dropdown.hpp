@@ -91,7 +91,7 @@ public:
     float width = bounds.right() - bounds.left();
     glm::vec2 center =
         glm::vec2(bounds.left() + width / 2.0f, bounds.top() - bounds.bottom());
-    for (int i = 0; i < scroll_pos; i++) {
+    for (uint32_t i = 0; i < scroll_pos; i++) {
       dropdown_boxes[i]->set_scale({width, unit_height, 1.0f});
       dropdown_boxes[i]->set_position(
           {center.x, bounds.top() - unit_height * 0.5f, 0.0f});
@@ -101,7 +101,7 @@ public:
           {bounds.left() + boarder_thickness, bounds.top() - boarder_thickness,
            0.0f});
     }
-    for (int i = scroll_pos; i < max_rows + scroll_pos; i++) {
+    for (uint32_t i = scroll_pos; i < max_rows + scroll_pos; i++) {
       dropdown_boxes[i]->set_scale({width, unit_height, 1.0f});
       dropdown_boxes[i]->set_position(
           {center.x,
@@ -116,7 +116,7 @@ public:
                boarder_thickness,
            0.0f});
     }
-    for (int i = max_rows + scroll_pos; i < value.size(); i++) {
+    for (uint32_t i = max_rows + scroll_pos; static_cast<size_t>(i) < value.size(); i++) {
       dropdown_boxes[i]->set_scale({0.0f, 0.0f, 1.0f});
       dropdown_boxes[i]->set_position(
           {center.x,
@@ -453,8 +453,8 @@ class DropdownListRenderer : public RenderSystem<DropdownList<T>> {
 public:
   void render(float dt, Camera *camera,
               DropdownList<T> *dropdown_list) override {
-    for (int i = 0; i < dropdown_list->get_value().size(); i++) {
-      if (i == dropdown_list->selection) {
+    for (size_t i = 0; i < dropdown_list->get_value().size(); i++) {
+      if (static_cast<int>(i) == dropdown_list->selection) {
         dropdown_list->dropdown_boxes[i]->render(
             camera, dropdown_list->selection_material.get(),
             dropdown_list->dropdown_box);

@@ -159,7 +159,7 @@ public:
   /**
    * @brief Construct a new empty BufferFormat object.
    */
-  BufferFormat() : attributes_({}), stride(0) {}
+  BufferFormat() : stride(0), attributes_({}) {}
   /**
    * @brief Construct a new BufferFormat object that contains the supplied
    * attributes.
@@ -168,7 +168,7 @@ public:
    * supplied using an initializer list.
    */
   BufferFormat(const std::initializer_list<BufferAttibrute> &attributes)
-      : attributes_(attributes) {}
+      : stride(0), attributes_(attributes) {}
   /**
    * @brief Obtain a reference to the vector of BufferAttribute elements
    * contained in the BufferFormat.

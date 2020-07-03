@@ -154,7 +154,7 @@ public:
 private:
   Referenced<Buffer<float>> vertex_buffer;
   int lines = 0;
-  int max_width = 0;
+  unsigned int max_width = 0;
   std::string text;
   float thickness;
   float extrusion;
@@ -346,7 +346,7 @@ private:
     glm::vec3 offset = glm::vec3(0.5f * static_cast<float>(column),
                                  -static_cast<float>(row), 0.0f);
     std::vector<unsigned int> indices = ASCII_font[letter];
-    for (int i = 0; i < indices.size() / 4; i++) {
+    for (size_t i = 0; i < indices.size() / 4; i++) {
 
       glm::vec3 p1 = {0.5f * grid_points[indices[4 * i]],
                       -grid_points[indices[4 * i + 1]], 0.0f};

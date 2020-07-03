@@ -60,7 +60,6 @@ bool is_in_polygon(glm::vec2 point, std::vector<glm::vec2> polygon) {
 glm::vec2 snap_to_line(glm::vec2 point, glm::vec2 p1, glm::vec2 p2) {
   // find closest point on line of infinite length
   float lambda = glm::dot(point - p1, p2 - p1) / glm::dot(p2 - p1, p2 - p1);
-  glm::vec2 p3;
   if (lambda <= 0.0f) {
     return p1;
   } else if (lambda >= 1.0f) {

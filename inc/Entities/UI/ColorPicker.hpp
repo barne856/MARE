@@ -620,7 +620,6 @@ public:
   bool on_mouse_button(const RendererInput &input, ColorPicker *picker) {
     if (input.LEFT_MOUSE_JUST_PRESSED && picker->is_cursor_in_bounds()) {
       UIElement::focus(picker);
-      glm::vec2 widget_coords = picker->get_model_coords();
       if (picker->is_in_color_triangle()) {
         focused_mesh = picker->mesh->get_meshes<Mesh>()[1];
       } else if (picker->is_in_transparency_slider()) {

@@ -48,9 +48,11 @@ public:
   TextBox(Layer *layer, util::Rect widget_bounds, unsigned int line_count,
           float margin_thickness, float boarder_thickness,
           unsigned int max_strokes)
-      : Widget(layer, widget_bounds), max_lines(line_count),
+      : Widget(layer, widget_bounds), 
+        boarder_thickness(boarder_thickness),
         margin_thickness(margin_thickness),
-        boarder_thickness(boarder_thickness) {
+        max_lines(line_count)
+         {
     value = "";
 
     box = gen_ref<QuadrangleMesh>();
@@ -138,7 +140,7 @@ public:
     if (no_lines_str.length() < max_chars_per_line * max_lines) {
       std::stringstream str_stream(str);
       std::string line;
-      int line_count = 0;
+      unsigned int line_count = 0;
       while (str_stream.good()) {
         std::getline(str_stream, line, '\n');
         line_count += 1;
@@ -236,7 +238,7 @@ private:
   std::string wrap_string(std::string str) {
     std::string result{};
     std::stringstream str_stream(str);
-    int line_count = 0;
+    unsigned int line_count = 0;
     while (str_stream.good()) {
       std::string line;
       std::getline(str_stream, line, '\n');

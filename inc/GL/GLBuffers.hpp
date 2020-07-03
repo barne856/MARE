@@ -167,10 +167,10 @@ public:
     count_ = std::max(static_cast<uint32_t>(size_in_bytes / sizeof(T)) +
                           offset_index,
                       count_);
-    size_t write_offset =
-        sizeof(T) *
-        (offset_index +
-         buffer_index_ * static_cast<uint32_t>(size_in_bytes / sizeof(T)));
+    //size_t write_offset =
+    //    sizeof(T) *
+    //    (offset_index +
+    //     buffer_index_ * static_cast<uint32_t>(size_in_bytes / sizeof(T)));
     // wait for OpenGL to finish reading from the buffer
     wait_buffer();
     // write into back buffer

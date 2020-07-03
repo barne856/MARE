@@ -69,8 +69,6 @@ class FlyControls : public ControlsSystem<Transform, Rigidbody> {
 
     dir = glm::vec3(sinf(theta) * cosf(phi), sinf(theta) * sinf(phi),
                     cosf(theta));
-    glm::vec3 right = glm::normalize(glm::cross(dir, {0.0f, 0.0f, 1.0f}));
-    glm::vec3 up = glm::cross(right, dir);
 
     transform->face_towards(dir, {0.0f, 0.0f, 1.0f});
     return false;
