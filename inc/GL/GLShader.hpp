@@ -199,10 +199,12 @@ private:
    * @see GLShader::type_to_name(GLenum)
    */
   void init_shader(const char *directory);
-
+  std::unordered_map<std::string, GLint>
+      resource_location_cache_; /**< The cahced location of the resources in the
+                          shader program.*/
   std::unordered_map<std::string, GLuint>
-      resource_cache_; /**< The cahced location of the resources in the shader
-                          program.*/
+      resource_index_cache_; /**< The cahced index of the resources in the
+                          shader program.*/
   std::unordered_map<std::string, GLuint>
       uniform_binding_cache_; /**< The cahced location of the uniform block
                                  binding locations for the shader program.*/
