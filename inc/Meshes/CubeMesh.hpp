@@ -148,7 +148,7 @@ public:
 
     Scoped<Buffer<float>> vertex_buffer = Renderer::gen_buffer<float>(
         &vertex_data[0], vertex_data.size() * sizeof(float));
-    vertex_buffer->set_format({{AttributeType::POSITON_3D, "position"},
+    vertex_buffer->set_format({{AttributeType::POSITION_3D, "position"},
                                {AttributeType::NORMAL, "normal"}});
 
     Scoped<Buffer<unsigned int>> index_buffer = Renderer::gen_buffer<uint32_t>(

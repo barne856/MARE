@@ -113,7 +113,7 @@ public:
 
     Scoped<Buffer<float>> vertex_buffer =
         Renderer::gen_buffer<float>(&data[0], data.size() * sizeof(float));
-    vertex_buffer->set_format({{AttributeType::POSITON_3D, "position"},
+    vertex_buffer->set_format({{AttributeType::POSITION_3D, "position"},
                                {AttributeType::NORMAL, "normal"}});
 
     add_geometry_buffer(std::move(vertex_buffer));

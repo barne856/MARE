@@ -40,6 +40,8 @@ public:
                               glm::vec4(1.0f), 32.0f};
     properties = Renderer::gen_buffer<phong_properties>(
         &props, sizeof(phong_properties), BufferType::READ_WRITE);
+    auto default_light = gen_ref<Spotlight>();
+    set_light(default_light);
   }
   /**
    * @brief Destroy the Phong Material
@@ -55,9 +57,7 @@ public:
       (*light_props)[0] = spotlight->properties;
       upload_uniform("light_properties", light_props.get());
       upload_vec3("light_position", spotlight->get_position());
-    }
-    else
-    {
+    } else {
       std::cerr << "ERROR: No light assigned to PhongMaterial!" << std::endl;
     }
     if (texture_) {

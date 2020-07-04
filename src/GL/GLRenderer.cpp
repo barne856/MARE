@@ -463,7 +463,7 @@ void GLRenderer::api_bind_mesh_render_state(SimpleMesh *mesh,
     for (auto &buffer : mesh->geometry_buffers) {
       for (const auto &attrib : buffer->format()) {
         if (attrib.type == AttributeType::POSITION_2D ||
-            attrib.type == AttributeType::POSITON_3D ||
+            attrib.type == AttributeType::POSITION_3D ||
             attrib.type == AttributeType::NORMAL ||
             attrib.type == AttributeType::COLOR ||
             attrib.type == AttributeType::TEXTURE_MAP) {

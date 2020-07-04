@@ -49,7 +49,7 @@ enum class AttributeType {
   POSITION_2D, /**< Represents 2D vertex data and is the equivalent of the glsl
                   input attribute `vec2`. Data in buffer will be interpreted as
                   two sequential floating point numbers (x,y).*/
-  POSITON_3D,  /**< Represents 3D vertex data and is the equivalent of the glsl
+  POSITION_3D,  /**< Represents 3D vertex data and is the equivalent of the glsl
                     input attribute `vec3`. Data in buffer will be interpreted as
                     three sequential floating point numbers (x,y,z).*/
   NORMAL,      /**< Represents 3D normal data and is the equivalent of the glsl
@@ -95,8 +95,8 @@ public:
    * table:
    * AttributeType  | component_count()
    * -------------- | ---------------
-   * POSITON_2D     | 2
-   * POSITON_3D     | 3
+   * POSITION_2D     | 2
+   * POSITION_3D     | 3
    * NORMAL         | 3
    * COLOR          | 4
    * TEXTURE_MAP    | 2
@@ -110,7 +110,7 @@ public:
     case AttributeType::POSITION_2D:
       return 2;
       break;
-    case AttributeType::POSITON_3D:
+    case AttributeType::POSITION_3D:
       return 3;
       break;
     case AttributeType::NORMAL:

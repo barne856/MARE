@@ -112,7 +112,7 @@ public:
 
     Referenced<Buffer<float>> vertex_buffer =
         Renderer::gen_buffer<float>(&data[0], data.size() * sizeof(float));
-    vertex_buffer->set_format({{AttributeType::POSITON_3D, "position"},
+    vertex_buffer->set_format({{AttributeType::POSITION_3D, "position"},
                                {AttributeType::NORMAL, "normal"}});
 
     Referenced<Buffer<unsigned int>> index_buffer = Renderer::gen_buffer<uint32_t>(
