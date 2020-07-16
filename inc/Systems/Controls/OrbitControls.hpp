@@ -28,7 +28,7 @@ class OrbitControls : public ControlsSystem<Transform> {
   float orbit_sensitivity = 3.0f;
   float translational_sensitivity = 1.0f;
   float zoom_sensitvity = 0.1f;
-  float minimum_distance_to_center = 1.0f;
+  float minimum_distance_to_center = 100.0f;
   float maximum_distance_to_center = 20000.0f;
   bool on_mouse_move(const RendererInput &input,
                      Transform *transform) override {

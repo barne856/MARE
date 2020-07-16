@@ -94,7 +94,7 @@ public:
    * @param parent_transform The parent Transform Component.
    */
   virtual void render(Camera *camera, Material *material,
-                      Transform* parent_transform) = 0;
+                      Transform *parent_transform) = 0;
   /**
    * @brief Abstract interface to render multiple instances of a Mesh using a
    * Material from the perspective of a Camera and transformed by a parent
@@ -107,7 +107,7 @@ public:
    * rendering.
    */
   virtual void render(Camera *camera, Material *material,
-                      Transform* parent_transform, unsigned int instance_count,
+                      Transform *parent_transform, unsigned int instance_count,
                       Buffer<Transform> *models) = 0;
 };
 
@@ -149,7 +149,7 @@ public:
    * @see Mesh
    */
   void render(Camera *camera, Material *material,
-              Transform* parent_transform) override;
+              Transform *parent_transform) override;
   /**
    * @brief The implementation of the abstract render method supplied by Mesh.
    *
@@ -159,7 +159,7 @@ public:
    * @param models The Buffer of transformation matricies to use for instanced.
    * @see Mesh
    */
-  void render(Camera *camera, Material *material, Transform* parent_transform,
+  void render(Camera *camera, Material *material, Transform *parent_transform,
               unsigned int instance_count, Buffer<Transform> *models) override;
 
   /**
@@ -201,6 +201,12 @@ public:
    * @param index_buffer The Index Buffer to set.
    */
   virtual void set_index_buffer(Referenced<Buffer<uint32_t>> index_buffer);
+  /**
+   * @brief Get a Reference to the Index Buffer.
+   *
+   * @return The Referenced to the Index Buffer.
+   */
+  virtual Referenced<Buffer<uint32_t>> get_index_buffer();
   /**
    * @brief If Indexed, returns the number of indices in the Index Buffer. Else,
    * returns the number of vertices in the Geometry Buffer.
@@ -316,7 +322,7 @@ public:
    * @see Mesh
    */
   void render(Camera *camera, Material *material,
-              Transform* parent_transform) override;
+              Transform *parent_transform) override;
   /**
    * @brief The implementation of the abstract render method supplied by Mesh.
    *
@@ -326,7 +332,7 @@ public:
    * @param models The Buffer of transformation matricies to use for instanced.
    * @see Mesh
    */
-  void render(Camera *camera, Material *material, Transform* parent_transform,
+  void render(Camera *camera, Material *material, Transform *parent_transform,
               unsigned int instance_count, Buffer<Transform> *models) override;
   /**
    * @brief Push a Mesh onto the Mesh stack.
@@ -347,7 +353,7 @@ public:
    *
    * @return The Meshes.
    */
-  template <typename T> std::vector<T*> get_meshes() {
+  template <typename T> std::vector<T *> get_meshes() {
     std::vector<T *> meshes{};
     for (auto mesh : meshes_) {
       if (auto m = std::dynamic_pointer_cast<T>(mesh)) {
@@ -401,7 +407,7 @@ public:
    * @see Mesh
    */
   void render(Camera *camera, Material *material,
-              Transform* parent_transform) override;
+              Transform *parent_transform) override;
   /**
    * @brief The implementation of the abstract render method supplied by Mesh.
    * @details Rendering an InstancedMesh of InstancedMeshes is supported, but
@@ -414,7 +420,7 @@ public:
    * @param models The Buffer of transformation matricies to use for instanced.
    * @see Mesh
    */
-  void render(Camera *camera, Material *material, Transform* parent_transform,
+  void render(Camera *camera, Material *material, Transform *parent_transform,
               unsigned int instance_count, Buffer<Transform> *models) override;
   /**
    * @brief Set the Mesh to be instanced.
@@ -486,12 +492,18 @@ public:
    * Buffer.
    */
   void set_instance_models(Referenced<Buffer<Transform>> models);
+  /**
+   * @brief Manually set the instance render count. Must be less than max_instances.
+   * 
+   * @param count The instance render count.
+   */
+  void set_instance_render_count(unsigned int count);
 
 protected:
   unsigned int instance_count_; /**< The current number of instances.*/
   Referenced<Buffer<Transform>>
       instance_transforms_;    /**< The Transform Buffer.*/
-  Referenced<Mesh> mesh_;          /**< The Mesh that is instanced.*/
+  Referenced<Mesh> mesh_;      /**< The Mesh that is instanced.*/
   unsigned int max_instances_; /**< The maximum number of instances allowed.*/
 };
 

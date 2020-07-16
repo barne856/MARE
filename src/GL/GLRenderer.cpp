@@ -297,6 +297,15 @@ void GLRenderer::api_wireframe_mode(bool wireframe) {
   }
 }
 
+void GLRenderer::api_enable_primative_restart(bool enable, uint32_t index) {
+  if (true) {
+    glEnable(GL_PRIMITIVE_RESTART);
+    glPrimitiveRestartIndex(index);
+  } else {
+    glDisable(GL_PRIMITIVE_RESTART);
+  }
+}
+
 void GLRenderer::api_enable_depth_testing(bool enable) {
   if (enable) {
     glEnable(GL_DEPTH_TEST);
@@ -400,8 +409,8 @@ void GLRenderer::api_render_simple_mesh(Camera *camera, SimpleMesh *mesh,
     glDrawArrays(opengl::GLDrawMethod(mesh->get_draw_method()),
                  mesh->get_render_index(), GLsizei(mesh->render_count()));
   }
-  mesh->lock_buffers();
-  mesh->swap_buffers();
+  //mesh->lock_buffers();
+  //mesh->swap_buffers();
 }
 // composite rendering
 void GLRenderer::api_render_simple_mesh(Camera *camera, SimpleMesh *mesh,
@@ -420,8 +429,8 @@ void GLRenderer::api_render_simple_mesh(Camera *camera, SimpleMesh *mesh,
     glDrawArrays(opengl::GLDrawMethod(mesh->get_draw_method()),
                  mesh->get_render_index(), GLsizei(mesh->render_count()));
   }
-  mesh->lock_buffers();
-  mesh->swap_buffers();
+  //mesh->lock_buffers();
+  //mesh->swap_buffers();
 }
 // instanced rendering
 void GLRenderer::api_render_simple_mesh(Camera *camera, SimpleMesh *mesh,
@@ -445,8 +454,8 @@ void GLRenderer::api_render_simple_mesh(Camera *camera, SimpleMesh *mesh,
         static_cast<GLsizei>(mesh->render_count()), instance_count);
   }
   glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, 0);
-  mesh->lock_buffers();
-  mesh->swap_buffers();
+  //mesh->lock_buffers();
+  //mesh->swap_buffers();
 }
 // Mesh functions
 void GLRenderer::api_bind_mesh_render_state(SimpleMesh *mesh,

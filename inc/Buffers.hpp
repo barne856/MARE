@@ -323,7 +323,7 @@ public:
    *
    * @param data A pointer to the data used to initialize the buffer. Can be
    * nullptr is BufferType is not BufferType::STATIC.
-   * @param size_in_bytes The size in bytes of the buffer. This is the size if a
+   * @param size_in_bytes The size in bytes of the buffer. This is the size of a
    * single buffer if the BufferType is multibuffered.
    * @param buffer_type Specifies the access and storage properties of the
    * Buffer.

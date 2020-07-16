@@ -135,6 +135,21 @@ void GLShader::init_shader(const char *directory) {
   shader_ID_ = create_program();
 }
 
+void GLShader::upload_int(const char *name, int value,
+                            bool suppress_warnings) {
+  if (!resource_location_cache_.count(name)) {
+    // cache the location
+    resource_location_cache_.insert_or_assign(
+        name, glGetProgramResourceLocation(shader_ID_, GL_UNIFORM, name));
+  }
+  if (resource_location_cache_[name] == -1 && suppress_warnings == false) {
+    std::cerr << "SHADER WARNING: No uniform '" << name
+              << "' exists in the shader" << std::endl;
+  } else {
+    glUniform1i(resource_location_cache_[name], value);
+  }
+}
+
 void GLShader::upload_float(const char *name, float value,
                             bool suppress_warnings) {
   if (!resource_location_cache_.count(name)) {
@@ -147,6 +162,21 @@ void GLShader::upload_float(const char *name, float value,
               << "' exists in the shader" << std::endl;
   } else {
     glUniform1f(resource_location_cache_[name], value);
+  }
+}
+
+void GLShader::upload_vec2(const char *name, glm::vec2 value,
+                           bool suppress_warnings) {
+  if (!resource_location_cache_.count(name)) {
+    // cache the location
+    resource_location_cache_.insert_or_assign(
+        name, glGetProgramResourceLocation(shader_ID_, GL_UNIFORM, name));
+  }
+  if (resource_location_cache_[name] == -1 && suppress_warnings == false) {
+    std::cerr << "SHADER WARNING: No uniform '" << name
+              << "' exists in the shader" << std::endl;
+  } else {
+    glUniform2fv(resource_location_cache_[name], 1, &value[0]);
   }
 }
 
@@ -230,7 +260,8 @@ void GLShader::upload_uniform(const char *name, IBuffer *uniform,
   }
   glBindBufferBase(GL_UNIFORM_BUFFER, uniform_binding_cache_[name],
                    uniform->name());
-  if (resource_index_cache_[name] == GL_INVALID_INDEX && suppress_warnings == false) {
+  if (resource_index_cache_[name] == GL_INVALID_INDEX &&
+      suppress_warnings == false) {
     std::cerr << "SHADER WARNING: No uniform block '" << name
               << "' exists in the shader" << std::endl;
   }
@@ -253,7 +284,8 @@ void GLShader::upload_storage(const char *name, IBuffer *storage,
   }
   glBindBufferBase(GL_SHADER_STORAGE_BUFFER, storage_binding_cache_[name],
                    storage->name());
-  if (resource_index_cache_[name] == GL_INVALID_INDEX && suppress_warnings == false) {
+  if (resource_index_cache_[name] == GL_INVALID_INDEX &&
+      suppress_warnings == false) {
     std::cerr << "SHADER WARNING: No storage buffer block '" << name
               << "' exists in the shader" << std::endl;
   }

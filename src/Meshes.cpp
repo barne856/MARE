@@ -33,6 +33,9 @@ std::vector<Referenced<Buffer<float>>> SimpleMesh::get_geometry_buffers() {
 void SimpleMesh::set_index_buffer(Referenced<Buffer<uint32_t>> index_buffer) {
   Renderer::set_mesh_index_buffer(this, index_buffer);
 }
+Referenced<Buffer<uint32_t>> SimpleMesh::get_index_buffer() {
+  return index_buffer;
+}
 size_t SimpleMesh::render_count() const {
   if (index_buffer) {
     return index_render_count;
@@ -124,10 +127,9 @@ void InstancedMesh::pop_instance() { instance_count_--; }
 
 void InstancedMesh::clear_instances() { instance_count_ = 0; }
 
-void InstancedMesh::flush_instances(Transform *models,
-                                    uint32_t offset, uint32_t count) {
-  instance_transforms_->flush(models, offset,
-                              count * sizeof(Transform));
+void InstancedMesh::flush_instances(Transform *models, uint32_t offset,
+                                    uint32_t count) {
+  instance_transforms_->flush(models, offset, count * sizeof(Transform));
 }
 
 Transform &InstancedMesh::operator[](unsigned int i) {
@@ -144,17 +146,18 @@ void InstancedMesh::render(Camera *camera, Material *material) {
 }
 
 void InstancedMesh::render(Camera *camera, Material *material,
-                           Transform* parent_transform) {
-                                   Transform trans{};
-    trans.set_transformation_matrix(
-        parent_transform->get_transformation_matrix() *
-        get_transformation_matrix());
-  mesh_->render(camera, material, &trans,
-                instance_count_, instance_transforms_.get());
+                           Transform *parent_transform) {
+  Transform trans{};
+  trans.set_transformation_matrix(
+      parent_transform->get_transformation_matrix() *
+      get_transformation_matrix());
+  mesh_->render(camera, material, &trans, instance_count_,
+                instance_transforms_.get());
 }
 
 void InstancedMesh::render(Camera *camera, Material *material,
-                           Transform* parent_transform, unsigned int instance_count,
+                           Transform *parent_transform,
+                           unsigned int instance_count,
                            Buffer<Transform> *models) {
   // rendering an instanced mesh of instanced meshes is a bad idea. It will not
   // reduce draw calls and it will read from the models buffer in a very
@@ -177,6 +180,10 @@ InstancedMesh::swap_instance_models(Referenced<Buffer<Transform>> models) {
 
 void InstancedMesh::set_instance_models(Referenced<Buffer<Transform>> models) {
   instance_transforms_ = models;
+}
+
+void InstancedMesh::set_instance_render_count(unsigned int count) {
+  instance_count_ = std::min(max_instances_, count);
 }
 
 } // namespace mare

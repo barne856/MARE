@@ -126,6 +126,13 @@ public:
    */
   void api_wireframe_mode(bool wireframe) override;
   /**
+   * @brief GLRenderer implementation of primative restart
+   *
+   * @param enable true enables, false disables.
+   * @param index The index to restart primatives at.
+   */
+  void api_enable_primative_restart(bool enable, uint32_t index) override;
+  /**
    * @brief GLRenderer implementation to enable depth testing.
    *
    * @param wireframe true enables depth testing, false disables depth testing.
@@ -244,7 +251,7 @@ public:
    */
   virtual void api_render_simple_mesh(Camera *camera, SimpleMesh *mesh,
                                       Material *material,
-                                      Transform* parent_transform) override;
+                                      Transform *parent_transform) override;
   /**
    * @brief GLRenderer implemented function to render a SimpleMesh with a
    * Material and a parent Transform.
@@ -259,7 +266,7 @@ public:
    */
   virtual void api_render_simple_mesh(Camera *camera, SimpleMesh *mesh,
                                       Material *material,
-                                      Transform* parent_transform,
+                                      Transform *parent_transform,
                                       unsigned int instance_count,
                                       Buffer<Transform> *models) override;
   /**

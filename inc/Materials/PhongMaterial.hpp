@@ -41,6 +41,7 @@ public:
     properties = Renderer::gen_buffer<phong_properties>(
         &props, sizeof(phong_properties), BufferType::READ_WRITE);
     auto default_light = gen_ref<Spotlight>();
+    default_light->set_position(glm::vec3(1.0f));
     set_light(default_light);
   }
   /**

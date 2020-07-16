@@ -3,8 +3,8 @@
 
 // MARE
 #include "Buffers.hpp"
-#include "Mare.hpp"
 #include "Components/Transform.hpp"
+#include "Mare.hpp"
 
 // External Libraries
 #include "glm.hpp"
@@ -69,6 +69,17 @@ public:
   virtual void use() const = 0;
   /**
    * @brief Abstract function implemented by the Rendering API that will upload
+   * a 32-bit int number as a uniform to a glsl Shader.
+   *
+   * @param name The name of the uniform in the glsl shader.
+   * @param value The int number to upload.
+   * @param suppress_warnings true enables reporting of warnings from the Engine
+   * regarding the existence of the uniform.
+   */
+  virtual void upload_int(const char *name, int value,
+                          bool suppress_warnings = false) = 0;
+  /**
+   * @brief Abstract function implemented by the Rendering API that will upload
    * a 32-bit floating point number as a uniform to a glsl Shader.
    *
    * @param name The name of the uniform in the glsl shader.
@@ -78,6 +89,17 @@ public:
    */
   virtual void upload_float(const char *name, float value,
                             bool suppress_warnings = false) = 0;
+  /**
+   * @brief Abstract function implemented by the Rendering API that will upload
+   * a value to a glsl Shader uniform.
+   *
+   * @param name The name of the uniform in the glsl Shader.
+   * @param value The value to upload.
+   * @param suppress_warnings true enables reporting of warnings from the Engine
+   * regarding the existence of the uniform.
+   */
+  virtual void upload_vec2(const char *name, glm::vec2 value,
+                           bool suppress_warnings = false) = 0;
   /**
    * @brief Abstract function implemented by the Rendering API that will upload
    * a value to a glsl Shader uniform.
@@ -214,6 +236,19 @@ public:
    */
   inline unsigned int name() { return shader_->name(); }
   /**
+   * @brief Upload an int to the ShaderProgram. The ShaderProgram must be bound
+   * first.
+   *
+   * @param name The name of the uniform in the glsl Shader.
+   * @param value The value to upload.
+   * @param suppress_warnings true enables reporting of warnings from the Engine
+   * regarding the existence of the uniform.
+   */
+  void upload_int(const char *name, int value,
+                    bool suppress_warnings = false) {
+    shader_->upload_int(name, value, suppress_warnings);
+  }
+  /**
    * @brief Upload a float to the ShaderProgram. The ShaderProgram must be bound
    * first.
    *
@@ -225,6 +260,19 @@ public:
   void upload_float(const char *name, float value,
                     bool suppress_warnings = false) {
     shader_->upload_float(name, value, suppress_warnings);
+  }
+  /**
+   * @brief Upload a vec2 to the ShaderProgram. The ShaderProgram must be bound
+   * first.
+   *
+   * @param name The name of the uniform in the glsl Shader.
+   * @param value The value to upload.
+   * @param suppress_warnings true enables reporting of warnings from the Engine
+   * regarding the existence of the uniform.
+   */
+  void upload_vec2(const char *name, glm::vec2 value,
+                   bool suppress_warnings = false) {
+    shader_->upload_vec2(name, value, suppress_warnings);
   }
   /**
    * @brief Upload a vec3 to the ShaderProgram. The ShaderProgram must be bound
@@ -457,7 +505,7 @@ public:
    * regarding the existence of the model matrix uniform.
    * @see Mesh
    */
-  void upload_mesh_model_matrix(Mesh *mesh, Transform* parent_transform,
+  void upload_mesh_model_matrix(Mesh *mesh, Transform *parent_transform,
                                 bool suppress_warnings = false);
   /**
    * @brief Upload a Mesh's normal matrix to the Material after. The Material
@@ -483,7 +531,7 @@ public:
    * regarding the existence of the normal matrix uniform.
    * @see Mesh
    */
-  void upload_mesh_normal_matrix(Mesh *mesh, Transform* parent_transform,
+  void upload_mesh_normal_matrix(Mesh *mesh, Transform *parent_transform,
                                  bool suppress_warnings = false);
   /**
    * @brief Upload a Transform Buffer to the Material.
@@ -518,7 +566,7 @@ public:
    * @param suppress_warnings true enables reporting of warnings from the Engine
    * regarding the existence of the Shader resources.
    */
-  void upload_mesh(Mesh *mesh, Transform* parent_transform,
+  void upload_mesh(Mesh *mesh, Transform *parent_transform,
                    bool suppress_warnings = false);
   /**
    * @brief A convience function to call all the neccesary functions to upload a
@@ -533,7 +581,7 @@ public:
    * @param suppress_warnings true enables reporting of warnings from the Engine
    * regarding the existence of the Shader resources.
    */
-  void upload_mesh(Mesh *mesh, Transform* parent_transform,
+  void upload_mesh(Mesh *mesh, Transform *parent_transform,
                    Buffer<Transform> *models, bool suppress_warnings = false);
 };
 } // namespace mare

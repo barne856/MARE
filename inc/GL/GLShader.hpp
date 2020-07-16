@@ -61,7 +61,16 @@ public:
    *
    */
   const static std::unordered_map<std::string, GLenum> shader_extension;
-
+  /**
+   * @brief Upload an int number as a uniform to a glsl Shader.
+   *
+   * @param name The name of the uniform in the glsl shader.
+   * @param value The int number to upload.
+   * @param suppress_warnings true enables reporting of warnings from the Engine
+   * regarding the existence of the uniform.
+   */
+  void upload_int(const char *name, int value,
+                  bool suppress_warnings = false) override;
   /**
    * @brief Upload a 32-bit floating point number as a uniform to a glsl Shader.
    *
@@ -72,6 +81,16 @@ public:
    */
   void upload_float(const char *name, float value,
                     bool suppress_warnings = false) override;
+  /**
+   * @brief Upload a value to a glsl Shader uniform.
+   *
+   * @param name The name of the uniform in the glsl Shader.
+   * @param value The value to upload.
+   * @param suppress_warnings true enables reporting of warnings from the Engine
+   * regarding the existence of the uniform.
+   */
+  void upload_vec2(const char *name, glm::vec2 value,
+                   bool suppress_warnings = false) override;
   /**
    * @brief Upload a value to a glsl Shader uniform.
    *

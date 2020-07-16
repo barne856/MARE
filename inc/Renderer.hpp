@@ -575,6 +575,14 @@ public:
    */
   virtual void api_wireframe_mode(bool wireframe) = 0;
   /**
+   * @brief Enable or disable primative restart of a certain index in index
+   * buffers
+   *
+   * @param enable enable or disable.
+   * @param index The index that will restart the primative.
+   */
+  virtual void api_enable_primative_restart(bool enable, uint32_t index) = 0;
+  /**
    * @brief Enable or disable depth testing, implemented by the Rendering API.
    * @details Used to enable depth testing for a Scene. Usually execued in the
    * Scene::render(float).
@@ -761,8 +769,7 @@ public:
    *
    * @return The vendor string
    */
-  static std::string get_vendor_string()
-  {
+  static std::string get_vendor_string() {
     return API->api_get_vendor_string();
   }
   /**
@@ -770,8 +777,7 @@ public:
    *
    * @return The version string
    */
-  static std::string get_version_string()
-  {
+  static std::string get_version_string() {
     return API->api_get_version_string();
   }
   /**
@@ -779,8 +785,7 @@ public:
    *
    * @return The renderer string
    */
-  static std::string get_renderer_string()
-  {
+  static std::string get_renderer_string() {
     return API->api_get_renderer_string();
   }
   /**
@@ -850,6 +855,17 @@ public:
    */
   static void wireframe_mode(bool wireframe) {
     API->api_wireframe_mode(wireframe);
+  }
+  /**
+   * @brief Static access to
+   * Renderer::api_enable_primative_restart(bool,uint32_t)
+   *
+   * @param enable true enables primative restart, false disables primative
+   * restart.
+   * @param index The index to restart primatives at.
+   */
+  static void enable_primative_restart(bool enable, uint32_t index) {
+    API->api_enable_primative_restart(enable, index);
   }
   /**
    * @brief Static access to Renderer::api_enable_depth_testing(bool).

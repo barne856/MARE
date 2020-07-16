@@ -93,6 +93,9 @@ public:
       break;
     case BufferType::READ_ONLY:
       flags = GL_MAP_READ_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT;
+      glNamedBufferStorage(buffer_ID_, size_in_bytes, data, flags);
+      buffer_pointer_ = static_cast<T *>(glMapNamedBufferRange(
+          buffer_ID_, 0, num_buffers_ * size_in_bytes, flags));
       break;
     case BufferType::WRITE_ONLY:
       flags = GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT;
@@ -118,11 +121,13 @@ public:
     default:
       break;
     }
-    if (buffer_type != BufferType::STATIC) {
+    if (buffer_type != BufferType::STATIC &&
+        buffer_type != BufferType::READ_ONLY) {
       glNamedBufferStorage(buffer_ID_, num_buffers_ * size_in_bytes, nullptr,
                            flags);
-      buffer_pointer_ = static_cast<T *>(glMapNamedBufferRange(
-          buffer_ID_, 0, num_buffers_ * size_in_bytes, flags));
+      buffer_pointer_ = static_cast<T *>(
+          glMapNamedBufferRange(buffer_ID_, 0, num_buffers_ * size_in_bytes,
+                                flags));
       if (data) {
         for (int i = 0; i < num_buffers_; i++) {
           flush(data, 0, size_in_bytes);
@@ -167,15 +172,14 @@ public:
     count_ = std::max(static_cast<uint32_t>(size_in_bytes / sizeof(T)) +
                           offset_index,
                       count_);
-    //size_t write_offset =
+    // size_t write_offset =
     //    sizeof(T) *
     //    (offset_index +
     //     buffer_index_ * static_cast<uint32_t>(size_in_bytes / sizeof(T)));
     // wait for OpenGL to finish reading from the buffer
-    wait_buffer();
+    //wait_buffer();
     // write into back buffer
-    std::memcpy(&buffer_pointer_[offset_index], data,
-                size_in_bytes);
+    std::memcpy(static_cast<void*>(&buffer_pointer_[offset_index]), static_cast<void*>(data), size_in_bytes);
   }
   /**
    * @brief Provides write access to the buffer using the subscript operator.
@@ -186,7 +190,7 @@ public:
   T &operator[](uint32_t i) {
     assert(type_ != BufferType::STATIC);    // Buffer must not be static
     assert(type_ != BufferType::READ_ONLY); // Buffer must not be read only
-    return buffer_pointer_[i];
+    return buffer_pointer_[buffer_index_ * static_cast<uint32_t>(size_ / sizeof(T)) + i];
   }
   /**
    * @brief Provides read access to the buffer using the subscript operator.
@@ -203,7 +207,9 @@ public:
     assert(type_ != BufferType::WRITE_ONLY_TRIPLE_BUFFERED); // Buffer must not
                                                              // be write only
     T element;
-    element = buffer_pointer_[i];
+    element = buffer_pointer_[buffer_index_ *
+                                  static_cast<uint32_t>(size_ / sizeof(T)) +
+                              i];
     return element;
   }
   /**
