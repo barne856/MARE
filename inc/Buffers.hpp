@@ -337,8 +337,6 @@ public:
     buffer_index_ = 0;
     num_buffers_ = 1;
     size_ = size_in_bytes;
-    assert(size_in_bytes >
-           0); // Buffer size must be larger than 0. Storage size is immuatable
     count_ = data ? static_cast<uint32_t>(size_in_bytes / sizeof(T)) : 0;
 
     if (buffer_type == BufferType::STATIC && !data) {

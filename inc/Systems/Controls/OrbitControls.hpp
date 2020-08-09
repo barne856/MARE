@@ -2,7 +2,7 @@
 #define ORBITCONTROLS
 
 // MARE
-#include "Components/Transform.hpp"
+#include "Entities/Camera.hpp"
 #include "Renderer.hpp"
 #include "Systems.hpp"
 
@@ -22,43 +22,48 @@ namespace mare {
  * plane is x-y.
  *
  */
-class OrbitControls : public ControlsSystem<Transform> {
-  public:
+class OrbitControls : public ControlsSystem<Camera> {
+public:
   float distance_to_center = 1.0f;
   float orbit_sensitivity = 3.0f;
   float translational_sensitivity = 1.0f;
   float zoom_sensitvity = 0.1f;
   float minimum_distance_to_center = 100.0f;
   float maximum_distance_to_center = 20000.0f;
-  bool on_mouse_move(const RendererInput &input,
-                     Transform *transform) override {
-    if(input.MIDDLE_MOUSE_PRESSED)
-    {
+  bool is_2D = false;
+  bool on_mouse_move(const RendererInput &input, Camera *transform) override {
+    if (input.MIDDLE_MOUSE_PRESSED) {
       glm::vec3 dir = transform->get_forward_vector();
       glm::vec3 pos = transform->get_position();
       glm::vec3 center = pos + dir * distance_to_center;
       float dist_2D = glm::length(glm::vec2(center - pos));
-      float angle = atan2f(dir.y, dir.x) - math::PI/2.0f;
+      float angle = atan2f(dir.y, dir.x) - math::PI / 2.0f;
       glm::vec3 direction{};
-      direction.x = 2.0f * static_cast<float>(input.mouse_vel.x) / static_cast<float>(Renderer::get_info().window_height);
-      direction.y = -2.0f * static_cast<float>(input.mouse_vel.y) / static_cast<float>(Renderer::get_info().window_height);
+      direction.x = 2.0f * static_cast<float>(input.mouse_vel.x) /
+                    static_cast<float>(Renderer::get_info().window_height);
+      direction.y = -2.0f * static_cast<float>(input.mouse_vel.y) /
+                    static_cast<float>(Renderer::get_info().window_height);
       direction.z = 0.0f;
-      if(dist_2D < 0.1f)
-      {
+      if (dist_2D < 0.1f) {
         glm::vec3 up = transform->get_up_vector();
-        angle = atan2f(up.y, up.x) - math::PI/2.0f;
-      }
-      else if(dir.z > 0.0f)
-      {
+        angle = atan2f(up.y, up.x) - math::PI / 2.0f;
+      } else if (dir.z > 0.0f) {
         direction.y *= -1.0f;
       }
-      transform->translate(-0.5f * distance_to_center * translational_sensitivity * glm::rotateZ(direction, angle));
-    }
-    else if (input.LEFT_MOUSE_PRESSED) {
+      transform->translate(-0.5f * distance_to_center *
+                           translational_sensitivity *
+                           glm::rotateZ(direction, angle));
+    } else if (input.LEFT_MOUSE_PRESSED) {
       // orbit around center and adjust inclination
 
-      float dtheta = -orbit_sensitivity*static_cast<float>(input.mouse_vel.y) / static_cast<float>(Renderer::get_info().window_height);
-      float dphi = -orbit_sensitivity*static_cast<float>(input.mouse_vel.x) / static_cast<float>(Renderer::get_info().window_height);
+      float dtheta = -orbit_sensitivity *
+                     static_cast<float>(input.mouse_vel.y) /
+                     static_cast<float>(Renderer::get_info().window_height);
+      if (is_2D) {
+        dtheta = 0.0f;
+      }
+      float dphi = -orbit_sensitivity * static_cast<float>(input.mouse_vel.x) /
+                   static_cast<float>(Renderer::get_info().window_height);
       glm::vec3 dir = transform->get_forward_vector();
       glm::vec3 pos = transform->get_position();
       glm::vec3 up = {0.0f, 0.0f, 1.0f};
@@ -101,23 +106,35 @@ class OrbitControls : public ControlsSystem<Transform> {
     }
     return false;
   }
-  bool on_key(const RendererInput &input, Transform *transform) override {
+  bool on_key(const RendererInput &input, Camera *transform) override {
+    if (input.P_JUST_PRESSED) {
+      if (transform->get_type() == ProjectionType::ORTHOGRAPHIC) {
+        transform->set_type(ProjectionType::PERSPECTIVE);
+        is_2D = false;
+      } else {
+        transform->set_type(ProjectionType::ORTHOGRAPHIC);
+        is_2D = true;
+      }
+    }
     return false;
   }
-  bool on_mouse_button(const RendererInput &input,
-                       Transform *transform) override {
+  bool on_mouse_button(const RendererInput &input, Camera *transform) override {
     return false;
   }
-  bool on_mouse_wheel(const RendererInput &input,
-                      Transform *transform) override {
+  bool on_mouse_wheel(const RendererInput &input, Camera *transform) override {
     glm::vec3 dir = transform->get_forward_vector();
     glm::vec3 pos = transform->get_position();
     glm::vec3 center = pos + dir * distance_to_center;
-    distance_to_center = glm::clamp(distance_to_center - input.mouse_scroll * zoom_sensitvity, minimum_distance_to_center, maximum_distance_to_center);
+    distance_to_center =
+        distance_to_center * (1.0f - input.mouse_scroll * zoom_sensitvity);
+    distance_to_center =
+        glm::clamp(distance_to_center, minimum_distance_to_center,
+                   maximum_distance_to_center);
     transform->set_position({center - dir * distance_to_center});
+    transform->set_ortho_scale(distance_to_center * tanf(math::PI / 8.0f));
     return false;
   }
-  bool on_resize(const RendererInput &input, Transform *transform) override {
+  bool on_resize(const RendererInput &input, Camera *transform) override {
     return false;
   }
 }; // namespace mare

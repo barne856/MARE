@@ -65,7 +65,7 @@ public:
     dropdown_string_meshes.clear();
     for (auto &str : options) {
       dropdown_boxes.push_back(gen_ref<QuadrangleMesh>());
-      dropdown_string_meshes.push_back(gen_ref<CharMesh>(str, 0.08f));
+      dropdown_string_meshes.push_back(gen_ref<CharMesh>(str, 1.0f / 17.0f));
     }
     scroll_pos = 0;
     selection = -1;
@@ -116,7 +116,8 @@ public:
                boarder_thickness,
            0.0f});
     }
-    for (uint32_t i = max_rows + scroll_pos; static_cast<size_t>(i) < value.size(); i++) {
+    for (uint32_t i = max_rows + scroll_pos;
+         static_cast<size_t>(i) < value.size(); i++) {
       dropdown_boxes[i]->set_scale({0.0f, 0.0f, 1.0f});
       dropdown_boxes[i]->set_position(
           {center.x,
@@ -167,7 +168,7 @@ public:
     dropdown_arrow = gen_ref<TriangleMesh>(
         glm::vec2(0.0f, -0.5f), glm::vec2(0.5f, 0.5f), glm::vec2(-0.5f, 0.5f));
     value_string_mesh =
-        gen_ref<CharMesh>(selection_hint + ": " + value, 0.08f, 0.0f, 1000);
+        gen_ref<CharMesh>(selection_hint, 1.0f / 17.0f, 0.0f, 1000);
     box_material = gen_ref<BasicColorMaterial>();
     box_material->set_color(box_color);
     text_material = gen_ref<BasicColorMaterial>();
@@ -189,7 +190,7 @@ public:
                              uint32_t max_rows) {
     dropdown_list->set_selection_options(options, max_rows);
     set_value("");
-    value_string_mesh->set_text(selection_hint_ + ": " + value);
+    value_string_mesh->set_text(value);
     rescale();
   }
   void rescale() override {
@@ -231,7 +232,7 @@ public:
     if (is_cursor_in_list_bounds()) {
       dropdown_list->update_selection(position);
       set_value(dropdown_list->get_value()[dropdown_list->selection]);
-      value_string_mesh->set_text(selection_hint_ + ": " + value);
+      value_string_mesh->set_text(value);
       on_select();
       rescale();
       on_unfocus();

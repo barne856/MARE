@@ -70,7 +70,7 @@ public:
    * @details 13 strokes is the largest size a single character takes up in
    * memory. This is the "@" character.
    * @param str The string to initialize the Mesh with.
-   * @param thickness The thickness of the text in model space. If this value is
+   * @param stroke_thickness The thickness of the text in model space. If this value is
    * zero, lines will be drawn that take up a single pixel in width. The maximum
    * thickness that should be used to maintain readability is 2/17. The default
    * is zero.

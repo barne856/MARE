@@ -4,9 +4,9 @@
 // Standard Library
 #include <algorithm>
 #include <memory>
+#include <string>
 #include <variant>
 #include <vector>
-#include <string>
 
 // External Libraries
 #include "glm.hpp"
@@ -89,13 +89,13 @@ template <typename T, typename... Args> Referenced<T> gen_ref(Args... args) {
  *
  */
 namespace math {
-  /**
-   * @brief Calculate the angle in radians between two 3D vectors
-   * 
-   * @param v1 The first vector.
-   * @param v2 The second vector.
-   * @return The angle between the two vectors.
-   */
+/**
+ * @brief Calculate the angle in radians between two 3D vectors
+ *
+ * @param v1 The first vector.
+ * @param v2 The second vector.
+ * @return The angle between the two vectors.
+ */
 float angle_between(glm::vec3 v1, glm::vec3 v2);
 /**
  * @brief The shoelace method for finding the area of a 2D polygon
@@ -229,11 +229,13 @@ std::string rgb_to_string(glm::vec3 color);
  * @brief A simple struct to define a bounding box of a UI element.
  */
 struct Rect {
-  Rect() : m_values(glm::vec4(-0.5f, -0.5f, 0.5f, 0.5f)){}
+  Rect() : m_values(glm::vec4(-0.5f, -0.5f, 0.5f, 0.5f)) {}
   float &left() { return m_values[0]; }
   float &bottom() { return m_values[1]; }
   float &right() { return m_values[2]; }
   float &top() { return m_values[3]; }
+  float height() { return top() - bottom(); }
+  float width() { return right() - left(); }
 
   void set_rect(glm::vec2 bottom_left, glm::vec2 top_right) {
     m_values = glm::vec4(bottom_left, top_right);
@@ -247,7 +249,7 @@ private:
 };
 /**
  * @brief Get the center of a Rect
- * 
+ *
  * @param rect The Rect
  * @return The center of the Rect
  */

@@ -40,39 +40,32 @@ public:
    * determine the font size.
    * @param margin_thickness The thickness as a percentage of the margin space
    * around the text box.
-   * @param boarder_thickness The thickness as a percentage of the boarder of the
-   * text box.
+   * @param boarder_thickness The thickness as a percentage of the boarder of
+   * the text box.
    * @param size_in_bytes The maximum size in bytes allocated for the text in
    * the text box.
    */
   TextBox(Layer *layer, util::Rect widget_bounds, unsigned int line_count,
-          float margin_thickness, float boarder_thickness,
+          float margin_thickness, float highlight_thickness,
           unsigned int max_strokes)
-      : Widget(layer, widget_bounds), 
-        boarder_thickness(boarder_thickness),
-        margin_thickness(margin_thickness),
-        max_lines(line_count)
-         {
+      : Widget(layer, widget_bounds), highlight_thickness(highlight_thickness),
+        margin_thickness(margin_thickness), max_lines(line_count) {
     value = "";
 
     box = gen_ref<QuadrangleMesh>();
-    boarder = gen_ref<QuadrangleMesh>();
     highlight = gen_ref<QuadrangleMesh>();
     text = gen_ref<CharMesh>("", 1.0f / 17.0f, 0.0f, max_strokes);
 
     text_material = gen_ref<BasicColorMaterial>();
     box_material = gen_ref<BasicColorMaterial>();
-    boarder_material = gen_ref<BasicColorMaterial>();
     highlight_material = gen_ref<BasicColorMaterial>();
 
     text_material->set_color(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
     box_material->set_color(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
-    boarder_material->set_color(glm::vec4(0.0f, 0.0, 0.0f, 1.0f));
     highlight_material->set_color(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
 
     rescale();
 
-    push_packet({boarder, boarder_material});
     push_packet({highlight, highlight_material});
     push_packet({box, box_material});
     push_packet({text, text_material});
@@ -174,38 +167,34 @@ public:
    *
    */
   void rescale() override {
-    float boarder_thickness_world_scale = boarder_thickness*(bounds.top() - bounds.bottom());
-    float margin_thickness_world_scale = margin_thickness*(bounds.top() - bounds.bottom());
-    float text_scale = (bounds.top() - bounds.bottom() -
-                        2.0f * margin_thickness_world_scale - 2.0f * boarder_thickness_world_scale) /
-                       static_cast<float>(max_lines);
-    max_chars_per_line =
-        floor(2.0f *
-              (bounds.right() - bounds.left() - 2.0f * margin_thickness_world_scale -
-               2.0f * boarder_thickness_world_scale) /
-              text_scale);
-    float box_width =
-        (bounds.right() - bounds.left()) - 4.0f * boarder_thickness_world_scale;
-    float box_height =
-        (bounds.top() - bounds.bottom()) - 4.0f * boarder_thickness_world_scale;
-    float highlight_width =
-        bounds.right() - bounds.left() - 2.0f * boarder_thickness_world_scale;
-    float highlight_height =
-        bounds.top() - bounds.bottom() - 2.0f * boarder_thickness_world_scale;
-    float boarder_width = (bounds.right() - bounds.left());
-    float boarder_height = (bounds.top() - bounds.bottom());
+    float highlight_thickness_world_scale =
+        highlight_thickness * (bounds.top() - bounds.bottom());
+    float margin_thickness_world_scale =
+        margin_thickness * (bounds.top() - bounds.bottom());
+    float text_scale =
+        (bounds.top() - bounds.bottom() - 2.0f * margin_thickness_world_scale) /
+        static_cast<float>(max_lines);
+    max_chars_per_line = floor(2.0f *
+                               (bounds.right() - bounds.left() -
+                                2.0f * margin_thickness_world_scale -
+                                2.0f * highlight_thickness_world_scale) /
+                               text_scale);
+    float box_width = (bounds.right() - bounds.left()) -
+                      2.0f * highlight_thickness_world_scale;
+    float box_height = (bounds.top() - bounds.bottom()) -
+                       2.0f * highlight_thickness_world_scale;
+    float highlight_width = bounds.right() - bounds.left();
+    float highlight_height = bounds.top() - bounds.bottom();
+
     glm::vec2 box_center = glm::vec2((bounds.left() + bounds.right()) / 2.0f,
                                      (bounds.top() + bounds.bottom()) / 2.0f);
     box->set_scale({box_width, box_height, 1.0f});
-    boarder->set_scale({boarder_width, boarder_height, 1.0f});
     highlight->set_scale({highlight_width, highlight_height, 1.0f});
     text->set_scale({text_scale, text_scale, 1.0f});
     box->set_position({box_center.x, box_center.y, 0.0f});
-    boarder->set_position({box_center.x, box_center.y, 0.0f});
     highlight->set_position({box_center.x, box_center.y, 0.0f});
-    text->set_position(
-        {bounds.left() + margin_thickness_world_scale + 2.0f * boarder_thickness_world_scale,
-         bounds.top() - margin_thickness_world_scale - boarder_thickness_world_scale, 0.0f});
+    text->set_position({bounds.left() + margin_thickness_world_scale,
+                        bounds.top() - margin_thickness_world_scale, 0.0f});
   }
   void on_focus() override {
     highlight_material->set_color({0.17f, 0.45f, 1.0f, 1.0f});
@@ -214,14 +203,12 @@ public:
     highlight_material->set_color({1.0f, 1.0f, 1.0f, 1.0f});
   }
   Referenced<QuadrangleMesh> box;
-  Referenced<QuadrangleMesh> boarder;
   Referenced<QuadrangleMesh> highlight;
   Referenced<CharMesh> text;
-  float boarder_thickness;
+  float highlight_thickness;
   float margin_thickness;
   Referenced<BasicColorMaterial> text_material;
   Referenced<BasicColorMaterial> box_material;
-  Referenced<BasicColorMaterial> boarder_material;
   Referenced<BasicColorMaterial> highlight_material;
   unsigned int max_lines;
   unsigned int max_chars_per_line;
@@ -292,8 +279,7 @@ public:
         UIElement::focus(text_box);
         return true;
       }
-      if(text_box->is_focused() && input.LEFT_MOUSE_JUST_RELEASED)
-      {
+      if (text_box->is_focused() && input.LEFT_MOUSE_JUST_RELEASED) {
         return true;
       }
     }
