@@ -1285,14 +1285,14 @@ protected:
 template <typename T> int launch() {
   static_assert(std::is_base_of<Renderer, T>::value,
                 "Type must be a renderer.");
-  try {
+  //try {
     std::unique_ptr<T> renderer = std::make_unique<T>();
     Renderer::set_renderer(renderer.get());
     renderer->run();
-  } catch (const std::exception &e) {
-    std::cerr << e.what() << '\n';
-    return 1;
-  }
+  //} catch (const std::exception &e) {
+  //  std::cerr << e.what() << '\n';
+  //  return 1;
+  //}
   return 0;
 }
 

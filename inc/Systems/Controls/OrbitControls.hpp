@@ -26,13 +26,16 @@ class OrbitControls : public ControlsSystem<Camera> {
 public:
   float distance_to_center = 1.0f;
   float orbit_sensitivity = 3.0f;
-  float translational_sensitivity = 1.0f;
+  float translational_sensitivity = 0.825f;
   float zoom_sensitvity = 0.1f;
   float minimum_distance_to_center = 100.0f;
   float maximum_distance_to_center = 20000.0f;
   bool is_2D = false;
+  bool pan_mode = false;
+  bool left_click_disabled = false;
   bool on_mouse_move(const RendererInput &input, Camera *transform) override {
-    if (input.MIDDLE_MOUSE_PRESSED) {
+    if ((!left_click_disabled && pan_mode && input.LEFT_MOUSE_PRESSED) ||
+        (input.MIDDLE_MOUSE_PRESSED && !pan_mode)) {
       glm::vec3 dir = transform->get_forward_vector();
       glm::vec3 pos = transform->get_position();
       glm::vec3 center = pos + dir * distance_to_center;
@@ -53,7 +56,8 @@ public:
       transform->translate(-0.5f * distance_to_center *
                            translational_sensitivity *
                            glm::rotateZ(direction, angle));
-    } else if (input.LEFT_MOUSE_PRESSED) {
+    } else if ((pan_mode && input.MIDDLE_MOUSE_PRESSED) ||
+               (!left_click_disabled && input.LEFT_MOUSE_PRESSED)) {
       // orbit around center and adjust inclination
 
       float dtheta = -orbit_sensitivity *

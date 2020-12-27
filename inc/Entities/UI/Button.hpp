@@ -116,9 +116,9 @@ public:
       UIElement::focus(button);
       button->box_material->set_color(button->box_pushed_color);
       button->label_material->set_color(button->label_pushed_color);
-      return false;
+      return true;
     }
-    if(input.LEFT_MOUSE_JUST_RELEASED && button->is_cursor_in_bounds())
+    if(input.LEFT_MOUSE_JUST_RELEASED && button->is_cursor_in_bounds() && button->is_focused())
     {
       button->box_material->set_color(button->box_color);
       button->label_material->set_color(button->label_color);

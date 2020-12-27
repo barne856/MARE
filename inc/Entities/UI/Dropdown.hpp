@@ -292,11 +292,15 @@ class DropdownControls : public ControlsSystem<Dropdown<T>> {
 public:
   bool on_mouse_button(const RendererInput &input,
                        Dropdown<T> *dropdown) override {
+    if(input.LEFT_MOUSE_JUST_PRESSED && dropdown->is_cursor_in_bounds())
+    {
+      UIElement::focus(dropdown);
+      return true;
+    }
     if (input.LEFT_MOUSE_JUST_RELEASED && dropdown->is_cursor_in_bounds() &&
-        dropdown->dropdown_list->opened == false) {
+        dropdown->dropdown_list->opened == false && dropdown->is_focused()) {
       dropdown->get_layer()->push_entity(dropdown->dropdown_list);
       dropdown->dropdown_list->opened = true;
-      UIElement::focus(dropdown);
       return true;
     }
     if (!dropdown->is_cursor_in_bounds() &&
@@ -345,7 +349,7 @@ public:
     return false;
   }
   bool on_mouse_wheel(const RendererInput &input,
-                      DropdownList<T> *dropdown_list) override {
+                      DropdownList<T> *dropdown_list) override {  
     if (dropdown_list->opened &&
         dropdown_list->dropdown_box->is_cursor_in_list_bounds()) {
       if (input.mouse_scroll == 1) {

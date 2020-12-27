@@ -45,9 +45,9 @@ public:
   }
   /**
    * @brief Construct a new QuadrangleMesh.
-   * @details Given vertices in counter-clockwise order the Mesh will face
-   * towards positive z. If vertices are given in clockwise order the Mesh faces
-   * negative z.
+   * @details Given vertices in counter-clockwise order from bottom left the
+   * Mesh will face towards positive z. If vertices are given in clockwise order
+   * the Mesh faces negative z.
    *
    * @param v1 The first vertex
    * @param v2 The second vertex
